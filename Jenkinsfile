@@ -149,61 +149,45 @@ pipeline {
                     echo "Current environment: ${currentEnv}"
                     def deployEnv = currentEnv == 'blue' ? 'green' : 'blue'
                     def port = deployEnv == 'blue' ? '8011' : '8012'
-                    def containerName = "spring-wms-${deployEnv}"
 
-                    echo "Deploying to environment: ${deployEnv}"
-                    echo "Using port: ${port}"
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
+                            cd /home/ec2-user/backend
 
-                    sshPublisher(publishers: [
-                        sshPublisherDesc(
-                            configName: 'BackendServer',
-                            transfers: [
-                                sshTransfer(
-                                    execCommand: """
-                                        set -e
-                                        set -x
+                            # 기존 컨테이너 정리
+                            docker ps -a | grep ${port} | grep "Exited" | awk "{print \$1}" | xargs -r docker rm
 
-                                        echo "Starting deployment process..."
-                                        cd /home/ec2-user/backend
+                            # 현재 실행 중인 컨테이너 중지
+                            docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml down || true
+                        '
 
-                                        echo "Loading Docker image directly..."
-                                        docker save ${DOCKER_TAG} | ssh ec2-user@api.stockholmes.store 'docker load'
+                        # 도커 이미지 전송
+                        docker save ${DOCKER_TAG} | ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store 'docker load'
 
-                                        echo "Cleaning up exited container for port ${port}..."
-                                        CONTAINER_ID=\$(docker ps -a | grep ${port} | grep 'Exited' | awk '{print \$1}')
-                                        if [ ! -z "\$CONTAINER_ID" ]; then
-                                            docker rm \$CONTAINER_ID
-                                        fi
+                        # 새 컨테이너 시작
+                        ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
+                            cd /home/ec2-user/backend
+                            export BUILD_NUMBER=${BUILD_NUMBER}
+                            docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml up -d
 
-                                        echo "Setting BUILD_NUMBER environment variable..."
-                                        export BUILD_NUMBER=${BUILD_NUMBER}
+                            sleep 10
+                        '
 
-                                        echo "Stopping existing container if any..."
-                                        docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml down || true
+                        # Nginx 설정 업데이트
+                        ssh -o StrictHostKeyChecking=no ec2-user@ip-172-31-43-48 "
+                            sudo sed -i 's/set \\\$deployment_env \\\".*\\\";/set \\\$deployment_env \\\"${deployEnv}\\\";/' /etc/nginx/conf.d/backend.conf
+                            echo '${deployEnv}' | sudo tee /etc/nginx/deployment_env
+                            sudo nginx -t && sudo systemctl reload nginx
+                        "
 
-                                        echo "Starting new container..."
-                                        docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml up -d
-
-                                        echo "Waiting for container to start..."
-                                        sleep 10
-
-                                        echo "Updating Nginx configuration..."
-                                        ssh ec2-user@ip-172-31-43-48 "sudo sed -i 's/set \\\$deployment_env \\\".*\\\";/set \\\$deployment_env \\\"${deployEnv}\\\";/' /etc/nginx/conf.d/backend.conf"
-                                        ssh ec2-user@ip-172-31-43-48 'echo "${deployEnv}" | sudo tee /etc/nginx/deployment_env'
-
-                                        echo "Testing and reloading Nginx..."
-                                        sudo nginx -t && sudo systemctl reload nginx
-
-                                        if [ "${currentEnv}" != "none" ]; then
-                                            echo "Stopping old container: ${currentEnv}..."
-                                            docker-compose -p spring-wms-${currentEnv} -f docker-compose.${currentEnv}.yml down
-                                        fi
-                                    """
-                                )
-                            ],
-                            verbose: true
-                        )
-                    ])
+                        # 이전 환경 정리
+                        if [ '${currentEnv}' != 'none' ]; then
+                            ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
+                                cd /home/ec2-user/backend
+                                docker-compose -p spring-wms-${currentEnv} -f docker-compose.${currentEnv}.yml down
+                            '
+                        fi
+                    """
                 }
             }
         }
