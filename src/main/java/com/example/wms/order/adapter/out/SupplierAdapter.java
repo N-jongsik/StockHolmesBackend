@@ -2,6 +2,7 @@ package com.example.wms.order.adapter.out;
 
 import com.example.wms.infrastructure.mapper.SupplierMapper;
 import com.example.wms.order.adapter.in.dto.ProductInSupplierDto;
+import com.example.wms.order.adapter.in.dto.SupplierOverviewDto;
 import com.example.wms.order.adapter.in.dto.SupplierResponseDto;
 import com.example.wms.order.application.port.out.SupplierPort;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +27,10 @@ public class SupplierAdapter implements SupplierPort {
     }
     public List<ProductInSupplierDto> findProductsBySupplierIds(List<Long> supplierIds) {
         return supplierMapper.findProductsBySupplierIds(supplierIds);
+    }
+
+    @Override
+    public List<SupplierOverviewDto> findProductOverview() {
+        return supplierMapper.findSupplierOverview();
     }
 }

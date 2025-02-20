@@ -2,6 +2,7 @@ package com.example.wms.order.application.service;
 
 import com.example.wms.infrastructure.pagination.util.PageableUtils;
 import com.example.wms.order.adapter.in.dto.ProductInSupplierDto;
+import com.example.wms.order.adapter.in.dto.SupplierOverviewDto;
 import com.example.wms.order.adapter.in.dto.SupplierResponseDto;
 import com.example.wms.order.application.domain.Supplier;
 import com.example.wms.order.application.port.in.SupplierUseCase;
@@ -48,5 +49,10 @@ public class SupplierService implements SupplierUseCase {
         }
 
         return new PageImpl<>(supplierList, safePageable, count);
+    }
+
+    @Override
+    public List<SupplierOverviewDto> getAllSupplierOverviews() {
+        return supplierPort.findProductOverview();
     }
 }

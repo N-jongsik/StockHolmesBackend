@@ -46,4 +46,8 @@
         </choose>
     </select>
 
+    <select id="findSupplierOverview">
+        select supplier_id, supplier_name
+        from supplier
+    </select>
 </mapper>
