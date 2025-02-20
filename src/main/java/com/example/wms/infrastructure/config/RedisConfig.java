@@ -40,15 +40,11 @@ public class RedisConfig {
     @Value("${spring.data.redis.password}")
     private String password;
 
-    @Autowired
-    private Environment env;
-
     @PostConstruct
     public void init() {
         log.info("=== Redis Configuration Initializing ===");
         log.info("Spring Boot Version: {}", SpringBootVersion.getVersion());
         log.info("Redis Host from @Value: {}", host);
-        log.info("Redis Host from Environment: {}", env.getProperty("spring.data.redis.host"));
         log.info("Redis Port from @Value: {}", port);
     }
 
@@ -65,12 +61,7 @@ public class RedisConfig {
             redisConfiguration.setPassword(password);
         }
 
-        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                .useSsl()
-                .disablePeerVerification()
-                .build();
-
-        return new LettuceConnectionFactory(redisConfiguration, clientConfig);
+        return new LettuceConnectionFactory(redisConfiguration);
     }
 
     @Bean
