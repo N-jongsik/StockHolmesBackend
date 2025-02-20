@@ -4,5 +4,5 @@ import com.example.wms.order.application.domain.OrderProduct;
 
 public interface OrderProductPort {
     OrderProduct findByProductId(Long productId);
-    void updateDefectiveCount(Long productId, Long defectiveCount);
+    void save(OrderProduct orderProduct);
 }
