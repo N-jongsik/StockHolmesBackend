@@ -12,5 +12,6 @@ public interface GetOrderPort {
     Order getOrder(Long orderId);
     List<OrderResponseDto> findOrderFilteringWithPageNation(String orderNumber, LocalDate startDate, LocalDate endDate, Pageable pageable);
     Integer countAllOrder(String orderNumber, LocalDate startDate, LocalDate endDate);
-    List<ProductListDto> findProductList(Long orderId);
+    List<OrderResponseDto> findOrderSupplierFilteringWithPageNation(Long supplierId, String orderNumber, LocalDate startDate, LocalDate endDate, Pageable pageable);
+    Integer countAllOrderSupplier(Long supplierId, String orderNumber, LocalDate startDate, LocalDate endDate);
 }

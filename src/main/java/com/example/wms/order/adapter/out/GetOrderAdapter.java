@@ -34,7 +34,12 @@ public class GetOrderAdapter implements GetOrderPort {
     }
 
     @Override
-    public List<ProductListDto> findProductList(Long orderId) {
-        return orderMapper.findProductListByOrderId(orderId);
+    public List<OrderResponseDto> findOrderSupplierFilteringWithPageNation(Long supplierId, String orderNumber, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        return orderMapper.findOrderSupplierFilteringWithPageNation(supplierId, orderNumber, startDate, endDate, pageable);
+    }
+
+    @Override
+    public Integer countAllOrderSupplier(Long supplierId, String orderNumber, LocalDate startDate, LocalDate endDate) {
+        return orderMapper.countAllOrderSupplier(supplierId, orderNumber, startDate, endDate);
     }
 }

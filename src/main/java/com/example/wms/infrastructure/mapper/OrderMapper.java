@@ -81,4 +81,18 @@ public interface OrderMapper {
 
 
     void upDateOrderApprove(@Param("orderId") Long orderId);
+
+    List<OrderResponseDto> findOrderSupplierFilteringWithPageNation(
+            @Param("supplierId") Long supplierId,
+            @Param("orderNumber") String orderNumber,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("pageable") Pageable pageable);
+
+    Integer countAllOrderSupplier(
+            @Param("supplierId") Long supplierId,
+            @Param("orderNumber") String orderNumber,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }

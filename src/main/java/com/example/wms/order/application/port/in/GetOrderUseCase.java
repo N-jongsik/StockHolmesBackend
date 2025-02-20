@@ -11,4 +11,5 @@ import java.util.List;
 public interface GetOrderUseCase {
     Order getOrder(Long orderId);
     Page<OrderResponseDto> getFilteredOrder(String orderNumber, LocalDate startDate, LocalDate endDate, Pageable pageable);
+    Page<OrderResponseDto> getFilteredOrderWithSupplier(Long supplierId,String orderNumber, LocalDate startDate, LocalDate endDate, Pageable pageable);
 }
