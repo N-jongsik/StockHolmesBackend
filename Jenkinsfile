@@ -9,6 +9,7 @@ pipeline {
     }
     environment {
         DOCKER_TAG = "backend:${BUILD_NUMBER}"
+        RESOURCE_DIR = "./src/main/resources"
     }
     tools {
         gradle 'gradle 8.11.1'
@@ -19,6 +20,7 @@ pipeline {
                 script {
                     echo "===== Stage: Checkout ====="
                     checkout scm
+                    sh 'mkdir -p ${RESOURCE_DIR}'
                     sh 'pwd && ls -la'
                 }
             }
@@ -43,12 +45,8 @@ pipeline {
             steps {
                 script {
                     echo "===== Stage: Prepare ====="
-                    echo "Cleaning Gradle Project"
                     sh 'gradle clean --no-daemon'
-                    echo "Checking Gradle version"
                     sh 'gradle --version'
-                    echo "Listing project files"
-                    sh 'ls -la'
                 }
             }
         }
@@ -57,35 +55,23 @@ pipeline {
             steps {
                 script {
                     echo "===== Stage: Replace Prod Properties ====="
-                    echo "Current directory structure:"
-                    sh 'pwd && ls -la'
 
                     withCredentials([file(credentialsId: 'wms-secret', variable: 'SECRET_FILE')]) {
-                        echo "Copying secret file..."
-                        sh """
-                            echo "Resource directory contents before:"
-                            ls -la ./src/main/resources/
+                        // 시크릿 파일 존재 및 유효성 검증
+                        def secretFileExists = fileExists("${SECRET_FILE}")
 
-                            chmod -R 777 ./src/main/resources
-                            cp \${SECRET_FILE} ./src/main/resources/application-prod.yml
+                        if (secretFileExists) {
+                            sh """
+                                echo "Secret file found: ${SECRET_FILE}"
+                                cp -v \${SECRET_FILE} ${RESOURCE_DIR}/application-prod.yml
 
-                            echo "Resource directory contents after:"
-                            ls -la ./src/main/resources/
-
-                            # 파일 존재 확인 & 내용 체크
-                            echo "===== Verifying prod file ====="
-                            if [ -f ./src/main/resources/application-prod.yml ]; then
-                                echo "Prod file exists"
-                                echo "File permissions:"
-                                ls -l ./src/main/resources/application-prod.yml
-                                echo "File size:"
-                                stat -f %z ./src/main/resources/application-prod.yml || stat -c %s ./src/main/resources/application-prod.yml
-                                echo "First line of file (without sensitive data):"
-                                head -n 1 ./src/main/resources/application-prod.yml
-                            else
-                                echo "ERROR: Prod file was not copied properly"
-                            fi
-                        """
+                                # 파일 권한 및 존재 확인
+                                ls -l ${RESOURCE_DIR}/application-prod.yml
+                                cat ${RESOURCE_DIR}/application-prod.yml | head -n 5
+                            """
+                        } else {
+                            error "ERROR: Secret file not found at ${SECRET_FILE}"
+                        }
                     }
                 }
             }
@@ -95,11 +81,9 @@ pipeline {
             steps {
                 script {
                     echo "===== Stage: Build ====="
-                    echo "Starting Gradle build..."
                     sh '''
                         set -x
-                        gradle build -x test
-                        echo "Build directory contents:"
+                        gradle build -Dspring.profiles.active=prod -x test
                         ls -la build/libs/
                     '''
                 }
@@ -110,24 +94,16 @@ pipeline {
             steps {
                 script {
                     echo "===== Stage: Build Docker Image ====="
-                    echo "Current directory structure:"
-                    sh 'pwd && ls -la'
-
-                    echo "Docker file contents:"
-                    sh 'cat ./docker/Dockerfile'
-
-                    echo "Building Docker image..."
                     sh """
                         set -x
                         docker build -f ./docker/Dockerfile -t ${DOCKER_TAG} .
-                        echo "===== Docker Images ====="
                         docker images
-                        echo "===== Docker Processes ====="
                         docker ps -a
                     """
                 }
             }
         }
+
         stage('Deploy to Backend Server') {
             steps {
                 script {
