@@ -1,5 +1,6 @@
 package com.example.wms.order.adapter.in;
 
+import com.example.wms.order.adapter.in.dto.SupplierOverviewDto;
 import com.example.wms.order.adapter.in.dto.SupplierResponseDto;
 import com.example.wms.order.application.port.in.SupplierUseCase;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,4 +37,12 @@ public class SupplierController {
         return ResponseEntity.status(HttpStatus.OK).body(supplierUseCase.getAllSuppliers(businessNumber, pageable));
     }
 
+    @GetMapping("/list")
+    @Operation(
+            summary = "공급업체 간단 조회",
+            description = "전체 공급업체 목록의 일부 컬럼(supplierId, supplierName)만 조회합니다."
+    )
+    ResponseEntity<List<SupplierOverviewDto>> getAllSupplierOverviews() {
+        return ResponseEntity.status(HttpStatus.OK).body(supplierUseCase.getAllSupplierOverviews());
+    }
 }
