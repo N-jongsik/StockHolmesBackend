@@ -28,4 +28,6 @@ public interface ProductMapper {
 
     Long getSupplierIdByProductId(Long productId);
     void updateStockLotCount(@Param("productId") Long productId);
+
+    List<Product> findPutAwayProductsByInboundId(Long inboundId);
 }

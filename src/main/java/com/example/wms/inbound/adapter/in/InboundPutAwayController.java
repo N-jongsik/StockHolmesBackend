@@ -24,8 +24,9 @@ public class InboundPutAwayController {
 
     @PostMapping("/{inboundId}")
     @Operation(summary = "입고 적치 생성하기", description = "입고 적치를 생성합니다.")
-    public ResponseEntity<Void> createInboundPutAway(@PathVariable Long inboundId, @RequestBody List<InboundPutAwayReqDto> inboundPutAwayReqDtos) {
-         inboundUseCase.putAway(inboundId, inboundPutAwayReqDtos);
+    public ResponseEntity<Void> createInboundPutAway(@PathVariable Long inboundId)
+    {
+         inboundUseCase.putAway(inboundId);
          return ResponseEntity.status(201).build();
     }
 

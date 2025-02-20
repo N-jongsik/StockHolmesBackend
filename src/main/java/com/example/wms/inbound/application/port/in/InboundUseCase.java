@@ -23,9 +23,8 @@ public interface InboundUseCase {
     void deleteInboundCheck(Long inboundId);
     InboundWorkerCheckResDto createInboundCheckByWorker(List<InboundCheckWorkerReqDto> workerCheckRequests);
     Page<InboundPutAwayResDto> getFilteredPutAway(String inboundPutAwayNumber, LocalDate startDate, LocalDate endDate, Pageable pageable);
-    void putAway(Long inboundId, List<InboundPutAwayReqDto> putAwayRequests);
+    void putAway(Long inboundId);
     Page<ProductInboundResDto> getAllInboundByProductWithPagination(LocalDate startDate, LocalDate endDate, Pageable pageable);
     Page<SupplierInboundResDto> getAllInboundBySupplierWithPagination(LocalDate startDate, LocalDate endDate, Pageable pageable);
     Page<InboundProgressResDto> getAllInboundProgressWithPagination(LocalDate startDate, LocalDate endDate, Pageable pageable);
-    public void testQuery();
 }

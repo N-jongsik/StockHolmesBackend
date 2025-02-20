@@ -102,4 +102,12 @@
         SET stock_lot_count = stock_lot_count + #{lotCount}
         WHERE product_id = #{productId}
     </update>
+
+    <select id="findPutAwayProductsByInboundId" resultType="com.example.wms.product.application.domain.Product">
+        SELECT *
+        FROM product p
+        INNER JOIN order_product op ON p.product_id = op.product_id
+        INNER JOIN inbound i ON op.order_id = i.order_id
+        WHERE i.inbound_id = #{inboundId}
+    </select>
 </mapper>

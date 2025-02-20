@@ -8,8 +8,6 @@ import com.example.wms.inbound.application.port.out.AssignInboundNumberPort;
 import com.example.wms.inbound.application.port.out.InboundPort;
 import com.example.wms.inbound.application.port.out.InboundRetrievalPort;
 import com.example.wms.infrastructure.exception.NotFoundException;
-import com.example.wms.infrastructure.mapper.InboundCheckMapper;
-import com.example.wms.infrastructure.mapper.TestMapper;
 import com.example.wms.infrastructure.pagination.util.PageableUtils;
 import com.example.wms.inventory.application.port.out.InventoryPort;
 import com.example.wms.order.application.domain.Order;
@@ -53,7 +51,7 @@ public class InboundService implements InboundUseCase {
     private final InventoryPort inventoryPort;
     private final ProductUseCase productUseCase;
     private final BinUseCase binUseCase;
-    private final TestMapper testMapper;
+
     @Scheduled(cron = "0 0 * * * ?") // 1시간 마다 실행
     public void schedule(){
         productUseCase.performABCAnalysis();
@@ -208,8 +206,8 @@ public class InboundService implements InboundUseCase {
                                .productCode(product.getProductCode())
                                .productName(product.getProductName())
                                .productCount(product.getProductCount())
-                               .stockLotCount(product.getStockLotCount())  // 필드명 주의
-                               .defectiveCount(product.getDefectiveCount())  // 필드명 주의
+                               .stockLotCount(product.getStockLotCount())
+                               .defectiveCount(product.getDefectiveCount())
                                .build())
                        .collect(Collectors.toList());
 
@@ -405,28 +403,34 @@ public class InboundService implements InboundUseCase {
     }
 
     @Override
-    public void putAway(Long inboundId, List<InboundPutAwayReqDto> putAwayRequests) {
+    public void putAway(Long inboundId) {
 
-        String putAwayNumber = makeNumber("PA");
-        LocalDate putAwayDate = LocalDate.now();
-        String inboundStatus = "입고적치";
-        inboundPort.updatePA(inboundId, putAwayDate, putAwayNumber, inboundStatus);
         Inbound inbound = inboundPort.findById(inboundId);
 
         if (inbound == null) {
             throw new NotFoundException("Inbound not found with id " + inboundId);
         }
 
+        String putAwayNumber = makeNumber("PA");
+        LocalDate putAwayDate = LocalDate.now();
+        String inboundStatus = "입고적치";
+        inboundPort.updatePA(inboundId, putAwayDate, putAwayNumber, inboundStatus);
+
+        List<InboundPutAwayReqDto> putAwayRequests = productPort.findPutAwayProductsByInboundId(inboundId)
+                .stream()
+                .map(product -> InboundPutAwayReqDto.builder()
+                        .productId(product.getProductId())
+                        .lotCount(product.getStockLotCount())
+                        .build())
+                .collect(Collectors.toList());
+
         for (InboundPutAwayReqDto request : putAwayRequests) {
             Long productId = request.getProductId();
             Integer lotCount = request.getLotCount();
-            System.out.println("productId ****"+productId);
             Product product = productPort.findById(productId);
             Integer lotUnit = product.getLotUnit();
             String locationBinCode = productPort.getLocationBinCode(productId);
-            System.out.println("locationBinCode****"+locationBinCode);
 
-//            Long binId = findExactBinId(locationBinCode);
             List<Long> binIds = binUseCase.assignBinIdsToLots(locationBinCode, lotCount);
 
             if (binIds.size() < lotCount) {
@@ -453,7 +457,6 @@ public class InboundService implements InboundUseCase {
             Integer totalCount = lotCount * lotUnit;
             inventoryPort.updateInventory(productId, totalCount);
             productPort.updateRequiredQuantity(productId, lotCount);
-            // product 수량도 업데이트
         }
     }
 
@@ -500,12 +503,6 @@ public class InboundService implements InboundUseCase {
         return new PageImpl<>(resultList, pageable, resultList.size());
     }
 
-    public void testQuery() {
-        List<Map<String, Object>> results = testMapper.findInboundCheckFilteringWithPagination();
-        for (Map<String, Object> row : results) {
-            System.out.println(row);
-        }
-    }
 
 }
 
