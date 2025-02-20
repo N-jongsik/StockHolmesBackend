@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wms.infrastructure.mapper.NotificationMapper">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="notificationId">
+        INSERT INTO notification
+            (content, event, user_role)
+        VALUES
+            (#{content}, #{event}, #{userRole})
+    </insert>
+
+    <select id="getAll" resultType="com.example.wms.notification.application.domain.Notification">
+        SELECT *
+        FROM notification
+        WHERE user_role = #{userRole}
+    </select>
+</mapper>

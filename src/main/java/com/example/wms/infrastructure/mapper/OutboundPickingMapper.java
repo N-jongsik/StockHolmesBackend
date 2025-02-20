@@ -5,8 +5,6 @@ import com.example.wms.outbound.application.domain.Outbound;
 import com.example.wms.outbound.application.domain.OutboundPlan;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
@@ -15,36 +13,20 @@ import java.util.List;
 @Mapper
 public interface OutboundPickingMapper {
 
-    @Update("""
-    UPDATE outbound
-    SET outbound_picking_number = #{outboundPickingNumber},
-        outbound_picking_date = #{outboundPickingDate}
-    WHERE outbound_id = #{outboundId}
-    """)
     void insertOutboundPicking(
             @Param("outboundId") Long outboundId,
             @Param("outboundPickingNumber") String outboundPickingNumber,
             @Param("outboundPickingDate") LocalDate outboundPickingDate
     );
 
-    @Select("""
-        SELECT outbound_picking_number FROM outbound ORDER BY outbound_picking_number DESC LIMIT 1
-    """)
     String findMaxOutboundPickingNumber();
 
-    @Select("""
-        SELECT * 
-        FROM outbound
-        WHERE outbound_plan_id = #{outboundPlanId};
-    """)
     Outbound findOutboundByPlanId(@Param("outboundPlanId") Long outboundPlanId);
 
     // 출고 피킹 삭제
-    @Update("UPDATE outbound SET outbound_picking_date = NULL, outbound_picking_number = NULL WHERE outbound_id = #{outboundId}")
     void deleteOutboundPicking(@Param("outboundId") Long outboundId);
 
     // 출고 피킹 수정
-    @Update("UPDATE outbound SET outbound_picking_date = #{outboundPickingDate} WHERE outbound_id = #{outboundId}")
     void updateOutboundPicking(@Param("outboundId") Long outboundId, @Param("outboundPickingDate") LocalDate outboundPickingDate);
 
     // 출고 피킹 조회
@@ -62,17 +44,7 @@ public interface OutboundPickingMapper {
             @Param("endDate") LocalDate endDate
     );
 
-    @Update("""
-        UPDATE outbound_plan
-        SET status = #{status}
-        WHERE outbound_plan_id = #{outboundPlanId}
-    """)
     void updateOutboundPlanStatus(@Param("outboundPlanId") Long outboundPlanId,@Param("status") String status);
 
-    @Select("""
-        SELECT * 
-        FROM outbound
-        WHERE outbound_id = #{outboundId};
-    """)
     Outbound findOutboundByOutboundId(@Param("outboundId") Long outboundId);
 }

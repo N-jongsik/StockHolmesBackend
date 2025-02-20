@@ -94,13 +94,6 @@
         LEFT JOIN product p ON opp.product_id = p.product_id
     </select>
 
-
-    <select id="findOutboundPlanByOutboundPlanId">
-        SELECT *
-        FROM outbound_plan
-        WHERE outbound_plan_id = #{outboundPlanId}
-    </select>
-
     <select id="countLoading">
         SELECT COUNT(*)
         FROM outbound
@@ -125,4 +118,63 @@
             </if>
         </where>
     </select>
+
+    <!-- 출고 로딩 등록 -->
+    <update id="insertOutboundLoading">
+        UPDATE outbound
+        SET outbound_loading_number = #{outboundLoadingNumber},
+            outbound_loading_date = #{outboundLoadingDate}
+        WHERE outbound_id = #{outboundId}
+    </update>
+
+    <!-- 가장 큰 출고 로딩 번호 조회 -->
+    <select id="findMaxOutboundLoadingNumber" resultType="String">
+        SELECT outbound_loading_number
+        FROM outbound
+        ORDER BY outbound_loading_number DESC
+        LIMIT 1
+    </select>
+
+    <!-- 출고 계획 ID로 출고 정보 조회 -->
+    <select id="findOutboundByPlanId" resultType="com.example.wms.outbound.application.domain.Outbound">
+        SELECT *
+        FROM outbound
+        WHERE outbound_plan_id = #{outboundPlanId}
+    </select>
+
+    <!-- 출고 로딩 삭제 -->
+    <update id="deleteOutboundLoading">
+        UPDATE outbound
+        SET outbound_loading_date = NULL,
+            outbound_loading_number = NULL
+        WHERE outbound_id = #{outboundId}
+    </update>
+
+    <!-- 출고 로딩 수정 -->
+    <update id="updateOutboundLoading">
+        UPDATE outbound
+        SET outbound_loading_date = #{outboundLoadingDate}
+        WHERE outbound_id = #{outboundId}
+    </update>
+
+    <!-- 출고 계획 ID로 출고 계획 조회 -->
+    <select id="findOutboundPlanByOutboundPlanId" resultType="com.example.wms.outbound.application.domain.OutboundPlan">
+        SELECT *
+        FROM outbound_plan
+        WHERE outbound_plan_id = #{outboundPlanId}
+    </select>
+
+    <!-- 출고 ID로 출고 정보 조회 -->
+    <select id="findOutboundByOutboundId" resultType="com.example.wms.outbound.application.domain.Outbound">
+        SELECT *
+        FROM outbound
+        WHERE outbound_id = #{outboundId}
+    </select>
+
+    <!-- 출고 계획 상태 업데이트 -->
+    <update id="updateOutboundPlanStatus">
+        UPDATE outbound_plan
+        SET status = #{status}
+        WHERE outbound_plan_id = #{outboundPlanId}
+    </update>
 </mapper>

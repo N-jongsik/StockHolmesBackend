@@ -30,29 +30,13 @@ public interface OrderMapper {
     void createOrder(Order order);
 
     // 발주 등록하기
-    @Insert("""
-        INSERT INTO `order`
-        (supplier_id, order_date, is_approved, is_delayed, order_number, order_status, daily_plan_id, is_return_order, inbound_date)
-        VALUES
-        (#{supplierId}, #{orderDate}, #{isApproved}, #{isDelayed}, #{orderNumber}, #{orderStatus}, #{dailyPlanId}, #{isReturnOrder}, #{inboundDate})
-    """)
-    @Options(useGeneratedKeys = true, keyProperty = "orderId")
     void registerOrder(Order order);
 
-    @Select("""
-        SELECT order_number FROM `order` ORDER BY order_number DESC LIMIT 1;
-    """)
     String findMaxOutboundOrderNumber();
 
     // 발주 삭제하기
-    @Delete("""
-        DELETE FROM `order` WHERE `order_id` = #{orderId};
-    """)
     void deleteOrder(@Param("orderId") Long orderId);
 
-    @Delete("""
-        DELETE FROM `order_product` WHERE `order_id` = #{orderId};
-    """)
     void deleteOrderProduct(@Param("orderId") Long orderId);
 
     @Transactional

@@ -120,4 +120,56 @@
         </where>
     </select>
 
+    <!-- 출고 피킹 등록 -->
+    <update id="insertOutboundPicking">
+        UPDATE outbound
+        SET outbound_picking_number = #{outboundPickingNumber},
+            outbound_picking_date = #{outboundPickingDate}
+        WHERE outbound_id = #{outboundId}
+    </update>
+
+    <!-- 가장 큰 출고 피킹 번호 조회 -->
+    <select id="findMaxOutboundPickingNumber" resultType="String">
+        SELECT outbound_picking_number
+        FROM outbound
+        ORDER BY outbound_picking_number DESC
+            LIMIT 1
+    </select>
+
+    <!-- 출고 계획 ID로 출고 정보 조회 -->
+    <select id="findOutboundByPlanId" resultType="com.example.wms.outbound.application.domain.Outbound">
+        SELECT *
+        FROM outbound
+        WHERE outbound_plan_id = #{outboundPlanId}
+    </select>
+
+    <!-- 출고 피킹 삭제 -->
+    <update id="deleteOutboundPicking">
+        UPDATE outbound
+        SET outbound_picking_date = NULL,
+            outbound_picking_number = NULL
+        WHERE outbound_id = #{outboundId}
+    </update>
+
+    <!-- 출고 피킹 수정 -->
+    <update id="updateOutboundPicking">
+        UPDATE outbound
+        SET outbound_picking_date = #{outboundPickingDate}
+        WHERE outbound_id = #{outboundId}
+    </update>
+
+    <!-- 출고 계획 상태 업데이트 -->
+    <update id="updateOutboundPlanStatus">
+        UPDATE outbound_plan
+        SET status = #{status}
+        WHERE outbound_plan_id = #{outboundPlanId}
+    </update>
+
+    <!-- 출고 ID로 출고 정보 조회 -->
+    <select id="findOutboundByOutboundId" resultType="com.example.wms.outbound.application.domain.Outbound">
+        SELECT *
+        FROM outbound
+        WHERE outbound_id = #{outboundId}
+    </select>
+
 </mapper>

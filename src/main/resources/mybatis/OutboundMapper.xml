@@ -1,112 +1,62 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.wms.infrastructure.mapper.OutboundPlanMapper">
-    <resultMap id="outboundPlanResultMap" type="com.example.wms.outbound.adapter.in.dto.OutboundPlanResponseDto">
-        <id property="outboundPlanId" column="outbound_plan_id"/>
-        <result property="planDate" column="plan_date"/>
-        <result property="process" column="process"/>
-        <result property="outboundScheduleNumber" column="outbound_schedule_number"/>
-        <result property="outboundScheduleDate" column="outbound_schedule_date"/>
-        <result property="productionPlanNumber" column="production_plan_number"/>
+<mapper namespace="com.example.wms.infrastructure.mapper.OutboundMapper">
+    <insert id="insert" parameterType="com.example.wms.outbound.application.domain.Outbound" useGeneratedKeys="true" keyProperty="outboundId">
+        INSERT INTO outbound
+        (outbound_plan_id, outbound_assign_number, outbound_assign_date, outbound_picking_number, outbound_picking_date, outbound_packing_number, outbound_packing_date, outbound_loading_number, outbound_loading_date)
+        VALUES
+            (#{outboundPlanId}, #{outboundAssignNumber}, #{outboundAssignDate}, #{outboundPickingNumber}, #{outboundPickingDate}, #{outboundPackingNumber}, #{outboundPackingDate}, #{outboundLoadingNumber}, #{outboundLoadingDate})
+    </insert>
 
-        <!-- productList 컬렉션 매핑 -->
-        <collection property="productList" ofType="com.example.wms.outbound.adapter.in.dto.ProductInfoDto">
-            <id property="productId" column="product_id"/>
-            <result property="productCode" column="product_code"/>
-            <result property="productName" column="product_name"/>
-            <result property="productCount" column="productCount"/>
-        </collection>
-    </resultMap>
+    <!-- outbound 테이블 업데이트 (출고 지시 등록) -->
+    <update id="insertOutboundAssign">
+        UPDATE outbound
+        SET outbound_assign_number = #{outboundAssignNumber},
+            outbound_assign_date = #{outboundAssignDate}
+        WHERE outbound_id = #{outboundId}
+    </update>
 
-    <select id="findOutboundPlanFilteringWithPageNation" resultMap="outboundPlanResultMap">
-        SELECT
-        op.outbound_plan_id,
-        op.status AS process,
-        op.outbound_schedule_number,
-        op.outbound_schedule_date,
-        op.production_plan_number,
-        op.plan_date,
-        -- Product 정보 컬럼
-        p.product_id,
-        p.product_code,
-        p.product_name,
-        opp.required_quantity as productCount
-        FROM (
-        SELECT op.*
-        FROM outbound_plan op
-        LEFT JOIN outbound o ON op.outbound_plan_id = o.outbound_plan_id
-        <where>
-            o.outbound_plan_id IS NULL
-            <!-- 시작일 조건 (startDate) -->
-            <if test="startDate != null">
-                AND op.outbound_schedule_date <![CDATA[>=]]> #{startDate}
-            </if>
-            <!-- 종료일 조건 (endDate) -->
-            <if test="endDate != null">
-                AND op.outbound_schedule_date <![CDATA[<=]]> #{endDate}
-            </if>
-            <!-- 번호 조건 (outboundScheduleNumber) -->
-            <if test="outboundScheduleNumber != null and outboundScheduleNumber != ''">
-                AND op.outbound_schedule_number LIKE CONCAT('%', #{outboundScheduleNumber}, '%')
-            </if>
-        </where>
-        <!-- 정렬 조건 -->
-        <if test="pageable.sort.sorted">
-            <trim prefix="ORDER BY">
-                <foreach item="order" index="i" collection="pageable.sort" separator=", ">
-                    ${order.property}
-                    <choose>
-                        <when test="order.direction.toString() == 'ASC'">ASC</when>
-                        <otherwise>DESC</otherwise>
-                    </choose>
-                </foreach>
-            </trim>
-        </if>
-        <!-- 페이징 조건 -->
-        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
-        ) op
-        LEFT JOIN outbound_plan_product opp ON op.outbound_plan_id = opp.outbound_plan_id
-        LEFT JOIN product p ON opp.product_id = p.product_id
+    <!-- 가장 큰 출고 지시 번호 조회 -->
+    <select id="findMaxOutboundAssignNumber" resultType="String">
+        SELECT outbound_assign_number
+        FROM outbound
+        ORDER BY outbound_assign_number DESC
+            LIMIT 1
     </select>
 
-    <select id="countAllOutboundPlan" resultType="Integer">
-        SELECT COUNT(*)
-        FROM outbound_plan
-    </select>
-
-    <select id="countAllOutboundPlanFiltering" resultType="Integer">
-        SELECT COUNT(*)
-        FROM outbound_plan op
-        LEFT JOIN outbound o ON op.outbound_plan_id = o.outbound_plan_id
-        <where>
-            o.outbound_plan_id IS NULL
-            <!-- 시작일 조건 (startDate) -->
-            <if test="startDate != null">
-                outbound_schedule_date <![CDATA[>=]]> #{startDate}
-            </if>
-
-            <!-- 종료일 조건 (endDate) -->
-            <if test="endDate != null">
-                <if test="startDate != null">
-                    AND
-                </if>
-                outbound_schedule_date <![CDATA[<=]]> #{endDate}
-            </if>
-
-            <!-- 번호 조건 (outboundScheduleNumber) -->
-            <if test="outboundScheduleNumber != null and outboundScheduleNumber != ''">
-                <if test="startDate != null or endDate != null">
-                    AND
-                </if>
-                outbound_schedule_number LIKE CONCAT('%', #{outboundScheduleNumber}, '%')
-            </if>
-        </where>
-    </select>
-
-    <select id="findOutboundPlanProductsByPlanId">
+    <!-- 출고 ID로 출고 정보 조회 -->
+    <select id="findOutboundByOutboundId" resultType="com.example.wms.outbound.application.domain.Outbound">
         SELECT *
-        FROM outbound_plan_product
+        FROM outbound
+        WHERE outbound_id = #{outboundId}
+    </select>
+
+    <!-- 출고 지시 삭제 -->
+    <update id="deleteOutboundAssign">
+        UPDATE outbound
+        SET outbound_assign_date = NULL,
+            outbound_assign_number = NULL
+        WHERE outbound_id = #{outboundId}
+    </update>
+
+    <!-- 출고 지시 수정 -->
+    <update id="updateOutboundAssign">
+        UPDATE outbound
+        SET outbound_assign_date = #{outboundAssignDate}
+        WHERE outbound_id = #{outboundId}
+    </update>
+
+    <!-- 출고 계획 ID로 출고 정보 조회 -->
+    <select id="findOutboundByPlanId" resultType="com.example.wms.outbound.application.domain.Outbound">
+        SELECT *
+        FROM outbound
         WHERE outbound_plan_id = #{outboundPlanId}
     </select>
 
+    <!-- 출고 계획 상태 업데이트 -->
+    <update id="updateOutboundPlanStatus">
+        UPDATE outbound_plan
+        SET status = #{status}
+        WHERE outbound_plan_id = #{outboundPlanId}
+    </update>
 </mapper>
