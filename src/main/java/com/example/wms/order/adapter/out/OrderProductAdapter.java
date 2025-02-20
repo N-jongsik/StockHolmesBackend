@@ -18,7 +18,7 @@ public class OrderProductAdapter implements OrderProductPort {
     }
 
     @Override
-    public void updateDefectiveCount(Long productId, Long defectiveCount) {
-        orderProductMapper.updateDefectiveCount(productId, defectiveCount);
+    public void save(OrderProduct orderProduct) {
+        orderProductMapper.save(orderProduct);
     }
 }

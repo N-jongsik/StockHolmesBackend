@@ -73,7 +73,7 @@
             p.product_id,
             p.product_code,
             p.product_name,
-            COUNT(p.stock_lot_count * p.lot_unit) AS product_count
+            op.product_count AS product_count
         FROM inbound i
         JOIN `order` o ON i.order_id = o.order_id
         JOIN order_product op ON o.order_id = op.order_id
@@ -171,73 +171,9 @@
         SELECT COUNT(*) FROM inbound;
     </select>
 
-    <select id="countFilteredPutAway" resultType="int">
-        SELECT COUNT(*)
-        FROM inbound
-        <where>
-            <if test="inboundPutAwayNumber != null">
-                put_away_number = #{inboundPutAwayNumber}
-            </if>
 
-            <if test="startDate != null">
-                <if test="inboundPutAwayNumber != null">
-                    AND
-                </if>
-                put_away_date <![CDATA[>=]]> #{startDate}
-            </if>
 
-            <if test="endDate != null">
-                <if test="inboundPutAwayNumber != null or startDate != null">
-                    AND
-                </if>
-                put_away_date <![CDATA[<=]]> #{endDate}
-            </if>
-        </where>
-    </select>
 
-    <select id="countAllInboundPlanFiltering" resultType="int">
-        SELECT COUNT(*)
-        FROM inbound
-        <where>
-            schedule_number is not null AND check_number is null
-            <if test="startDate != null">
-                AND
-                schedule_date <![CDATA[>=]]> #{startDate}
-            </if>
-
-            <if test="endDate != null">
-                AND
-                schedule_date <![CDATA[<=]]> #{endDate}
-            </if>
-
-            <if test="inboundScheduleNumber != null and inboundScheduleNumber != ''">
-                AND
-                schedule_number LIKE CONCAT('%', #{inboundScheduleNumber}, '%')
-            </if>
-        </where>
-    </select>
-
-    <select id="countAllInboundCheckFiltering" resultType="int">
-        SELECT COUNT(*)
-        FROM inbound
-        <where>
-            check_number is not null AND put_away_number is null
-            <if test="startDate != null">
-                AND
-                check_date <![CDATA[>=]]> #{startDate}
-            </if>
-
-            <if test="endDate != null">
-                AND
-                check_date <![CDATA[<=]]> #{endDate}
-            </if>
-
-            <if test="inboundCheckNumber != null and inboundCheckNumber != ''">
-                AND
-                check_number LIKE CONCAT('%', #{inboundCheckNumber}, '%')
-            </if>
-        </where>
-    </select>
 
     <select id="findAllInboundBySupplierWithPagination" resultMap="SupplierInboundResultMap">
         SELECT * FROM (

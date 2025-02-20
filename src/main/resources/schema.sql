@@ -79,10 +79,10 @@ CREATE TABLE IF NOT EXISTS `order` (
 CREATE TABLE IF NOT EXISTS order_product (
                                              order_product_id BIGINT AUTO_INCREMENT PRIMARY KEY,
                                              order_id BIGINT NOT NULL,
-                                             product_id BIGINT NOT NULL,
-                                             is_defective BOOLEAN,
                                              product_count INT,
+                                             product_id BIGINT NOT NULL,
                                              product_name VARCHAR(50),
+                                             is_defective BOOLEAN,
                                              defective_count BIGINT,
                                              CONSTRAINT fk_order FOREIGN KEY (order_id) REFERENCES `order`(order_id),
                                              CONSTRAINT fk_product_order_product FOREIGN KEY (product_id) REFERENCES product(product_id)

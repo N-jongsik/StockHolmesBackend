@@ -18,7 +18,7 @@
         p.product_id,
         p.product_code,
         p.product_name,
-        (p.stock_lot_count * p.lot_unit) AS product_count,
+        op.product_count AS product_count,
         p.stock_lot_count AS stock_lot_count,
         op.defective_count AS defective_count
         FROM (
@@ -37,7 +37,8 @@
         FROM inbound i
         INNER JOIN `order` o ON i.order_id = o.order_id
         <where>
-            i.check_number IS NOT NULL AND i.put_away_number IS NULL
+            check_number IS NOT NULL
+            AND put_away_number IS NULL
             <if test="startDate != null">
                 AND check_date <![CDATA[>=]]> #{startDate}
             </if>
@@ -65,6 +66,28 @@
         INNER JOIN order_product op ON b.order_id = op.order_id
         INNER JOIN product p ON op.product_id = p.product_id
         INNER JOIN supplier s ON b.supplier_id = s.supplier_id
+    </select>
+
+    <select id="countAllInboundCheckFiltering" resultType="int">
+        SELECT COUNT(*)
+        FROM inbound
+        <where>
+            check_number is not null AND put_away_number is null
+            <if test="startDate != null">
+                AND
+                check_date <![CDATA[>=]]> #{startDate}
+            </if>
+
+            <if test="endDate != null">
+                AND
+                check_date <![CDATA[<=]]> #{endDate}
+            </if>
+
+            <if test="inboundCheckNumber != null and inboundCheckNumber != ''">
+                AND
+                check_number LIKE CONCAT('%', #{inboundCheckNumber}, '%')
+            </if>
+        </where>
     </select>
     <resultMap id="InboundAllProductResultMap" type="com.example.wms.inbound.adapter.in.dto.response.InboundAllProductDto">
         <id column="inbound_id" property="inboundId"/>

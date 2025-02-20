@@ -3,7 +3,9 @@ package com.example.wms.order.adapter.out;
 import com.example.wms.infrastructure.exception.NotFoundException;
 import com.example.wms.infrastructure.mapper.*;
 import com.example.wms.order.application.domain.Order;
+import com.example.wms.order.application.domain.OrderProduct;
 import com.example.wms.order.application.port.out.OrderPort;
+import com.example.wms.order.application.port.out.OrderProductPort;
 import com.example.wms.outbound.adapter.in.dto.OutboundPlanRequestDto;
 import com.example.wms.outbound.adapter.in.dto.ProductInfoDto;
 import com.example.wms.outbound.application.domain.OutboundPlan;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -23,21 +26,23 @@ import java.util.List;
 public class OrderAdapter implements OrderPort {
 
     private final ProductPort productPort;
+    private final OrderProductPort orderProductPort;
     private final OrderMapper orderMapper;
-    private final CreateOutboundPlanPort outboundPlanPort;
     private final InboundMapper inboundMapper;
 
-
     @Override
-    public void createOrder(Long productId, Long inboundId, Long defectiveCount) { // defectiveCount 값 수정
+    public void createOrder(Long productId, Long inboundId, Long defectiveCount) {
+
         Product product = productPort.findById(productId);
+        Long orderId;
+
         if (product == null) {
             throw new NotFoundException("Product not found for ID : " + productId);
         }
 
+
         String orderNumber = generateOrderNumber();
 
-        for(int i=0; i<defectiveCount; i++) {
             Order order = Order.builder()
                     .dailyPlanId(orderMapper.findOrderById(inboundMapper.findById(inboundId).getOrderId()).getDailyPlanId())
                     .supplierId(product.getSupplierId())
@@ -48,12 +53,21 @@ public class OrderAdapter implements OrderPort {
                     .orderStatus("처리중")
                     .inboundDate(LocalDate.now())
                     .build();
+            orderId = orderMapper.createOrder(order);
+            System.out.println("🍏"+ orderId);
 
-            orderMapper.createOrder(order);
-        }
 
-
+        OrderProduct orderProduct = OrderProduct.builder()
+                .orderId(orderId)
+                .productCount(defectiveCount.intValue()*product.getLotUnit())
+                .productId(productId)
+                .productName(product.getProductName())
+                .isDefective(true)
+                .defectiveCount(defectiveCount)
+                .build();
+        orderProductPort.save(orderProduct);
     }
+
 
 
 

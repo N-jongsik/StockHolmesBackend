@@ -14,4 +14,6 @@ import java.util.Map;
 public interface InboundCheckMapper {
 
     List<InboundAllProductDto> findInboundCheckFilteringWithPagination(@Param("inboundCheckNumber") String inboundCheckNumber, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("pageable") Pageable pageable);
+    Integer countAllInboundCheckFiltering(@Param("inboundCheckNumber") String inboundCheckNumber, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
 }

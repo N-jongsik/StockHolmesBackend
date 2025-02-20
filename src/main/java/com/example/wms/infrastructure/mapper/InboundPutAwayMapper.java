@@ -12,5 +12,6 @@ import java.util.List;
 @Mapper
 public interface InboundPutAwayMapper {
     List<InboundPutAwayAllProductDto> findInboundPutAwayFilteringWithPagination(@Param("inboundPutAwayNumber") String inboundPutAwayNumber, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("pageable") Pageable pageable);
+    Integer countFilteredPutAway(@Param("inboundPutAwayNumber") String inboundPutAwayNumber, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
 }

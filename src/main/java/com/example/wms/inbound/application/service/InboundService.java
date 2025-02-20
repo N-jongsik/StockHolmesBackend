@@ -233,6 +233,13 @@ public class InboundService implements InboundUseCase {
         inboundPort.save(inboundPlan);
     }
 
+    private String generateFullLotBinCode(String locationBinCode, int index) {
+        if (!locationBinCode.matches("[A-F]-\\d{2}-\\d{2}-\\d{2}")) {
+            return locationBinCode + "-" + String.format("%02d", index + 1);
+        }
+        return locationBinCode;
+    }
+
     @Transactional
     @Override
     public void deleteInboundPlan(Long inboundId) {
@@ -252,34 +259,63 @@ public class InboundService implements InboundUseCase {
         for (InboundCheckedProductReqDto checkedProduct : inboundCheckReqDto.getCheckedProductList()) {
 
             Long productId = checkedProduct.getProductId();
-            Long defectiveCount = checkedProduct.getDefectiveCount();
+            Integer count = (checkedProduct.getDefectiveCount().intValue());
 
+            int defectiveCount = count / productPort.findById(productId).getLotUnit();
             Product product = productPort.findById(productId);
 
             if (product == null) {
                 throw new NotFoundException("product not found with id :" + productId);
             }
 
-            OrderProduct orderProduct = orderProductPort.findByProductId(productId);
-            orderProductPort.updateDefectiveCount(productId, defectiveCount);
+            long countLongValue = defectiveCount;
+
             // 재발주
             if (defectiveCount > 0) {
-                orderPort.createOrder(orderProduct.getProductId(), inboundId, defectiveCount);
+                orderPort.createOrder(productId, inboundId, countLongValue); // 품목별 불합격 수량을 입력받아 발주를 넣는다.
             }
-        }
 
-        inboundPort.updateIC(inbound.getInboundId(), LocalDate.now(), makeNumber("IC"), "입하검사");
+            List<InboundPutAwayReqDto> putAwayRequests = productPort.findPutAwayProductsByInboundId(inboundId)
+                    .stream()
+                    .map(p -> InboundPutAwayReqDto.builder()
+                            .productId(p.getProductId())
+                            .lotCount(countLongValue)
+                            .build())
+                    .collect(Collectors.toList());
+
+            for (InboundPutAwayReqDto request : putAwayRequests) {
+                Integer lotCount = request.getLotCount().intValue();
+                String locationBinCode = productPort.getLocationBinCode(request.getProductId());
+
+                List<Long> binIds = binUseCase.assignBinIdsToLots(locationBinCode, lotCount);
+
+                if (binIds.size() < lotCount) {
+                    throw new NotFoundException("할당할 bin이 부족합니다." + locationBinCode);
+                }
+
+                for (int i = 0; i < lotCount; i++) {
+                    String lotBinCode = generateFullLotBinCode(locationBinCode, i);
+                    Lot lot = Lot.builder()
+                            .productId(productId)
+                            .binId(binIds.get(i))
+                            .lotNumber(lotBinCode)
+                            .status(LotStatus.입고)
+                            .inboundId(inboundId)
+                            .build();
+                    lotPort.insertLot(lot);
+                }
+            }
+            inboundPort.updateIC(inbound.getInboundId(), LocalDate.now(), makeNumber("IC"), "입하검사");
+        }
     }
 
     @Override
     public Page<InboundResDto> getFilteredInboundCheck(String inboundCheckNumber, LocalDate startDate, LocalDate endDate, Pageable pageable) {
 
         Pageable safePageable = PageableUtils.convertToSafePageableStrict(pageable, Inbound.class);
-
         List<InboundAllProductDto> inboundAllProductDtoList = inboundRetrievalPort.findInboundCheckFilteringWithPagination(inboundCheckNumber, startDate, endDate, safePageable);
 
         Integer count = inboundRetrievalPort.countFilteredInboundCheck(inboundCheckNumber, startDate, endDate);
-
         List<InboundResDto> inboundResDtoList = convertToInboundResDto(inboundAllProductDtoList);
 
         return new PageImpl<>(inboundResDtoList, pageable, count);
@@ -420,13 +456,13 @@ public class InboundService implements InboundUseCase {
                 .stream()
                 .map(product -> InboundPutAwayReqDto.builder()
                         .productId(product.getProductId())
-                        .lotCount(product.getStockLotCount())
+                        .lotCount(Long.valueOf(product.getStockLotCount()))
                         .build())
                 .collect(Collectors.toList());
 
         for (InboundPutAwayReqDto request : putAwayRequests) {
             Long productId = request.getProductId();
-            Integer lotCount = request.getLotCount();
+            int lotCount = request.getLotCount().intValue();
             Product product = productPort.findById(productId);
             Integer lotUnit = product.getLotUnit();
             String locationBinCode = productPort.getLocationBinCode(productId);
@@ -435,19 +471,6 @@ public class InboundService implements InboundUseCase {
 
             if (binIds.size() < lotCount) {
                 throw new NotFoundException("할당할 bin이 부족합니다." + locationBinCode);
-            }
-
-            for(int i=0; i<lotCount; i++) {
-                String lotBinCode = generateFullLotBinCode(locationBinCode, i);
-                System.out.println("****lotBinCode"+lotBinCode);
-                Lot lot = Lot.builder()
-                        .productId(productId)
-                        .binId(binIds.get(i))
-                        .lotNumber(lotBinCode)
-                        .status(LotStatus.입고)
-                        .inboundId(inboundId)
-                        .build();
-                lotPort.insertLot(lot);
             }
 
             for (Long binId : binIds) {
@@ -460,13 +483,7 @@ public class InboundService implements InboundUseCase {
         }
     }
 
-    private String generateFullLotBinCode(String locationBinCode, int index) {
-        System.out.println("***locationBinCode"+locationBinCode);
-        if (!locationBinCode.matches("[A-F]-\\d{2}-\\d{2}-\\d{2}")) {
-            return locationBinCode + "-" + String.format("%02d", index + 1);
-        }
-        return locationBinCode;
-    }
+
 
     @Override
     public Page<ProductInboundResDto> getAllInboundByProductWithPagination(LocalDate startDate, LocalDate endDate, Pageable pageable) {
