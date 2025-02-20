@@ -57,9 +57,9 @@
     </select>
 
     <insert id="createOrder" useGeneratedKeys="true" keyProperty="orderId">
-        INSERT INTO `order` (supplier_id, order_number, order_date, is_approved, is_return_order,
+        INSERT INTO `order` (daily_plan_id, supplier_id, order_number, order_date, is_approved, is_return_order,
         order_status, inbound_date)
-        VALUES (#{supplierId}, #{orderNumber}, #{orderDate}, #{isApproved}, #{isReturnOrder},
+        VALUES (#{dailyPlanId}, #{supplierId}, #{orderNumber}, #{orderDate}, #{isApproved}, #{isReturnOrder},
         #{orderStatus}, #{inboundDate})
     </insert>
 
