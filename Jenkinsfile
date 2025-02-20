@@ -4,7 +4,7 @@ pipeline {
         choice(
             name: 'DEPLOY_ENV',
             choices: ['blue', 'green'],
-            description: '배포 환경 선택'
+            description: '배포 환경 선택하기'
         )
     }
     environment {
