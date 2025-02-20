@@ -67,23 +67,23 @@ pipeline {
                             ls -la ./src/main/resources/
 
                             chmod -R 777 ./src/main/resources
-                            cp \${SECRET_FILE} ./src/main/resources/application-secret.yml
+                            cp \${SECRET_FILE} ./src/main/resources/application-prod.yml
 
                             echo "Resource directory contents after:"
                             ls -la ./src/main/resources/
 
                             # 파일 존재 확인 & 내용 체크
-                            echo "===== Verifying secret file ====="
-                            if [ -f ./src/main/resources/application-secret.yml ]; then
-                                echo "Secret file exists"
+                            echo "===== Verifying prod file ====="
+                            if [ -f ./src/main/resources/application-prod.yml ]; then
+                                echo "Prod file exists"
                                 echo "File permissions:"
-                                ls -l ./src/main/resources/application-secret.yml
+                                ls -l ./src/main/resources/application-prod.yml
                                 echo "File size:"
-                                stat -f %z ./src/main/resources/application-secret.yml || stat -c %s ./src/main/resources/application-secret.yml
+                                stat -f %z ./src/main/resources/application-prod.yml || stat -c %s ./src/main/resources/application-prod.yml
                                 echo "First line of file (without sensitive data):"
-                                head -n 1 ./src/main/resources/application-secret.yml
+                                head -n 1 ./src/main/resources/application-prod.yml
                             else
-                                echo "ERROR: Secret file was not copied properly"
+                                echo "ERROR: Prod file was not copied properly"
                             fi
                         """
                     }
