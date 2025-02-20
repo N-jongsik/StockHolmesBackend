@@ -22,7 +22,7 @@ public class InboundProductDto {
     @Schema(description = "품목명", example = "tire")
     private String productName;
 
-    @Schema(description = "품목 수량", example = "30")
+    @Schema(description = "품목마다 발주한 수량", example = "30")
     private Long productCount;
 
     @Schema(description = "품목 lot 수량", example = "3")
