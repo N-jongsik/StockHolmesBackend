@@ -54,7 +54,7 @@ public class InboundService implements InboundUseCase {
     private final ProductUseCase productUseCase;
     private final BinUseCase binUseCase;
     private final TestMapper testMapper;
-    @Scheduled(cron = "0 0 * * * ?") // 1분마다 실행
+    @Scheduled(cron = "0 0 * * * ?") // 1시간 마다 실행
     public void schedule(){
         productUseCase.performABCAnalysis();
         productUseCase.assignLocationBinCode();
@@ -127,7 +127,50 @@ public class InboundService implements InboundUseCase {
         return inboundRetrievalPort.findInboundProductListByOrderId(orderProduct.getOrderId());
     }
 
+    private List<InboundPutAwayResDto> convertToInboundPutAwayResDto(List<InboundPutAwayAllProductDto> inboundPutAwayDtoList) {
+        if (inboundPutAwayDtoList.isEmpty()) {
+            return Collections.emptyList();
+        }
 
+        Map<Long, InboundPutAwayResDto> inboundPutAwayMap = new LinkedHashMap<>();
+
+        for (InboundPutAwayAllProductDto dto : inboundPutAwayDtoList) {
+            inboundPutAwayMap.putIfAbsent(dto.getInboundId(),
+                    InboundPutAwayResDto.builder()
+                            .inboundId(dto.getInboundId())
+                            .inboundStatus(dto.getInboundStatus())
+                            .createdAt(dto.getCreatedAt())
+                            .scheduleNumber(dto.getScheduleNumber())
+                            .inboundCheckNumber(dto.getInboundCheckNumber())
+                            .putAwayNumber(dto.getPutAwayNumber())
+                            .putAwayDate(dto.getPutAwayDate())
+                            .orderId(dto.getOrderId())
+                            .orderNumber(dto.getOrderNumber())
+                            .orderDate(dto.getOrderDate())
+                            .supplierId(dto.getSupplierId())
+                            .supplierName(dto.getSupplierName())
+                            .lotList(dto.getLotList())
+                            .build()
+            );
+
+            InboundPutAwayResDto existingPutAwayResDto = inboundPutAwayMap.get(dto.getInboundId());
+
+            if (dto.getLotList() != null && !dto.getLotList().isEmpty()) {
+                List<LotResDto> convertedProducts = dto.getLotList().stream()
+                        .map(product -> LotResDto.builder()
+                                .lotId(product.getLotId())
+                                .productId(product.getProductId())
+                                .productCode(product.getProductCode())
+                                .productName(product.getProductName())
+                                .productCount(product.getProductCount())
+                                .locationBinCode(product.getLocationBinCode())
+                                .build())
+                        .collect(Collectors.toList());
+                existingPutAwayResDto.getLotList().addAll(convertedProducts);
+            }
+        }
+        return new ArrayList<>(inboundPutAwayMap.values());
+    }
 
     private List<InboundResDto> convertToInboundResDto(List<InboundAllProductDto> inboundDtoList) {
         if (inboundDtoList.isEmpty()) {
@@ -292,10 +335,13 @@ public class InboundService implements InboundUseCase {
     public Page<InboundPutAwayResDto> getFilteredPutAway(String inboundPutAwayNumber, LocalDate startDate, LocalDate endDate, Pageable pageable) {
         Pageable safePageable = PageableUtils.convertToSafePageableStrict(pageable, Inbound.class);
 
-        List<InboundPutAwayResDto> inboundPutAwayList = inboundRetrievalPort.findFilteredInboundPutAway(inboundPutAwayNumber, startDate, endDate, safePageable);
+        List<InboundPutAwayAllProductDto> inboundPutAwayList = inboundRetrievalPort.findFilteredInboundPutAway(inboundPutAwayNumber, startDate, endDate, safePageable);
+
         Integer count = inboundRetrievalPort.countFilteredPutAway(inboundPutAwayNumber, startDate, endDate);
 
-        return new PageImpl<>(inboundPutAwayList, safePageable, count);
+        List<InboundPutAwayResDto> inboundPutAwayResDtoList = convertToInboundPutAwayResDto(inboundPutAwayList);
+
+        return new PageImpl<>(inboundPutAwayResDtoList, safePageable, count);
     }
 
     @Override
