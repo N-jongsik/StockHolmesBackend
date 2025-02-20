@@ -27,7 +27,7 @@ public interface OrderMapper {
 
     String getLastOrderNumber();
 
-    void createOrder(Order order);
+    Long createOrder(Order order);
 
     // 발주 등록하기
     @Insert("""
