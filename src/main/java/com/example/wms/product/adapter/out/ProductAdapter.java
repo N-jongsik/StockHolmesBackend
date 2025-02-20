@@ -69,6 +69,11 @@ public class ProductAdapter implements ProductPort {
         return productMapper.getSupplierIdByProductId(productId);
     }
 
+    @Override
+    public List<Product> findPutAwayProductsByInboundId(Long inboundId) {
+       return productMapper.findPutAwayProductsByInboundId(inboundId);
+    }
+
     private <T> T executeWithFallback(Supplier<T> action, T fallback) {
         try {
             return action.get();

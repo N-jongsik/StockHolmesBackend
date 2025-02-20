@@ -1,5 +1,6 @@
 package com.example.wms.product.application.port.out;
 
+import com.example.wms.inbound.adapter.in.dto.request.InboundPutAwayReqDto;
 import com.example.wms.product.adapter.in.dto.ProductOverviewDto;
 import com.example.wms.product.adapter.in.dto.ProductResponseDto;
 import com.example.wms.product.application.domain.Product;
@@ -19,4 +20,5 @@ public interface ProductPort {
     String getLocationBinCode(Long productId);
     void updateRequiredQuantity(Long productId, Integer lotCount);
     Long getSupplierId(Long productId);
+    List<Product> findPutAwayProductsByInboundId(Long inboundId);
 }
