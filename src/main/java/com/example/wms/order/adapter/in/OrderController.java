@@ -7,7 +7,10 @@ import com.example.wms.order.adapter.in.dto.OrderResponseDto;
 import com.example.wms.order.adapter.in.dto.ProductListDto;
 import com.example.wms.order.application.domain.Order;
 import com.example.wms.order.application.port.in.*;
+import com.example.wms.user.application.domain.User;
 import com.example.wms.user.application.domain.enums.UserRole;
+import com.example.wms.user.application.port.out.JwtTokenPort;
+import com.example.wms.user.application.port.out.UserPort;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import static com.example.wms.infrastructure.security.util.SecurityUtils.getLoginUserStaffNumber;
 
 @RestController
 @RequestMapping("/order")
@@ -32,6 +37,7 @@ public class OrderController {
     private final GetOrderUseCase getOrderUseCase;
     private final UpdateOrderUseCase updateOrderUseCase;
     private final NotificationUseCase notificationUseCase;
+    private final UserPort userPort;
 
     @PostMapping
     @Operation(summary = "발주 등록하기")
@@ -86,15 +92,17 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/supplier/{supplierId}")
+    @GetMapping("/supplier")
     @Operation(summary = "발주 조회하기 납품업체버젼", description = "자신에게 온 승인되지 않은 발주 아이템 조회")
     public ResponseEntity<?> getOrders(
-            @PathVariable("supplierId") Long supplierId,
             @RequestParam(value = "number", required = false) String orderNumber,
             @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @ParameterObject Pageable pageable
     ){
-        return ResponseEntity.ok(getOrderUseCase.getFilteredOrderWithSupplier(supplierId,orderNumber, startDate, endDate, pageable));
+        String staffNumber =  getLoginUserStaffNumber();
+        User user = userPort.findByStaffNumber(staffNumber);
+
+        return ResponseEntity.ok(getOrderUseCase.getFilteredOrderWithSupplier(user.getSupplierId(),orderNumber, startDate, endDate, pageable));
     }
 }
