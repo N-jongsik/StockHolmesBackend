@@ -4,7 +4,7 @@ pipeline {
         choice(
             name: 'DEPLOY_ENV',
             choices: ['blue', 'green'],
-            description: '배포 환경 선택하기'
+            description: '배포 환경 선택'
         )
     }
     environment {
@@ -192,7 +192,7 @@ pipeline {
                                         ssh ec2-user@ip-172-31-43-48 'echo "${deployEnv}" | sudo tee /etc/nginx/deployment_env'
 
                                         echo "Testing and reloading Nginx..."
-                                        ssh ec2-user@ip-172-31-43-48 'sudo nginx -t && sudo systemctl reload nginx'
+                                        sudo nginx -t && sudo systemctl reload nginx
 
                                         if [ "${currentEnv}" != "none" ]; then
                                             echo "Stopping old container: ${currentEnv}..."
