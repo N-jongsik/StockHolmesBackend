@@ -59,14 +59,15 @@
             p.product_name,
             p.purchase_price,
             p.sale_price,
-            (p.lot_unit * p.stock_lot_count) as productCount,
+            (p.lot_unit * p.stock_lot_count) as product_count,
+            i.available_quantity,
             s.supplier_name,
             p.category,
             p.threshold,
             p.lead_time,
             p.location_bin_code,
             p.abc_grade
-        FROM product p join supplier s on p.supplier_id = s.supplier_id
+        FROM product p join inventory i on p.product_id = i.product_id join supplier s on p.supplier_id = s.supplier_id
         <if test="productCode != null and productCode != ''">
             WHERE product_code LIKE CONCAT('%', #{productCode}, '%')
         </if>

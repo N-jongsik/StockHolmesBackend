@@ -39,7 +39,8 @@
         p.product_id,
         p.product_code,
         p.product_name,
-        i.available_quantity AS productCount,
+        i.available_quantity,
+        (p.lot_unit * p.stock_lot_count) as productCount,
         p.threshold
         FROM product p
         JOIN inventory i ON p.product_id = i.product_id

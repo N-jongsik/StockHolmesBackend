@@ -13,6 +13,7 @@ public class ProductResponseDto {
     private Integer purchasePrice; // 구매 가격
     private Integer salePrice; // 판매 가격
     private Long productCount;
+    private Integer availableQuantity;
     private String supplierName; // 공급자 이름
     private String category; // 카테고리
     private Integer threshold; // 최소 LOT 수량
