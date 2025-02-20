@@ -9,5 +9,6 @@ public class ProductThresholdDto {
     private String productCode;
     private String productName;
     private Integer productCount;
+    private Integer availableQuantity;
     private Integer threshold;
 }
