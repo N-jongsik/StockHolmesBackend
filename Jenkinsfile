@@ -192,7 +192,7 @@ pipeline {
                                         ssh ec2-user@ip-172-31-43-48 'echo "${deployEnv}" | sudo tee /etc/nginx/deployment_env'
 
                                         echo "Testing and reloading Nginx..."
-                                        sudo nginx -t && sudo systemctl reload nginx
+                                        ssh ec2-user@ip-172-31-43-48 'sudo nginx -t && sudo systemctl reload nginx'
 
                                         if [ "${currentEnv}" != "none" ]; then
                                             echo "Stopping old container: ${currentEnv}..."
