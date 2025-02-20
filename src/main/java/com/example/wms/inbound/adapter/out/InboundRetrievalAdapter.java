@@ -49,12 +49,12 @@ public class InboundRetrievalAdapter implements InboundRetrievalPort {
 
     @Override
     public Integer countFilteredInboundPlan(String inboundScheduleNumber, LocalDate startDate, LocalDate endDate) {
-        return inboundRetrievalMapper.countAllInboundPlanFiltering(inboundScheduleNumber, startDate, endDate);
+        return inboundPlanMapper.countAllInboundPlanFiltering(inboundScheduleNumber, startDate, endDate);
     }
 
     @Override
     public Integer countFilteredInboundCheck(String inboundCheckNumber, LocalDate startDate, LocalDate endDate) {
-        return inboundRetrievalMapper.countAllInboundCheckFiltering(inboundCheckNumber, startDate, endDate);
+        return inboundCheckMapper.countAllInboundCheckFiltering(inboundCheckNumber, startDate, endDate);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class InboundRetrievalAdapter implements InboundRetrievalPort {
 
     @Override
     public Integer countFilteredPutAway(String inboundPutAwayNumber, LocalDate startDate, LocalDate endDate) {
-        return inboundRetrievalMapper.countFilteredPutAway(inboundPutAwayNumber, startDate, endDate);
+        return inboundPutAwayMapper.countFilteredPutAway(inboundPutAwayNumber, startDate, endDate);
     }
 
     @Override
