@@ -14,6 +14,7 @@
         b.order_number,
         b.order_date,
         b.supplier_id,
+        s.supplier_name,
         p.product_id,
         p.product_code,
         p.product_name,
@@ -62,6 +63,7 @@
         ) b
         INNER JOIN order_product op ON b.order_id = op.order_id
         INNER JOIN product p ON op.product_id = p.product_id
+        INNER JOIN supplier s ON b.supplier_id = s.supplier_id
     </select>
     <resultMap id="InboundAllProductResultMap" type="com.example.wms.inbound.adapter.in.dto.response.InboundAllProductDto">
         <id column="inbound_id" property="inboundId"/>
