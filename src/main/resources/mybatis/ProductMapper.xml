@@ -110,4 +110,8 @@
         INNER JOIN inbound i ON op.order_id = i.order_id
         WHERE i.inbound_id = #{inboundId}
     </select>
+
+    <select id="selectProductOverview">
+        SELECT product_id, product_name, product_code FROM product
+    </select>
 </mapper>

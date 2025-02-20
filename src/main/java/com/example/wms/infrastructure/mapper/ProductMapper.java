@@ -19,7 +19,6 @@ public interface ProductMapper {
     List<ProductResponseDto> findProductWithPagination(@Param("productCode") String productCode, @Param("pageable") Pageable pageable);
     long countAllProducts(@Param("productCode") String productCode);
 
-    @Select("SELECT product_id, product_name, product_code FROM product")
     List<ProductOverviewDto> selectProductOverview();
 
     Product findById(@Param("productId") Long productId);
