@@ -17,6 +17,6 @@ public class InboundPutAwayReqDto {
     private Long productId;
 
     @Schema(description = "품목 별 lot 단위 개수", example = "3")
-    private Integer lotCount;
+    private Long lotCount;
 
 }
