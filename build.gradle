@@ -8,6 +8,10 @@ plugins {
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
+repositories {
+    mavenCentral()
+}
+
 jacoco {
     toolVersion = "0.8.8"
 }
@@ -24,10 +28,6 @@ configurations {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -36,42 +36,41 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
     // MySQL
-    implementation 'mysql:mysql-connector-java'
-    implementation 'org.apache.tomcat:tomcat-jdbc'
+    implementation 'mysql:mysql-connector-java:8.0.32'
 
     // Lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
     // MyBatis
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter'
-    implementation 'org.mybatis:mybatis'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    implementation 'org.mybatis:mybatis:3.5.9'
 
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'io.lettuce:lettuce-core'
-    implementation 'org.apache.commons:commons-pool2'
+    implementation 'io.lettuce:lettuce-core:6.2.6.RELEASE'
+    implementation 'org.apache.commons:commons-pool2:2.12.0'
 
     // Swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 
     // AWS S3
-    implementation 'org.springframework.cloud:spring-cloud-starter-aws'
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 
     // JWT
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl'
-    implementation 'io.jsonwebtoken:jjwt-api'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson'
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
     // WebSocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
     // Selenium
-    implementation 'org.seleniumhq.selenium:selenium-java'
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.15.0'
 
     // H2 Database (Runtime Only)
     runtimeOnly 'com.h2database:h2'
