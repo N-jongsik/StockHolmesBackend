@@ -28,7 +28,9 @@ jwt:
 
   data:
     redis:
-      host: 172.31.37.49
+      host: redis.jx8td2.clustercfg.apn2.cache.amazonaws.com
       port: 6379
-      password: ${secret.redis.password}
+      password:
+      ssl:
+        enable : true
 

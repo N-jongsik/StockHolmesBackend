@@ -12,6 +12,7 @@ import java.util.List;
 
 @Mapper
 public interface ProductMapper {
+    void save(Product product);
     List<Product> getAllProducts();
     void updateABCGrade(@Param("productId") Long productId, @Param("abcGrade") String abcGrade);
     void updateBinLocation(@Param("productId") Long productId, @Param("binCode") String locationBinCode);

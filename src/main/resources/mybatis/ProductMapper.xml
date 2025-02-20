@@ -16,6 +16,15 @@
         <result property="leadTime" column="lead_time"/>
     </resultMap>
 
+    <insert id="save">
+        INSERT INTO product (
+            product_code, product_name, category, detail_category,
+            purchase_price, sale_price, stock_lot_count, supplier_id
+        ) VALUES (
+                     #{productCode}, #{productName}, #{category}, #{detailCategory},
+                     #{purchasePrice}, #{salePrice}, #{stockLotCount}, #{supplierId}
+                 )
+    </insert>
     <select id="getAllProducts" resultMap="productResultMap">
         SELECT * FROM product
     </select>

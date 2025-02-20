@@ -17,6 +17,7 @@ public class Product {
     private Long supplierId; // 공급자 ID
     private Integer stockLotCount; // 재고 로트 수량
     private String category; // 카테고리
+    private String detailCategory; // 세부 품목
     private Integer threshold; // 최소 LOT 수량
     private Integer leadTime; // 이 품목이 납품업체로부터 납품될 때 까지 걸리는 시간
     private String locationBinCode;
