@@ -18,4 +18,4 @@ services:
 
 networks:
   servernetwork:
-    driver: bridge
+    external: true

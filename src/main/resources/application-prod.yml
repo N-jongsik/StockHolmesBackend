@@ -38,9 +38,8 @@ spring:
       host: redis.jx8td2.clustercfg.apn2.cache.amazonaws.com
       port: 6379
       password:
-    web:
-      pageable:
-        default-page-size: 10
+        ssl:
+          enable: true
 
 logging:
   level:
