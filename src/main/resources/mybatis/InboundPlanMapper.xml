@@ -18,7 +18,7 @@
         p.product_id,
         p.product_code,
         p.product_name,
-        (p.stock_lot_count * p.lot_unit) AS product_count
+        op.product_count AS product_count
         FROM (
         SELECT
         i.inbound_id,
@@ -65,6 +65,29 @@
         INNER JOIN product p ON op.product_id = p.product_id
         INNER JOIN supplier s ON b.supplier_id = s.supplier_id
     </select>
+
+    <select id="countAllInboundPlanFiltering" resultType="int">
+        SELECT COUNT(*)
+        FROM inbound
+        <where>
+            schedule_number is not null AND check_number is null
+            <if test="startDate != null">
+                AND
+                schedule_date <![CDATA[>=]]> #{startDate}
+            </if>
+
+            <if test="endDate != null">
+                AND
+                schedule_date <![CDATA[<=]]> #{endDate}
+            </if>
+
+            <if test="inboundScheduleNumber != null and inboundScheduleNumber != ''">
+                AND
+                schedule_number LIKE CONCAT('%', #{inboundScheduleNumber}, '%')
+            </if>
+        </where>
+    </select>
+
     <resultMap id="InboundAllProductResultMap" type="com.example.wms.inbound.adapter.in.dto.response.InboundAllProductDto">
         <id column="inbound_id" property="inboundId"/>
         <result column="inbound_status" property="inboundStatus"/>
