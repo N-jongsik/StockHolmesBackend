@@ -12,4 +12,5 @@ import java.util.List;
 @Mapper
 public interface InboundPlanMapper {
     List<InboundAllProductDto> findInboundPlanFilteringWithPagination(@Param("inboundScheduleNumber") String inboundScheduleNumber, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("pageable") Pageable pageable);
+    Integer countAllInboundPlanFiltering(@Param("inboundScheduleNumber") String inboundScheduleNumber, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }
