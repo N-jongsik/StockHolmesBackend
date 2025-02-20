@@ -1,7 +1,6 @@
 package com.example.wms.order.application.domain;
 
 
-import com.example.wms.infrastructure.entity.BaseEntity;
 import lombok.*;
 
 @Data
