@@ -55,19 +55,14 @@ pipeline {
             steps {
                 script {
                     echo "===== Stage: Replace Prod Properties ====="
-
                     withCredentials([file(credentialsId: 'wms-secret', variable: 'SECRET_FILE')]) {
-                        // 시크릿 파일 존재 및 유효성 검증
                         def secretFileExists = fileExists("${SECRET_FILE}")
-
                         if (secretFileExists) {
                             sh """
                                 echo "Secret file found: ${SECRET_FILE}"
-                                cp -v \${SECRET_FILE} ${RESOURCE_DIR}/application-prod.yml
-
-                                # 파일 권한 및 존재 확인
-                                ls -l ${RESOURCE_DIR}/application-prod.yml
-                                cat ${RESOURCE_DIR}/application-prod.yml | head -n 5
+                                cp -v "${SECRET_FILE}" "${RESOURCE_DIR}/application-prod.yml"
+                                ls -l "${RESOURCE_DIR}/application-prod.yml"
+                                cat "${RESOURCE_DIR}/application-prod.yml" | head -n 5
                             """
                         } else {
                             error "ERROR: Secret file not found at ${SECRET_FILE}"
