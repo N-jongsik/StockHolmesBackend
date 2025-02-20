@@ -27,4 +27,6 @@ public interface ProductMapper {
     void updateRequiredQuantity(@Param("productId") Long productId, @Param("lotCount") Integer lotCount);
 
     Long getSupplierIdByProductId(Long productId);
+
+    List<Product> findPutAwayProductsByInboundId(Long inboundId);
 }
