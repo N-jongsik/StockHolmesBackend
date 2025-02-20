@@ -103,6 +103,14 @@
         SELECT o.*
         FROM `order` o
         WHERE 1=1
+
+        ORDER BY
+        <if test="pageable.sort != null and pageable.sort.toString().contains('ORDER BY')">
+            ${pageable.sort.toString().replace('ORDER BY', '')},
+        </if>
+        o.order_date DESC
+
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
         ) o
         JOIN supplier s ON o.supplier_id = s.supplier_id
         LEFT JOIN order_product op ON o.order_id = op.order_id
@@ -121,13 +129,6 @@
             AND o.order_date <![CDATA[<=]]> #{endDate}
         </if>
 
-        ORDER BY
-        <if test="pageable.sort != null and pageable.sort.toString().contains('ORDER BY')">
-            ${pageable.sort.toString().replace('ORDER BY', '')},
-        </if>
-        o.order_date DESC
-
-        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
     </select>
 
 
@@ -224,8 +225,27 @@
         </if>
     </select>
 
+    <!-- 발주 등록하기 -->
+    <insert id="registerOrder" useGeneratedKeys="true" keyProperty="orderId">
+        INSERT INTO `order`
+        (supplier_id, order_date, is_approved, is_delayed, order_number, order_status, daily_plan_id, is_return_order, inbound_date)
+        VALUES
+            (#{supplierId}, #{orderDate}, #{isApproved}, #{isDelayed}, #{orderNumber}, #{orderStatus}, #{dailyPlanId}, #{isReturnOrder}, #{inboundDate})
+    </insert>
 
+    <!-- 최대 order_number 조회 -->
+    <select id="findMaxOutboundOrderNumber" resultType="string">
+        SELECT order_number FROM `order` ORDER BY order_number DESC LIMIT 1;
+    </select>
 
+    <!-- 발주 삭제하기 -->
+    <delete id="deleteOrder">
+        DELETE FROM `order` WHERE `order_id` = #{orderId};
+    </delete>
 
+    <!-- 발주 상품 삭제하기 -->
+    <delete id="deleteOrderProduct">
+        DELETE FROM `order_product` WHERE `order_id` = #{orderId};
+    </delete>
 
 </mapper>

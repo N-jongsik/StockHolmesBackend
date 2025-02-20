@@ -19,7 +19,6 @@ public interface ProductMapper {
     List<ProductResponseDto> findProductWithPagination(@Param("productCode") String productCode, @Param("pageable") Pageable pageable);
     long countAllProducts(@Param("productCode") String productCode);
 
-    @Select("SELECT product_id, product_name, product_code FROM product")
     List<ProductOverviewDto> selectProductOverview();
 
     Product findById(@Param("productId") Long productId);
@@ -27,7 +26,6 @@ public interface ProductMapper {
     void updateRequiredQuantity(@Param("productId") Long productId, @Param("lotCount") Integer lotCount);
 
     Long getSupplierIdByProductId(Long productId);
-    void updateStockLotCount(@Param("productId") Long productId);
 
     List<Product> findPutAwayProductsByInboundId(Long inboundId);
 }

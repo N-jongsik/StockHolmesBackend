@@ -28,17 +28,7 @@ public interface OutboundAssignMapper {
             @Param("endDate") LocalDate endDate
     );
 
-    @Update("""
-        UPDATE outbound_plan
-        SET status = #{status}
-        WHERE outbound_plan_id = #{outboundPlanId}
-    """)
     void updateOutboundPlanStatus(@Param("outboundPlanId") Long outboundPlanId,@Param("status") String status);
 
-    @Select("""
-        SELECT *
-        FROM outbound
-        WHERE outbound_id = #{outboundId};
-    """)
     Outbound findOutboundByOutboundId(@Param("outboundId") Long outboundId);
 }

@@ -117,4 +117,17 @@
         </where>
     </select>
 
+    <update id="updateOutboundPlanStatus">
+        UPDATE outbound_plan
+        SET status = #{status}
+        WHERE outbound_plan_id = #{outboundPlanId}
+    </update>
+
+    <select id="findOutboundByOutboundId" resultType="Outbound">
+        SELECT *
+        FROM outbound
+        WHERE outbound_id = #{outboundId}
+    </select>
+
+
 </mapper>
