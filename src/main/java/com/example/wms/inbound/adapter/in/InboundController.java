@@ -68,8 +68,5 @@ public class InboundController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/test")
-    public void testQuery() {
-        inboundUseCase.testQuery();
-    }
+
 }
