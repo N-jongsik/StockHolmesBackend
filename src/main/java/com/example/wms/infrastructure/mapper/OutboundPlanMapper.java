@@ -5,6 +5,7 @@ import com.example.wms.outbound.adapter.in.dto.OutboundPlanResponseDto;
 import com.example.wms.outbound.adapter.in.dto.ProductInfoDto;
 import com.example.wms.outbound.application.domain.Outbound;
 import com.example.wms.outbound.application.domain.OutboundPlan;
+import com.example.wms.outbound.application.domain.OutboundPlanProduct;
 import org.apache.ibatis.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,4 +99,6 @@ public interface OutboundPlanMapper {
         WHERE outbound_plan_id = #{outboundPlanId}
     """)
     void updateOutboundPlanStatus(@Param("outboundPlanId") Long outboundPlanId,@Param("status") String status);
+
+    List<OutboundPlanProduct> findOutboundPlanProductsByPlanId(@Param("outboundPlanId") Long outboundPlanId);
 }

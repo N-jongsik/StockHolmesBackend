@@ -1,8 +1,10 @@
 package com.example.wms.outbound.adapter.out.adapter;
 
 import com.example.wms.infrastructure.mapper.OutboundMapper;
+import com.example.wms.infrastructure.mapper.OutboundPlanMapper;
 import com.example.wms.outbound.application.domain.Outbound;
 import com.example.wms.outbound.application.domain.OutboundPlan;
+import com.example.wms.outbound.application.domain.OutboundPlanProduct;
 import com.example.wms.outbound.application.port.out.CreateOutboundAssignPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import java.util.List;
 public class CreateOutboundAssignAdapter implements CreateOutboundAssignPort {
 
     private final OutboundMapper outboundMapper;
+    private final OutboundPlanMapper outboundPlanMapper;
 
     @Override
     public void save(Outbound outbound) {
@@ -34,6 +37,11 @@ public class CreateOutboundAssignAdapter implements CreateOutboundAssignPort {
     }
 
     @Override
+    public OutboundPlan findOutboundPlanByPlanId(Long outboundPlanId) {
+        return null;
+    }
+
+    @Override
     public void update(Outbound outbound) {
         outboundMapper.insertOutboundAssign(outbound.getOutboundId(),outbound.getOutboundAssignNumber(),outbound.getOutboundAssignDate());
     }
@@ -41,6 +49,11 @@ public class CreateOutboundAssignAdapter implements CreateOutboundAssignPort {
     @Override
     public void updateOutboundPlanStatus(OutboundPlan outboundPlan) {
         outboundMapper.updateOutboundPlanStatus(outboundPlan.getOutboundPlanId(), "출고지시");
+    }
+
+    @Override
+    public List<OutboundPlanProduct> findOutboundPlanProductsByPlanId(Long outboundPlanId) {
+        return outboundPlanMapper.findOutboundPlanProductsByPlanId(outboundPlanId);
     }
 
 }
