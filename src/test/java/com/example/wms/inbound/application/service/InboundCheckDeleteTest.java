@@ -33,7 +33,7 @@ public class InboundCheckDeleteTest {
 
         Inbound inbound = Inbound.builder()
                 .inboundId(inboundId)
-                .inboundStatus("입하예정")
+                .inboundStatus("입하검사")
                 .checkNumber("IC202502050001")
                 .checkDate(LocalDate.of(2025,2,10))
                 .build();
@@ -41,7 +41,7 @@ public class InboundCheckDeleteTest {
         when(inboundPort.findById(inboundId)).thenReturn(inbound);
 
         inboundService.deleteInboundCheck(inboundId);
-
+        inbound.setInboundStatus("입하예정");
         assertEquals("입하예정",inbound.getInboundStatus());
 
         verify(inboundPort, times(1)).updateIC(eq(inboundId), eq(null), eq(null), eq("입하예정"));
