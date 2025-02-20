@@ -32,4 +32,12 @@ public class GetOrderService implements GetOrderUseCase {
         Integer count = getOrderPort.countAllOrder(orderNumber, startDate, endDate);
         return new PageImpl<>(orderList, pageable, count);
     }
+
+    @Override
+    public Page<OrderResponseDto> getFilteredOrderWithSupplier(Long supplierId, String orderNumber, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        Pageable safePageable = PageableUtils.convertToSafePageableStrict(pageable, OrderResponseDto.class);
+        List<OrderResponseDto> orderList = getOrderPort.findOrderSupplierFilteringWithPageNation(supplierId, orderNumber, startDate, endDate, safePageable);
+        Integer count = getOrderPort.countAllOrderSupplier(supplierId, orderNumber, startDate, endDate);
+        return new PageImpl<>(orderList, pageable, count);
+    }
 }

@@ -2,6 +2,7 @@ package com.example.wms.infrastructure.mapper;
 
 import com.example.wms.outbound.adapter.in.dto.OutboundPlanRequestDto;
 import com.example.wms.outbound.application.domain.Outbound;
+import com.example.wms.outbound.application.domain.OutboundPlanProduct;
 import io.swagger.v3.oas.annotations.Operation;
 import org.apache.ibatis.annotations.*;
 import org.springframework.data.domain.Pageable;
@@ -76,4 +77,5 @@ public interface OutboundMapper {
         WHERE outbound_plan_id = #{outboundPlanId}
     """)
     void updateOutboundPlanStatus(@Param("outboundPlanId") Long outboundPlanId,@Param("status") String status);
+
 }

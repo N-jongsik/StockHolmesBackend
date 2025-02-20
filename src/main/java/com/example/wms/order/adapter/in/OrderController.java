@@ -85,4 +85,16 @@ public class OrderController {
         updateOrderUseCase.updateOrderApprove(orderId);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/supplier/{supplierId}")
+    @Operation(summary = "발주 조회하기 납품업체버젼", description = "자신에게 온 승인되지 않은 발주 아이템 조회")
+    public ResponseEntity<?> getOrders(
+            @PathVariable("supplierId") Long supplierId,
+            @RequestParam(value = "number", required = false) String orderNumber,
+            @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @ParameterObject Pageable pageable
+    ){
+        return ResponseEntity.ok(getOrderUseCase.getFilteredOrderWithSupplier(supplierId,orderNumber, startDate, endDate, pageable));
+    }
 }

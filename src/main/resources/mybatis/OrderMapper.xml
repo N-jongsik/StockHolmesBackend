@@ -134,27 +134,16 @@
 
     <select id="countAllOrder">
         SELECT COUNT(*)
-        FROM `order`
-        <where>
-            order_number IS NOT NULL
-            <!-- 시작일 조건 (startDate) -->
-            <if test="startDate != null">
-                AND
-                order_date <![CDATA[>=]]> #{startDate}
-            </if>
-
-            <!-- 종료일 조건 (endDate) -->
-            <if test="endDate != null">
-                AND
-                order_date <![CDATA[<=]]> #{endDate}
-            </if>
-
-            <!-- 번호 조건 (OrderNumber) -->
-            <if test="orderNumber != null and orderNumber != ''">
-                AND
-                order_date LIKE CONCAT('%', #{outboundOrderNumber}, '%')
-            </if>
-        </where>
+        FROM `order` o
+        <if test="startDate != null">
+            AND o.order_date <![CDATA[>=]]> #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND o.order_date <![CDATA[<=]]> #{endDate}
+        </if>
+        <if test="orderNumber != null and orderNumber != ''">
+            AND o.order_date LIKE CONCAT('%', #{orderNumber}, '%')
+        </if>
     </select>
 
     <select id="findProductListByOrderId">
@@ -171,5 +160,72 @@
         SET is_approved = true ,  order_status = "완료"
         WHERE `order_id` = #{orderId}
     </update>
+
+    <select id="findOrderSupplierFilteringWithPageNation" resultMap="orderResultMap">
+        SELECT
+        o.order_id,
+        o.order_number,
+        o.order_status,
+        s.supplier_name,
+        o.supplier_id,
+        o.order_date,
+        o.is_approved,
+        o.is_return_order,
+        o.order_date AS delivery_deadline,
+        op.product_id,
+        op.product_name,
+        p.product_code,
+        op.product_count
+        FROM (
+        SELECT o.*
+        FROM `order` o
+        WHERE 1=1
+        AND o.supplier_id = #{supplierId}
+        AND o.is_approved = false
+        ) o
+        JOIN supplier s ON o.supplier_id = s.supplier_id
+        LEFT JOIN order_product op ON o.order_id = op.order_id
+        LEFT JOIN product p ON op.product_id = p.product_id
+
+        <if test="orderNumber != null and orderNumber != ''">
+            AND o.order_number LIKE CONCAT('%', #{orderNumber}, '%')
+        </if>
+
+        <if test="startDate != null">
+            AND o.order_date <![CDATA[>=]]> #{startDate}
+        </if>
+
+        <if test="endDate != null">
+            AND o.order_date <![CDATA[<=]]> #{endDate}
+        </if>
+
+        ORDER BY
+        <if test="pageable.sort != null and pageable.sort.toString().contains('ORDER BY')">
+            ${pageable.sort.toString().replace('ORDER BY', '')},
+        </if>
+        o.order_date DESC
+
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+    </select>
+
+    <select id="countAllOrderSupplier">
+        SELECT COUNT(*)
+        FROM `order` o
+        WHERE o.supplier_id = #{supplierId}
+        AND o.is_approved = false
+        <if test="startDate != null">
+            AND o.order_date <![CDATA[>=]]> #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND o.order_date <![CDATA[<=]]> #{endDate}
+        </if>
+        <if test="orderNumber != null and orderNumber != ''">
+            AND o.order_date LIKE CONCAT('%', #{orderNumber}, '%')
+        </if>
+    </select>
+
+
+
+
 
 </mapper>

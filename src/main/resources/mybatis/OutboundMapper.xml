@@ -103,5 +103,10 @@
         </where>
     </select>
 
+    <select id="findOutboundPlanProductsByPlanId">
+        SELECT *
+        FROM outbound_plan_product
+        WHERE outbound_plan_id = #{outboundPlanId}
+    </select>
 
 </mapper>
