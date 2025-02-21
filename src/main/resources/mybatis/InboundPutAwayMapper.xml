@@ -16,6 +16,7 @@
         b.supplier_id,
         s.supplier_name,
         l.lot_id,
+        l.lot_number,
         p.product_id,
         p.product_code,
         p.product_name,
