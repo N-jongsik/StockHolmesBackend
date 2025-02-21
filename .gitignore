@@ -38,4 +38,4 @@ out/
 
 # Ignore application-secret.yml
 application-secret.yml
-
+application-prod.yml

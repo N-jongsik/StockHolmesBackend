@@ -21,7 +21,6 @@ public interface InboundUseCase {
     Page<InboundResDto> getFilteredInboundCheck(String inboundCheckNumber, LocalDate startDate, LocalDate endDate, Pageable pageable);
     void updateInboundCheck(Long inboundId, InboundCheckUpdateReqDto updateReqDto);
     void deleteInboundCheck(Long inboundId);
-    InboundWorkerCheckResDto createInboundCheckByWorker(List<InboundCheckWorkerReqDto> workerCheckRequests);
     Page<InboundPutAwayResDto> getFilteredPutAway(String inboundPutAwayNumber, LocalDate startDate, LocalDate endDate, Pageable pageable);
     void putAway(Long inboundId);
     Page<ProductInboundResDto> getAllInboundByProductWithPagination(LocalDate startDate, LocalDate endDate, Pageable pageable);

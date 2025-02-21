@@ -18,7 +18,7 @@
         INSERT INTO inbound
         ( inbound_status, schedule_number, schedule_date, check_number, check_date, put_away_number, put_away_date, order_id, supplier_id)
         VALUES
-        (#{inboundStatus}, #{scheduleNumber}, #{scheduleDate}, #{checkNumber}, #{checkDate}, #{putAwayNumber}, #{putAwayDate}, #{orderId}, #{supplierId})
+            (#{inboundStatus}, #{scheduleNumber}, #{scheduleDate}, #{checkNumber}, #{checkDate}, #{putAwayNumber}, #{putAwayDate}, #{orderId}, #{supplierId})
     </insert>
 
     <delete id="delete" parameterType="java.lang.Long">
@@ -61,7 +61,7 @@
         UPDATE order_product
         SET is_defective = #{isDefective}
         WHERE order_id = #{orderId}
-        AND product_id = #{productId}
+          AND product_id = #{productId}
     </update>
 
     <select id="findLotsByScheduleNumber" resultType="com.example.wms.product.adapter.in.dto.LotInfoDto">
@@ -70,8 +70,8 @@
             COUNT(l.lot_id) AS lotCount,
             b.bin_code
         FROM lot l
-        JOIN bin b ON l.bin_id = b.bin_id
-        JOIN inbound i ON l.inbound_id = i.inbound_id
+                 JOIN bin b ON l.bin_id = b.bin_id
+                 JOIN inbound i ON l.inbound_id = i.inbound_id
         WHERE i.schedule_number = #{scheduleNumber}
         GROUP BY l.product_id, b.bin_code
     </select>
@@ -82,8 +82,8 @@
             (p.stock_lot_count * p.lot_unit) AS lotCount,
             p.location_bin_code AS binCode
         FROM inbound i
-        INNER JOIN lot l on i.inbound_id = l.inbound_id
-        INNER JOIN product p ON l.product_id = p.product_id
+                 INNER JOIN lot l on i.inbound_id = l.inbound_id
+                 INNER JOIN product p ON l.product_id = p.product_id
         WHERE i.check_number = #{checkNumber}
     </select>
 

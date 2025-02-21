@@ -31,10 +31,9 @@ public class OrderAdapter implements OrderPort {
     private final InboundMapper inboundMapper;
 
     @Override
-    public void createOrder(Long productId, Long inboundId, Long defectiveCount) {
+    public Long createOrder(Long productId, Long inboundId, Long defectiveCount) {
 
         Product product = productPort.findById(productId);
-        Long orderId;
 
         if (product == null) {
             throw new NotFoundException("Product not found for ID : " + productId);
@@ -53,19 +52,9 @@ public class OrderAdapter implements OrderPort {
                     .orderStatus("처리중")
                     .inboundDate(LocalDate.now())
                     .build();
-            orderId = orderMapper.createOrder(order);
-            System.out.println("🍏"+ orderId);
-
-
-        OrderProduct orderProduct = OrderProduct.builder()
-                .orderId(orderId)
-                .productCount(defectiveCount.intValue()*product.getLotUnit())
-                .productId(productId)
-                .productName(product.getProductName())
-                .isDefective(true)
-                .defectiveCount(defectiveCount)
-                .build();
-        orderProductPort.save(orderProduct);
+            orderMapper.createOrder(order);
+            Long returnOrderId = order.getOrderId();
+        return returnOrderId;
     }
 
 

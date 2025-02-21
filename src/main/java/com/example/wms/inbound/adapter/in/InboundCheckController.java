@@ -2,9 +2,7 @@ package com.example.wms.inbound.adapter.in;
 
 import com.example.wms.inbound.adapter.in.dto.request.InboundCheckReqDto;
 import com.example.wms.inbound.adapter.in.dto.request.InboundCheckUpdateReqDto;
-import com.example.wms.inbound.adapter.in.dto.request.InboundCheckWorkerReqDto;
 import com.example.wms.inbound.adapter.in.dto.response.InboundResDto;
-import com.example.wms.inbound.adapter.in.dto.response.InboundWorkerCheckResDto;
 import com.example.wms.inbound.application.port.in.InboundUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,7 +10,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.core.annotations.ParameterObject;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -73,10 +71,5 @@ public class InboundCheckController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/check")
-    @Operation(summary="입하 검사 작업자가 등록하기", description = "InboundCheckWorkerReqDto를 입하 검사를 등록합니다.")
-    public ResponseEntity<InboundWorkerCheckResDto> checkInbound(@RequestBody List<InboundCheckWorkerReqDto> checkRequests) {
-        InboundWorkerCheckResDto response = inboundUseCase.createInboundCheckByWorker(checkRequests);
-        return ResponseEntity.ok(response);
-    }
+
 }

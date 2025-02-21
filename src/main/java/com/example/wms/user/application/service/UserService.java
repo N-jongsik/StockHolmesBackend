@@ -4,6 +4,7 @@ import com.example.wms.infrastructure.jwt.enums.JwtHeaderUtil;
 import com.example.wms.user.adapter.in.dto.response.UserInfoResDto;
 import com.example.wms.user.application.domain.User;
 import com.example.wms.user.application.domain.enums.UserRole;
+import com.example.wms.user.application.exception.UserNotFoundException;
 import com.example.wms.user.application.port.in.UserUseCase;
 import com.example.wms.user.application.port.out.*;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.example.wms.infrastructure.security.util.SecurityUtils.getLoginUserStaffNumber;
+import static com.example.wms.user.application.domain.enums.UserExceptionMessage.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -77,6 +79,18 @@ public class UserService implements UserUseCase {
         String staffNumber = getLoginUserStaffNumber();
 
         return UserInfoResDto.entityToResDto(userPort.findByStaffNumber(staffNumber));
+    }
+
+    @Override
+    public UserInfoResDto findUserByStaffNumber(String staffNumber) {
+        log.info("[회원 조회] 사번으로 회원 조회 요청: {}", staffNumber);
+        User user = userPort.findByStaffNumber(staffNumber);
+        if (user == null) {
+            log.warn("[회원 조회] 사번에 해당하는 회원을 찾을 수 없습니다: {}", staffNumber);
+            throw new UserNotFoundException(USER_NOT_FOUND.getMessage());
+        }
+        log.info("[회원 조회] 사번으로 회원 조회 성공: {}", staffNumber);
+        return UserInfoResDto.entityToResDto(user);
     }
 
     @Override

@@ -47,7 +47,7 @@
     <select id="findBinIdByBinCode" resultType="java.lang.Long">
         SELECT bin_id
         FROM bin
-        WHERE bin_code = #{binCode}
+        WHERE bin_code = #{locationBinCode}
     </select>
 
     <select id="findBinIdInZone" resultType="java.lang.Long">

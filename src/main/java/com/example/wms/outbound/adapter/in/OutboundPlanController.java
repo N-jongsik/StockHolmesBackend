@@ -8,7 +8,7 @@ import com.example.wms.outbound.application.domain.OutboundPlan;
 import com.example.wms.outbound.application.port.in.*;
 import com.example.wms.user.application.domain.enums.UserRole;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.core.annotations.ParameterObject;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
