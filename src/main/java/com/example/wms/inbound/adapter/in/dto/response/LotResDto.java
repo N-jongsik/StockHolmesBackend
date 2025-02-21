@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LotResDto {
     private Long lotId;
-    private Long lotNumber;
+    private String lotNumber;
     private Long productId;
     private String productCode;
     private String productName;

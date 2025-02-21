@@ -68,7 +68,6 @@ public class GetInboundPutAwayService implements GetInboundPutAwayUseCase {
                                 .lotId(product.getLotId())
                                 .lotNumber(product.getLotNumber())
                                 .productId(product.getProductId())
-                                .productCode(product.getProductCode())
                                 .productName(product.getProductName())
                                 .productCount(product.getProductCount())
                                 .locationBinCode(product.getLocationBinCode())
