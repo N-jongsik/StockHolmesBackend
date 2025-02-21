@@ -15,7 +15,7 @@ import static org.mockito.Mockito.verify;
 public class InboundDeleteTest {
 
     @InjectMocks
-    private InboundService inboundService;
+    private DeleteInboundPlanService deleteInboundPlanService;
 
     @Mock
     private InboundPort inboundPort;
@@ -26,7 +26,7 @@ public class InboundDeleteTest {
         // given
         Long inboundId = 1L;
 
-        inboundService.deleteInboundPlan(inboundId);
+        deleteInboundPlanService.deleteInboundPlan(inboundId);
 
         verify(inboundPort, times(1)).delete(inboundId);
     }

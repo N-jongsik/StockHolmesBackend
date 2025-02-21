@@ -1,6 +1,5 @@
 package com.example.wms.worker.application.service;
 
-import com.example.wms.inbound.adapter.in.dto.response.InboundPutAwayResDto;
 import com.example.wms.worker.adapter.in.dto.response.WorkerInboundResDto;
 import com.example.wms.worker.adapter.in.dto.response.WorkerProductResDto;
 import com.example.wms.worker.application.port.out.WorkerInboundPort;
@@ -56,6 +55,8 @@ class WorkerInboundServiceTest {
         LocalDate endDate = LocalDate.of(2025,2,22);
         Pageable pageable = PageRequest.of(0,10);
 
+        when(workerInboundPort.findFilteredWorkerInboundList(eq(startDate), eq(endDate), any(Pageable.class)))
+                .thenReturn(mockWorkerInboundList);
         when(workerInboundPort.countFilteredWorkerInboundList(eq(startDate),eq(endDate)))
                 .thenReturn(mockWorkerInboundList.size());
 
@@ -64,6 +65,8 @@ class WorkerInboundServiceTest {
 
         // then
         assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(mockWorkerInboundList.size());
+        assertThat(result.getTotalElements()).isEqualTo(mockWorkerInboundList.size());
 
         verify(workerInboundPort, times(1)).findFilteredWorkerInboundList(eq(startDate), eq(endDate), any(Pageable.class));
         verify(workerInboundPort, times(1)).countFilteredWorkerInboundList(eq(startDate), eq(endDate));

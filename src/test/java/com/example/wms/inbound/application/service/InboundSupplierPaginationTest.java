@@ -29,7 +29,7 @@ public class InboundSupplierPaginationTest {
     InboundRetrievalPort inboundRetrievalPort;
 
     @InjectMocks
-    InboundService inboundService;
+    GetInboundBySupplierService getInboundBySupplierService;
 
     private List<SupplierInboundResDto> mockSupplierInboundList;
 
@@ -54,7 +54,7 @@ public class InboundSupplierPaginationTest {
         when(inboundRetrievalPort.findAllInboundBySupplierWithPagination(startDate, endDate, pageable))
                 .thenReturn(mockSupplierInboundList);
 
-        Page<SupplierInboundResDto> result = inboundService.getAllInboundBySupplierWithPagination(startDate, endDate, pageable);
+        Page<SupplierInboundResDto> result = getInboundBySupplierService.getAllInboundBySupplierWithPagination(startDate, endDate, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);

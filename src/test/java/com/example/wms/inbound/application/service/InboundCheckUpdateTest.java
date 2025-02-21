@@ -28,7 +28,7 @@ import static org.mockito.Mockito.*;
 public class InboundCheckUpdateTest {
 
     @InjectMocks
-    private InboundService inboundService;
+    private UpdateInboundCheckService updateInboundCheckService;
 
     @Mock
     private OrderProductPort orderProductPort;
@@ -84,7 +84,7 @@ public class InboundCheckUpdateTest {
         when(orderProductPort.findByProductId(20L)).thenReturn(new OrderProduct(20L, 1L, 2,1L,"df",false,5L));
   
         // when
-        inboundService.updateInboundCheck(inboundId, updateReqDto);
+        updateInboundCheckService.updateInboundCheck(inboundId, updateReqDto);
 
         assertEquals(updateCheckDate, inbound.getCheckDate());
         verify(inboundPort, times(1)).updateIC(inboundId,updateCheckDate ,inbound.getCheckNumber(), "입하검사");

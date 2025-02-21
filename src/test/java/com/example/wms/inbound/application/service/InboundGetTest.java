@@ -29,7 +29,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
-class InboundGetTest {
+public class InboundGetTest {
 
     private static final Logger logger = LoggerFactory.getLogger(InboundGetTest.class);
 
@@ -37,7 +37,7 @@ class InboundGetTest {
     InboundRetrievalPort inboundRetrievalPort;
 
     @InjectMocks
-    InboundService inboundService;
+    GetInboundPlanService getInboundPlanService;
 
     private List<InboundAllProductDto> mockInboundPlanProductList;
 
@@ -114,24 +114,6 @@ class InboundGetTest {
 
 
     @Test
-    @DisplayName("입하 예정 목록을 조회합니다.")
-    void testGetInboundPlans() {
-        Pageable pageable = PageRequest.of(0,10);
-        when(inboundRetrievalPort.findInboundProductListWithPagination(any(Pageable.class)))
-                .thenReturn(mockInboundPlanProductList);
-        when(inboundRetrievalPort.countAllInboundPlan()).thenReturn(mockInboundPlanProductList.size());
-
-        Page<InboundResDto> result = inboundService.getInboundPlans(pageable);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(mockInboundPlanProductList.size());
-        assertThat(result.getTotalElements()).isEqualTo(mockInboundPlanProductList.size());
-
-        verify(inboundRetrievalPort,times(1)).findInboundProductListWithPagination(any(Pageable.class));
-        verify(inboundRetrievalPort, times(1)).countAllInboundPlan();
-    }
-
-    @Test
     @DisplayName("입하 예정 목록을 필터링하여 조회합니다.")
     void testGetFilteredInboundPlans() {
 
@@ -147,7 +129,7 @@ class InboundGetTest {
                 .thenReturn(mockInboundPlanProductList.size());
 
         // when
-        Page<InboundResDto> result = inboundService.getFilteredInboundPlans(inboundScheduleNumber, startDate, endDate, pageable);
+        Page<InboundResDto> result = getInboundPlanService.getFilteredInboundPlans(inboundScheduleNumber, startDate, endDate, pageable);
 
         // then
         assertThat(result).isNotNull();
