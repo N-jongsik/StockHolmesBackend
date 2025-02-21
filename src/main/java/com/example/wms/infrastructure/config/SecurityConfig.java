@@ -37,21 +37,26 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authz -> authz.anyRequest().permitAll())
-                .exceptionHandling(exceptionHandling ->
-                        exceptionHandling
-                                .accessDeniedHandler(new CustomAccessDeniedHandler(objectMapper))
-                                .authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper))
-                )
+                .cors().configurationSource(corsConfigurationSource())
+                .and()
+
+                .httpBasic().disable()
+                .csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+
+                .authorizeRequests()
+
+                .anyRequest().permitAll() // 필터에서 거름
+
+                .and()
+                .exceptionHandling()
+                .accessDeniedHandler(new CustomAccessDeniedHandler(objectMapper))
+                .authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper))
+                .and()
                 .addFilterBefore(
-                        new CustomAuthenticationFilter(
-                                refreshTokenService, jwtTokenProvider, objectMapper, logoutAccessTokenRedisRepository
-                        ),
-                        UsernamePasswordAuthenticationFilter.class
-                );
+                        new CustomAuthenticationFilter(refreshTokenService, jwtTokenProvider, objectMapper, logoutAccessTokenRedisRepository),
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

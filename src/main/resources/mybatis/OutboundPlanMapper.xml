@@ -103,7 +103,7 @@
         </where>
     </select>
 
-    <select id="findOutboundPlanProductsByPlanId">
+    <select id="findOutboundPlanProductsByPlanId" resultType="com.example.wms.outbound.adapter.in.dto.ProductInfoDto">
         SELECT *
         FROM outbound_plan_product
         WHERE outbound_plan_id = #{outboundPlanId}

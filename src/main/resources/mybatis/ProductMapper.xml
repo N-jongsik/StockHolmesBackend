@@ -45,7 +45,7 @@
         FROM product;
     </select>
 
-    <select id="getSupplierIdByProductId">
+    <select id="getSupplierIdByProductId" resultType="java.lang.Long">
         SELECT supplier_id
         FROM product
         WHERE product_id = #{productId};

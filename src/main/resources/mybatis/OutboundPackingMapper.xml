@@ -100,7 +100,7 @@
         WHERE outbound_plan_id = #{outboundPlanId}
     </select>
 
-    <select id="countPacking">
+    <select id="countPacking" resultType="int">
         SELECT COUNT(*)
         FROM outbound
         <where>

@@ -34,7 +34,7 @@
         </if>
     </select>
 
-    <select id="findAllProductThresholds">
+    <select id="findAllProductThresholds" resultType="com.example.wms.inventory.adapter.in.dto.ProductThresholdDto">
         SELECT
         p.product_id,
         p.product_code,
@@ -80,7 +80,7 @@
         WHERE product_id = #{productId}
     </update>
 
-    <select id="findByProductId">
+    <select id="findByProductId" resultType="com.example.wms.product.application.domain.Product">
         SELECT *
         FROM product
         WHERE product_id = #{productId}
