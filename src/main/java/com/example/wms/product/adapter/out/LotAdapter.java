@@ -19,7 +19,17 @@ public class LotAdapter implements LotPort {
     }
 
     @Override
-    public void insertLot(Lot lot) {
-        lotMapper.save(lot);
+    public Long insertLot(Lot lot) {
+        return lotMapper.save(lot);
+    }
+
+    @Override
+    public Long findLot(Long binId) {
+        return lotMapper.findLot(binId);
+    }
+
+    @Override
+    public Lot findById(Long lotId) {
+        return lotMapper.findById(lotId);
     }
 }

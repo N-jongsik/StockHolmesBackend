@@ -19,6 +19,14 @@
       </where>
       GROUP BY i.inbound_id, p.product_id, p.product_code, p.product_name
    </select>
+
+   <update id="updateLotDefectiveStatus">
+      UPDATE order_product op
+      SET is_defective = #{isDefective}
+      WHERE product_id = #{productId}
+
+   </update>
+
    <resultMap id="WorkerInboundResultMap" type="com.example.wms.worker.adapter.in.dto.response.WorkerInboundResDto">
       <id column="inbound_id" property="inboundId"/>
       <collection property="productList" ofType="com.example.wms.worker.adapter.in.dto.response.WorkerProductResDto">

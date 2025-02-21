@@ -1,15 +1,14 @@
 package com.example.wms.worker.adapter.in;
 
+import com.example.wms.worker.adapter.in.dto.request.WorkerInboundCheckReqDto;
+import com.example.wms.worker.adapter.in.dto.response.WorkerInboundCheckResDto;
 import com.example.wms.worker.adapter.in.dto.response.WorkerInboundResDto;
 import com.example.wms.worker.application.port.in.WorkerInboundUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,6 +25,12 @@ public class WorkerInboundController {
     public ResponseEntity<List<WorkerInboundResDto>> getInboundPlans(@RequestParam(value = "todayDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate todayDate)
     {
         return ResponseEntity.ok(workerInboundUseCase.getFilteredWorkerInboundList(todayDate));
+    }
+
+    @PostMapping("/inbound/{inboundId}")
+    public ResponseEntity<WorkerInboundCheckResDto> processCheck(@PathVariable Long inboundId, @RequestBody WorkerInboundCheckReqDto dto) {
+
+        return ResponseEntity.ok(workerInboundUseCase.createWorkerInboundCheck(inboundId, dto));
     }
 
 }
