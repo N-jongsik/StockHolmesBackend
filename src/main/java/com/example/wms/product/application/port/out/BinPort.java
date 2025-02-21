@@ -1,6 +1,7 @@
 package com.example.wms.product.application.port.out;
 
 import com.example.wms.product.adapter.out.dto.FlatBinDto;
+import com.example.wms.product.application.domain.Bin;
 
 import java.util.List;
 
@@ -13,4 +14,5 @@ public interface BinPort {
     void incrementBinAmount(Long binId, Integer lotCount);
     Long findExactBinIdByBinCode(String binCode);
     List<Long> findBinIdsByBinPrefix(String binCode);
+    Bin findBinByBinId(Long binId);
 }

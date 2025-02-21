@@ -183,6 +183,7 @@
         WHERE 1=1
         AND o.supplier_id = #{supplierId}
         AND o.is_approved = false
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
         ) o
         JOIN supplier s ON o.supplier_id = s.supplier_id
         LEFT JOIN order_product op ON o.order_id = op.order_id
@@ -206,7 +207,6 @@
         </if>
         o.order_date DESC
 
-        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
     </select>
 
     <select id="countAllOrderSupplier">

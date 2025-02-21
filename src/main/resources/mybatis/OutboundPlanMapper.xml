@@ -103,7 +103,7 @@
         </where>
     </select>
 
-    <select id="findOutboundPlanProductsByPlanId">
+    <select id="findOutboundPlanProductsByPlanId" resultType="com.example.wms.outbound.application.domain.OutboundPlanProduct">
         SELECT *
         FROM outbound_plan_product
         WHERE outbound_plan_id = #{outboundPlanId}
@@ -117,12 +117,12 @@
     </select>
 
     <!-- outboundPlan 저장하기 -->
-    <insert id="insert" parameterType="com.example.wms.outbound.application.domain.OutboundPlan">
-        INSERT INTO outbound_plan
-        (plan_date, status, outbound_schedule_number, outbound_schedule_date, production_plan_number)
-        VALUES
-            (#{planDate}, #{status}, #{outboundScheduleNumber}, #{outboundScheduleDate}, #{productionPlanNumber})
+    <insert id="insert" parameterType="com.example.wms.outbound.application.domain.OutboundPlan"
+            useGeneratedKeys="true" keyProperty="outboundPlanId">
+        INSERT INTO outbound_plan (plan_date, status, outbound_schedule_number, outbound_schedule_date, production_plan_number)
+        VALUES (#{planDate}, #{status}, #{outboundScheduleNumber}, #{outboundScheduleDate}, #{productionPlanNumber});
     </insert>
+
 
     <!-- outboundPlan 삭제하기 -->
     <delete id="deleteById" parameterType="java.lang.Long">

@@ -129,5 +129,24 @@
         WHERE outbound_id = #{outboundId}
     </select>
 
+    <select id="findOutboundsByScheduleDate">
+        SELECT
+            o.outbound_id,
+            o.outbound_plan_id,
+            o.outbound_assign_number,
+            o.outbound_assign_date,
+            o.outbound_picking_number,
+            o.outbound_picking_date,
+            o.outbound_packing_number,
+            o.outbound_packing_date,
+            o.outbound_loading_number,
+            o.outbound_loading_date
+        FROM
+            outbound o
+                JOIN outbound_plan op ON o.outbound_plan_id = op.outbound_plan_id
+        WHERE DATE_FORMAT(op.outbound_schedule_date, '%Y-%m-%d') = DATE_FORMAT(#{scheduleDate}, '%Y-%m-%d')
+    </select>
+
+
 
 </mapper>

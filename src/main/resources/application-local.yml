@@ -55,6 +55,9 @@ logging:
       apache.tiles: INFO
       spring.mail: DEBUG
     root: INFO
+    mybatis: DEBUG
+    jdbc.sqlonly: DEBUG
+    jdbc.sqltiming: DEBUG
 
 server:
   error:
