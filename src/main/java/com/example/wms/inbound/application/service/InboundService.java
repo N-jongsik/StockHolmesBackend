@@ -233,8 +233,13 @@ public class InboundService implements InboundUseCase {
     }
 
     private String generateFullLotBinCode(String locationBinCode, int index) {
-        if (!locationBinCode.matches("[A-F]-\\d{2}-\\d{2}-\\d{2}")) {
-            return locationBinCode + "-" + String.format("%02d", index + 1);
+
+        if (locationBinCode.matches("[A-F]-\\d{2}")) {
+            return locationBinCode + "-" + String.format("%02d", index+1) + "-" + String.format("%02d", index+1);
+        }
+
+        else if (locationBinCode.matches("[A-F]-\\d{2}-\\d{2}")) {
+            return locationBinCode + "-" + String.format("%02d", index+1);
         }
         return locationBinCode;
     }
@@ -268,7 +273,6 @@ public class InboundService implements InboundUseCase {
             }
 
             long countLongValue = defectiveCount;
-
             if (defectiveCount > 0) {
                 Long orderId = orderPort.createOrder(productId, inboundId, countLongValue);
                 OrderProduct orderProduct = OrderProduct.builder()
@@ -296,21 +300,36 @@ public class InboundService implements InboundUseCase {
 
                 List<Long> binIds = binUseCase.assignBinIdsToLots(locationBinCode, lotCount);
 
+                // bin의 amount가 넣으려는 lot 개수보다 부족할 경우
                 if (binIds.size() < lotCount) {
-                    throw new NotFoundException("할당할 bin이 부족합니다." + locationBinCode);
+                    for (int i = 0; i< binIds.size(); i++) {
+                        String lotBinCode = generateFullLotBinCode("F-01", i);
+                        Lot lot = Lot.builder()
+                                .productId(productId)
+                                .binId(binIds.get(i))
+                                .lotNumber(lotBinCode)
+                                .status(LotStatus.입고)
+                                .inboundId(inboundId)
+                                .build();
+                        lotPort.insertLot(lot);
+
+                    }
                 }
 
-                for (int i = 0; i < lotCount; i++) {
-                    String lotBinCode = generateFullLotBinCode(locationBinCode, i);
-                    Lot lot = Lot.builder()
-                            .productId(productId)
-                            .binId(binIds.get(i))
-                            .lotNumber(lotBinCode)
-                            .status(LotStatus.입고)
-                            .inboundId(inboundId)
-                            .build();
-                    lotPort.insertLot(lot);
+                else {
+                    for (int i = 0; i < lotCount; i++) {
+                        String lotBinCode = generateFullLotBinCode(locationBinCode, i);
+                        Lot lot = Lot.builder()
+                                .productId(productId)
+                                .binId(binIds.get(i))
+                                .lotNumber(lotBinCode)
+                                .status(LotStatus.입고)
+                                .inboundId(inboundId)
+                                .build();
+                        lotPort.insertLot(lot);
+                    }
                 }
+
             }
             inboundPort.updateIC(inbound.getInboundId(), LocalDate.now(), makeNumber("IC"), "입하검사");
         }
@@ -366,6 +385,7 @@ public class InboundService implements InboundUseCase {
                 orderPort.createOrder(productId, inboundId, updatedDefectiveCount-beforeDefectiveCount); // 재발주
             } else if (beforeDefectiveCount - updatedDefectiveCount > 0) {
                 // 발주 수정 메서드 추가
+                orderProduct.setDefectiveCount(updatedDefectiveCount);
             }
             orderProduct.setDefectiveCount(updatedDefectiveCount); // 발주 품목 별 불량품 개수 업데이트
         }
@@ -448,18 +468,6 @@ public class InboundService implements InboundUseCase {
             int lotCount = request.getLotCount().intValue();
             Product product = productPort.findById(productId);
             Integer lotUnit = product.getLotUnit();
-            String locationBinCode = productPort.getLocationBinCode(productId);
-
-            List<Long> binIds = binUseCase.assignBinIdsToLots(locationBinCode, lotCount);
-
-            if (binIds.size() < lotCount) {
-                throw new NotFoundException("할당할 bin이 부족합니다." + locationBinCode);
-            }
-
-            for (Long binId : binIds) {
-                binPort.incrementBinAmount(binId, lotCount);
-            }
-
             Integer totalCount = lotCount * lotUnit;
             inventoryPort.updateInventory(productId, totalCount);
             productPort.updateRequiredQuantity(productId, lotCount);
