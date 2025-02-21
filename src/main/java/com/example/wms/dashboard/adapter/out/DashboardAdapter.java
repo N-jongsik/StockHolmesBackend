@@ -3,6 +3,7 @@ package com.example.wms.dashboard.adapter.out;
 import com.example.wms.dashboard.adapter.in.dto.InboundStatusResponseDto;
 import com.example.wms.dashboard.adapter.in.dto.OrderStatusResponseDto;
 import com.example.wms.dashboard.adapter.in.dto.OutboundStatusResponseDto;
+import com.example.wms.dashboard.adapter.in.dto.TodayCountDto;
 import com.example.wms.dashboard.application.port.out.DashboardPort;
 import com.example.wms.infrastructure.mapper.DashboardMapper;
 import lombok.RequiredArgsConstructor;
@@ -25,5 +26,15 @@ public class DashboardAdapter implements DashboardPort {
     @Override
     public OrderStatusResponseDto selectOrderStatusCounts() {
         return dashboardMapper.selectOrderStatusCounts();
+    }
+
+    @Override
+    public TodayCountDto selectTodayReceivedCounts() {
+        return dashboardMapper.selectTodayReceivedCounts();
+    }
+
+    @Override
+    public TodayCountDto selectTodayCompletedCounts() {
+        return dashboardMapper.selectTodayCompletedCounts();
     }
 }
