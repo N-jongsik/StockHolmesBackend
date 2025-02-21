@@ -14,16 +14,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j  // 로깅을 위해 추가
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserMapper userMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.info("Attempting to load user details for username: {}", username);  // 로그 추가
         User user = userMapper.findByStaffNumber(username)
                 .orElseThrow(() -> {
-                    log.error("User not found for username: {}", username);  // 로그 추가
                     return new UserNotFoundException(UserExceptionMessage.USER_NOT_FOUND.getMessage());
                 });
         return new CustomUserDetails(user);
