@@ -27,11 +27,11 @@ public class User extends BaseEntity {
         this.password = newPassword;
     }
 
-    public void updateActiveStatus(boolean isActive) {
+    public void updateActive(boolean isActive) {
         this.isActive = isActive;
     }
 
-    public void updatePUserRole(UserRole newRole) {
+    public void updateUserRole(UserRole newRole) {
         this.userRole = newRole;
     }
 }

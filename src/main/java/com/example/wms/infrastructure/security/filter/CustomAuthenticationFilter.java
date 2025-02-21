@@ -7,17 +7,12 @@ import com.example.wms.infrastructure.jwt.JwtTokenProvider;
 import com.example.wms.infrastructure.jwt.dto.Token;
 import com.example.wms.infrastructure.jwt.enums.JwtHeaderUtil;
 import com.example.wms.infrastructure.jwt.enums.JwtResponseMessage;
-import com.example.wms.infrastructure.jwt.exception.MalformedHeaderException;
 import com.example.wms.infrastructure.jwt.exception.TokenNotFoundException;
 import com.example.wms.infrastructure.repository.LogoutAccessTokenRedisRepository;
 import com.example.wms.user.adapter.in.dto.response.TokenInfo;
 import com.example.wms.user.application.domain.RefreshToken;
 import com.example.wms.user.application.service.RefreshTokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,10 +23,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static com.example.wms.infrastructure.enums.ExceptionMessage.ALREADY_LOGGED_OUT;
-import static com.example.wms.infrastructure.jwt.enums.JwtExceptionMessage.MALFORMED_HEADER;
 import static com.example.wms.infrastructure.jwt.enums.JwtExceptionMessage.TOKEN_NOTFOUND;
 import static com.example.wms.infrastructure.jwt.enums.TokenType.ACCESS;
 
@@ -55,8 +53,8 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             "/api/auth/register",
             "/api/auth/login",
             "/api/user/reissue-token",
-            "/api/user",
             "/api/user/list",
+            "/api/user/staff-number",
             "/api/upload",
             "/api/outbound",
             "/api/bin",
@@ -78,38 +76,55 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String requestUri = request.getRequestURI();
-
         log.info("🚀 요청 URI: {}", requestUri);
 
+        // 허용된 URL이면 바로 통과
         if (isPermitUrl(requestUri)) {
+            log.info("Permitting access to URL without authentication: {}", requestUri);
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
             Token token = resolveAccessToken(request);
+
+            // 토큰이 null이면 다음 필터로 진행
+            if (token == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             checkLogout(token.getToken());
 
-            if (token != null && jwtTokenProvider.validateToken(token.getToken())) {
+            if (jwtTokenProvider.validateToken(token.getToken())) {
                 Authentication authentication = jwtTokenProvider.getAuthentication(token.getToken());
+                log.info("Valid token. Setting authentication: {}", authentication);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } else if (token != null && !jwtTokenProvider.validateToken(token.getToken())) {
+            } else {
+                log.info("Invalid token. Handling expired access token.");
                 handleExpiredAccessToken(request, response);
                 return;
             }
 
             filterChain.doFilter(request, response);
         } catch (TokenException e) {
+            log.error("Token exception occurred: ", e);
             makeTokenExceptionResponse(response, e);
         }
     }
 
-    private String getJwtFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+    private Token resolveAccessToken(HttpServletRequest request) {
+        String token = request.getHeader(JwtHeaderUtil.AUTHORIZATION.getValue());
+
+        // 토큰이 없거나 형식에 맞지 않으면 null 반환
+        if (!StringUtils.hasText(token) || !token.startsWith(JwtHeaderUtil.GRANT_TYPE.getValue())) {
+            return null;
         }
-        return null;
+
+        return Token.builder()
+                .tokenType(ACCESS)
+                .token(token.substring(JwtHeaderUtil.GRANT_TYPE.getValue().length()))
+                .build();
     }
 
     private boolean isPermitUrl(String requestUri) {
@@ -141,17 +156,6 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         } else {
             throw new TokenNotFoundException(TOKEN_NOTFOUND.getMessage());
         }
-    }
-
-    private Token resolveAccessToken(HttpServletRequest request) {
-        String token = request.getHeader(JwtHeaderUtil.AUTHORIZATION.getValue());
-        if (StringUtils.hasText(token) && token.startsWith(JwtHeaderUtil.GRANT_TYPE.getValue())) {
-            return Token.builder()
-                    .tokenType(ACCESS)
-                    .token(token.substring(JwtHeaderUtil.GRANT_TYPE.getValue().length()))
-                    .build();
-        }
-        throw new MalformedHeaderException(MALFORMED_HEADER.getMessage());
     }
 
     private String getRefreshTokenFromRedis(HttpServletRequest request) {
