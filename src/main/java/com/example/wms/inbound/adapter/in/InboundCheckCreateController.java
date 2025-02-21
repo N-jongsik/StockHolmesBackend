@@ -3,7 +3,6 @@ package com.example.wms.inbound.adapter.in;
 
 import com.example.wms.inbound.adapter.in.dto.request.InboundCheckReqDto;
 import com.example.wms.inbound.application.port.in.CreateInboundCheckUseCase;
-import com.example.wms.inbound.application.port.in.InboundUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
