@@ -94,7 +94,7 @@
         LEFT JOIN product p ON opp.product_id = p.product_id
     </select>
 
-    <select id="countLoading">
+    <select id="countLoading" resultType="int">
         SELECT COUNT(*)
         FROM outbound
         <where>
