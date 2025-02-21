@@ -55,17 +55,21 @@ pipeline {
             steps {
                 script {
                     echo "===== Stage: Replace Prod Properties ====="
-                    sh '''
-                        git update-index --no-assume-unchanged src/main/resources/application-prod.yml || true
-                        if [ -f "${SECRET_FILE}" ]; then
-                            echo "Secret file found"
-                            cp "${SECRET_FILE}" "${RESOURCE_DIR}/application-prod.yml"
-                            ls -l "${RESOURCE_DIR}/application-prod.yml"
-                        else
-                            echo "ERROR: Secret file not found"
-                            exit 1
-                        fi
-                    '''
+                    sh "chmod -R 777 ${RESOURCE_DIR} || mkdir -p ${RESOURCE_DIR} && chmod -R 777 ${RESOURCE_DIR}"
+                    withCredentials([file(credentialsId: 'wms-secret', variable: 'SECRET_FILE')]) {
+                        sh '''
+                            if [ -f "${SECRET_FILE}" ]; then
+                                echo "Secret file found"
+                                cp "${SECRET_FILE}" "${RESOURCE_DIR}/application-prod.yml"
+                                ls -l "${RESOURCE_DIR}/application-prod.yml"
+                                echo "First 5 lines of configuration file:"
+                                head -n 5 "${RESOURCE_DIR}/application-prod.yml"
+                            else
+                                echo "ERROR: Secret file not found at ${SECRET_FILE}"
+                                exit 1
+                            fi
+                        '''
+                    }
                 }
             }
         }
