@@ -24,4 +24,16 @@
                 (SELECT COUNT(*) FROM `order` WHERE is_approved = false) AS notApproved
     </select>
 
+    <select id="selectTodayReceivedCounts" resultType="com.example.wms.dashboard.adapter.in.dto.TodayCountDto">
+        select
+            (select count(*) from inbound where schedule_date = CURDATE()) as inboundCount,
+            (select count(*) from outbound_plan where outbound_schedule_date = CURDATE()) as outboundCount
+    </select>
+
+    <select id="selectTodayCompletedCounts" resultType="com.example.wms.dashboard.adapter.in.dto.TodayCountDto">
+        select
+                (select count(*) from inbound where put_away_date = CURDATE()) as inboundCount,
+                (select count(*) from outbound where outbound_loading_date = CURDATE()) as outboundCount
+    </select>
+
 </mapper>

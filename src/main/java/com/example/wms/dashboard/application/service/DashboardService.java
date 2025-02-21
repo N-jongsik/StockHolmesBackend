@@ -3,6 +3,7 @@ package com.example.wms.dashboard.application.service;
 import com.example.wms.dashboard.adapter.in.dto.InboundStatusResponseDto;
 import com.example.wms.dashboard.adapter.in.dto.OrderStatusResponseDto;
 import com.example.wms.dashboard.adapter.in.dto.OutboundStatusResponseDto;
+import com.example.wms.dashboard.adapter.in.dto.TodayCountDto;
 import com.example.wms.dashboard.application.port.in.DashboardUseCase;
 import com.example.wms.dashboard.application.port.out.DashboardPort;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +27,15 @@ public class DashboardService implements DashboardUseCase {
     @Override
     public OrderStatusResponseDto getOrderStatus() {
         return dashboardPort.selectOrderStatusCounts();
+    }
+
+    @Override
+    public TodayCountDto getTodayReceived() {
+        return dashboardPort.selectTodayReceivedCounts();
+    }
+
+    @Override
+    public TodayCountDto getTodayCompleted() {
+        return dashboardPort.selectTodayCompletedCounts();
     }
 }
