@@ -3,6 +3,7 @@ package com.example.wms.dashboard.adapter.in;
 import com.example.wms.dashboard.adapter.in.dto.InboundStatusResponseDto;
 import com.example.wms.dashboard.adapter.in.dto.OrderStatusResponseDto;
 import com.example.wms.dashboard.adapter.in.dto.OutboundStatusResponseDto;
+import com.example.wms.dashboard.adapter.in.dto.TodayCountDto;
 import com.example.wms.dashboard.application.port.in.DashboardUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,5 +45,23 @@ public class DashboardController {
     )
     public ResponseEntity<OrderStatusResponseDto> getOrderStatus() {
         return ResponseEntity.ok(dashboardUseCase.getOrderStatus());
+    }
+
+    @GetMapping("/today-received")
+    @Operation(
+            summary = "오늘 들어올 입출고 개수 조회",
+            description = "오늘 들어올 입출고 개수를 조회할 수 있습니다.\n"
+    )
+    public ResponseEntity<TodayCountDto> getTodayReceived() {
+        return ResponseEntity.ok(dashboardUseCase.getTodayReceived());
+    }
+
+    @GetMapping("/today-completed")
+    @Operation(
+            summary = "오늘 완료된 입출고 개수 조회",
+            description = "오늘 완료된 입출고 개수를 조회할 수 있습니다.\n"
+    )
+    public ResponseEntity<TodayCountDto> getTodayCompleted() {
+        return ResponseEntity.ok(dashboardUseCase.getTodayCompleted());
     }
 }
