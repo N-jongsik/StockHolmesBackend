@@ -269,9 +269,17 @@ public class InboundService implements InboundUseCase {
 
             long countLongValue = defectiveCount;
 
-            // 재발주
             if (defectiveCount > 0) {
-                orderPort.createOrder(productId, inboundId, countLongValue); // 품목별 불합격 수량을 입력받아 발주를 넣는다.
+                Long orderId = orderPort.createOrder(productId, inboundId, countLongValue);
+                OrderProduct orderProduct = OrderProduct.builder()
+                        .orderId(orderId)
+                        .productCount(defectiveCount*product.getLotUnit())
+                        .productId(productId)
+                        .productName(product.getProductName())
+                        .isDefective(true)
+                        .defectiveCount((long)defectiveCount)
+                        .build();
+                orderProductPort.save(orderProduct);
             }
 
             List<InboundPutAwayReqDto> putAwayRequests = productPort.findPutAwayProductsByInboundId(inboundId)
