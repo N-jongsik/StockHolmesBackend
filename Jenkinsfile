@@ -60,7 +60,7 @@ pipeline {
                         if (secretFileExists) {
                             sh """
                                 echo "Secret file found: ${SECRET_FILE}"
-                                cp -v "${SECRET_FILE}" "${RESOURCE_DIR}/application-prod.yml"
+                                sudo cp -v "${SECRET_FILE}" "${RESOURCE_DIR}/application-prod.yml"
                                 ls -l "${RESOURCE_DIR}/application-prod.yml"
                                 cat "${RESOURCE_DIR}/application-prod.yml" | head -n 5
                             """
