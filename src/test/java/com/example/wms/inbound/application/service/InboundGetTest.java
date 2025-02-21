@@ -115,7 +115,7 @@ public class InboundGetTest {
 
     @Test
     @DisplayName("입하 예정 목록을 필터링하여 조회합니다.")
-    void testGetFilteredInboundPlans() {
+    public void testGetFilteredInboundPlans() {
 
         // given
         String inboundScheduleNumber = "Schedule1";

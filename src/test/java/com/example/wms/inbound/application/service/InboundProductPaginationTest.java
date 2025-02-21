@@ -55,7 +55,7 @@ public class InboundProductPaginationTest {
 
     @Test
     @DisplayName("품목 별 입고조회를 테스트합니다.")
-    void testGetAllInboundByProductWithPagination() {
+    public void testGetAllInboundByProductWithPagination() {
 
         // given
         LocalDate startDate = LocalDate.of(2025,2,15);
