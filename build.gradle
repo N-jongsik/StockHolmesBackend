@@ -91,20 +91,24 @@ dependencies {
 
     // pdf
     implementation 'com.itextpdf:itext7-core:7.2.2'
-
 }
 
 tasks.named('jar') {
     enabled = false
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-    jvmArgs '-Xshare:off'
+// 테스트 비활성화
+test {
+    enabled = false
 }
 
-test {
-    finalizedBy jacocoTestReport
+// main 클래스 지정
+bootJar {
+    mainClassName = 'com.example.wms.WmsApplication'
+}
+
+springBoot {
+    mainClass = 'com.example.wms.WmsApplication'
 }
 
 jacocoTestReport {
