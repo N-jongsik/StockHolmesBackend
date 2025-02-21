@@ -37,7 +37,7 @@ public class AuthService implements AuthUseCase {
     private final RefreshTokenService refreshTokenService;
     private final LogoutAccessTokenRedisRepository logoutAccessTokenRedisRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UserService userService; // UserService를 주입받음
+    private final UserService userService;
 
     @Override
     public AuthenticatedResDto signUp(SignUpReqDto signUpReqDto) {
@@ -50,14 +50,16 @@ public class AuthService implements AuthUseCase {
             throw new DuplicatedException(DUPLICATED_STAFF_NUMBER.getMessage());
         }
 
-        signUpReqDto.setPassword(passwordEncoder.encode(signUpReqDto.getBirthDate()));
+        String rawPassword = signUpReqDto.getBirthDate().replaceAll("-", "");
+
+        signUpReqDto.setPassword(passwordEncoder.encode(rawPassword));
         log.info("[회원가입] 패스워드 암호화 완료.");
 
         signUpReqDto.setStaffNumber(staffNumber);
 
         User user = authPort.save(signUpReqDto.dtoToEntity());
 
-        TokenInfo tokenInfo = jwtTokenService.generateAndSaveTokens(staffNumber, signUpReqDto.getBirthDate());
+        TokenInfo tokenInfo = jwtTokenService.generateAndSaveTokens(staffNumber, rawPassword);
 
         log.info("[회원가입 성공] 사번: {}", user.getStaffNumber());
 
