@@ -4,7 +4,7 @@ import com.example.wms.inbound.adapter.in.dto.response.InboundProgressResDto;
 import com.example.wms.inbound.application.service.InboundService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.core.annotations.ParameterObject;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;

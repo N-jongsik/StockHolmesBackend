@@ -3,7 +3,9 @@ package com.example.wms.infrastructure.config;
 import com.example.wms.user.application.domain.LogoutAccessToken;
 import com.example.wms.user.application.domain.RefreshToken;
 import com.example.wms.user.application.domain.UserInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.SpringBootVersion;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,25 +19,37 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import javax.annotation.PostConstruct;
 import java.time.Duration;
 
+@Slf4j
 @EnableCaching
 @Configuration
 @EnableRedisRepositories
 public class RedisConfig {
 
-    @Value("${spring.data.redis.host}")
+    @Value("${spring.redis.host}")
     private String host;
 
-    @Value("${spring.data.redis.port}")
+    @Value("${spring.redis.port}")
     private int port;
 
-    @Value("${spring.data.redis.password}")
+    @Value("${spring.redis.password}")
     private String password;
+
+    @PostConstruct
+    public void init() {
+        log.info("=== Redis Configuration Initializing ===");
+        log.info("Spring Boot Version: {}", SpringBootVersion.getVersion());
+        log.info("Redis Host from @Value: {}", host);
+        log.info("Redis Port from @Value: {}", port);
+    }
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
+        log.info("=== Creating Redis Connection Factory ===");
         RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration();
+        log.info("Setting Redis host: {}", host);
         redisConfiguration.setHostName(host);
         redisConfiguration.setPort(port);
 

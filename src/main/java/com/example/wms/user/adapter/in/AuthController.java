@@ -9,7 +9,7 @@ import com.example.wms.user.adapter.in.dto.response.UserInfoResDto;
 import com.example.wms.user.application.port.in.AuthUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
