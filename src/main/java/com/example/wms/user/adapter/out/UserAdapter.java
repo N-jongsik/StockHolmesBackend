@@ -2,11 +2,12 @@ package com.example.wms.user.adapter.out;
 
 import com.example.wms.infrastructure.mapper.UserMapper;
 import com.example.wms.user.application.domain.User;
-import com.example.wms.user.application.domain.enums.UserExceptionMessage;
-import com.example.wms.user.application.exception.InvalidSignUpException;
 import com.example.wms.user.application.port.out.UserPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -38,8 +39,10 @@ public class UserAdapter implements UserPort {
     }
 
     @Override
-    public List<User> findAllUsers(int limit, int offset) {
-        return userMapper.findAllUsers(limit, offset);
+    public Page<User> findAllUsers(Pageable pageable) {
+        List<User> users = userMapper.findAllUsers(pageable.getPageSize(), pageable.getOffset());
+        long totalUsers = userMapper.countTotalUsers();
+        return new PageImpl<>(users, pageable, totalUsers);
     }
 
     @Override
@@ -50,5 +53,10 @@ public class UserAdapter implements UserPort {
     @Override
     public boolean existsByStaffNumber(String staffNumber) {
         return userMapper.existsByStaffNumber(staffNumber);
+    }
+
+    @Override
+    public long countTotalUsers() {
+        return userMapper.countTotalUsers();
     }
 }

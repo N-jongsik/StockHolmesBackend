@@ -31,8 +31,11 @@ public interface UserMapper {
     // 사용자 ID로 존재 여부 체크
     boolean existsById(@Param("userId") Long userId);
 
-    // 모든 사용자 조회
-    List<User> findAllUsers(@Param("limit") int limit, @Param("offset") int offset);
+    // 전체 사용자 수 조회
+    long countTotalUsers();
+
+    // 모든 사용자 조회 - 페이징
+    List<User> findAllUsers(@Param("limit") int limit, @Param("offset") long offset);
 
     // 역할별 마지막 사번 조회
     String findLastStaffNumberByRole(@Param("prefix") String prefix);

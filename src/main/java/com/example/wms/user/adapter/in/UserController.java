@@ -3,16 +3,15 @@ package com.example.wms.user.adapter.in;
 
 import com.example.wms.user.adapter.in.dto.response.UserInfoResDto;
 import com.example.wms.user.application.port.in.UserUseCase;
-import com.example.wms.user.application.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "user", description = "user domain apis")
 @Slf4j
@@ -59,9 +58,12 @@ public class UserController {
     /**
      * 모든 회원 정보 조회_
      */
-    @Operation(summary = "모든 회원 정보 조회", description = "10명씩 페이지네이션한 회원 정보를 조회합니다.")
+    /**
+     * 모든 회원 정보 조회
+     */
+    @Operation(summary = "모든 회원 정보 조회", description = "페이지네이션한 회원 정보를 조회합니다.")
     @GetMapping("/list")
-    public List<UserInfoResDto> findAllUsers(@RequestParam int page) {
-        return userUseCase.findAllUsers(10, page);
+    public ResponseEntity<Page<UserInfoResDto>> findAllUsers(Pageable pageable) {
+        return ResponseEntity.ok(userUseCase.findAllUsers(pageable));
     }
 }

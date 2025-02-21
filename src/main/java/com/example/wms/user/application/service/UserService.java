@@ -9,6 +9,10 @@ import com.example.wms.user.application.port.in.UserUseCase;
 import com.example.wms.user.application.port.out.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -100,17 +104,13 @@ public class UserService implements UserUseCase {
     }
 
     @Override
-    public List<UserInfoResDto> findAllUsers(int pageSize, int page) {
-        if (page <= 0) {
-            page = 1;
-        }
-
-        int offset = (page - 1) * pageSize;
-
-        List<User> users = userPort.findAllUsers(pageSize, offset);
-        return users.stream()
+    public Page<UserInfoResDto> findAllUsers(Pageable pageable) {
+        Page<User> userPage = userPort.findAllUsers(pageable);
+        List<UserInfoResDto> userInfos = userPage.getContent().stream()
                 .map(UserInfoResDto::entityToResDto)
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(userInfos, pageable, userPage.getTotalElements());
     }
 
     /**
