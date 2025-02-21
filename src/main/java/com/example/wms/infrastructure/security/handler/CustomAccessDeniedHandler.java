@@ -9,10 +9,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
-
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
@@ -20,14 +19,21 @@ import java.io.IOException;
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     private final ObjectMapper objectMapper;
-    private final String URF_8 = "utf-8";
+    private static final String UTF_8 = "utf-8";
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+    public void handle(HttpServletRequest request,
+                       HttpServletResponse response,
+                       AccessDeniedException accessDeniedException) throws IOException, ServletException {
+
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding(URF_8);
+        response.setCharacterEncoding(UTF_8);
 
-        response.getWriter().write(objectMapper.writeValueAsString(ResponseDto.create(ExceptionMessage.AUTHENTICATION_FAILED.getMessage())));
+        response.getWriter().write(
+                objectMapper.writeValueAsString(
+                        ResponseDto.create(ExceptionMessage.AUTHENTICATION_FAILED.getMessage())
+                )
+        );
     }
 }

@@ -1,99 +1,94 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.wms.infrastructure.mapper.InboundMapper">
-    <resultMap id="inboundResultMap" type="com.example.wms.inbound.application.domain.Inbound">
-        <id property="inboundId" column="inbound_id"/>
-        <result property="inboundStatus" column="inbound_status"/>
-        <result property="scheduleNumber" column="schedule_number"/>
-        <result property="scheduleDate" column="schedule_date"/>
-        <result property="checkNumber" column="check_number"/>
-        <result property="checkDate" column="check_date"/>
-        <result property="putAwayNumber" column="put_away_number"/>
-        <result property="putAwayDate" column="put_away_date"/>
-        <result property="orderId" column="order_id"/>
-        <result property="supplierId" column="supplier_id"/>
-    </resultMap>
 
-    <insert id="insert" useGeneratedKeys="true" keyProperty="inboundId">
-        INSERT INTO inbound
-        ( inbound_status, schedule_number, schedule_date, check_number, check_date, put_away_number, put_away_date, order_id, supplier_id)
-        VALUES
-        (#{inboundStatus}, #{scheduleNumber}, #{scheduleDate}, #{checkNumber}, #{checkDate}, #{putAwayNumber}, #{putAwayDate}, #{orderId}, #{supplierId})
-    </insert>
-
-    <delete id="delete" parameterType="java.lang.Long">
-        DELETE FROM inbound WHERE inbound_id = #{inboundId}
-    </delete>
-
-    <!-- 입하 검사 단계: check_number와 check_date 업데이트 -->
-    <update id="updateIC">
-        UPDATE inbound
-        SET check_number = #{checkNumber},
-            check_date = #{checkDate},
-            inbound_status = #{inboundStatus}
-        WHERE inbound_id = #{inboundId}
-    </update>
-
-    <!-- 입고 적치 단계 : put_away_number와 put_away_date 업데이트 -->
-    <update id="updatePA">
-        UPDATE inbound
-        SET put_away_number = #{putAwayNumber},
-            put_away_date = #{putAwayDate},
-            inbound_status = #{inboundStatus}
-        WHERE inbound_id = #{inboundId}
-    </update>
-
-    <select id="findOrderIdByScheduleNumber" resultType="java.lang.Long">
-        SELECT order_id
-        FROM inbound
-        WHERE schedule_number = #{scheduleNumber}
-    </select>
-
-    <update id="updateInboundWorkerCheck">
-        UPDATE inbound
-        SET check_number = #{checkNumber},
-            check_date = DATE(NOW()),
-            inbound_status = "입하검사"
-        WHERE schedule_number = #{scheduleNumber}
-    </update>
-
-    <update id="updateOrderProduct">
-        UPDATE order_product
-        SET is_defective = #{isDefective}
-        WHERE order_id = #{orderId}
-        AND product_id = #{productId}
-    </update>
-
-    <select id="findLotsByScheduleNumber" resultType="com.example.wms.product.adapter.in.dto.LotInfoDto">
+<mapper namespace="com.example.wms.infrastructure.mapper.InventoryMapper">
+    <select id="findAllProductInventories">
         SELECT
-            l.product_id,
-            COUNT(l.lot_id) AS lotCount,
-            b.bin_code
-        FROM lot l
-        JOIN bin b ON l.bin_id = b.bin_id
-        JOIN inbound i ON l.inbound_id = i.inbound_id
-        WHERE i.schedule_number = #{scheduleNumber}
-        GROUP BY l.product_id, b.bin_code
+        p.product_id,
+        p.product_code,
+        p.product_name,
+        i.available_quantity AS product_count
+        FROM product p
+        JOIN inventory i ON p.product_id = i.product_id
+        <if test="productCode != null and productCode != ''">
+            WHERE p.product_code LIKE CONCAT('%', #{productCode}, '%')
+        </if>
+        <if test="pageable.sort.sorted">
+            <trim prefix="ORDER BY">
+                <foreach item="order" index="i" collection="pageable.sort" separator=", ">
+                    ${order.property}
+                    <choose>
+                        <when test="order.direction.toString() == 'ASC'"> ASC</when>
+                        <otherwise> DESC</otherwise>
+                    </choose>
+                </foreach>
+            </trim>
+        </if>
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
     </select>
 
-    <select id="findLotsByCheckNumber" resultMap="LotInfoResultMap">
+    <select id="countAllProductInventories" resultType="long">
+        SELECT count(*) FROM product p JOIN inventory i ON p.product_id = i.product_id
+        <if test="productCode != null and productCode != ''">
+            WHERE p.product_code LIKE CONCAT('%', #{productCode}, '%')
+        </if>
+    </select>
+
+    <select id="findAllProductThresholds">
         SELECT
-            p.product_id,
-            (p.stock_lot_count * p.lot_unit) AS lotCount,
-            p.location_bin_code AS binCode
-        FROM inbound i
-        INNER JOIN lot l on i.inbound_id = l.inbound_id
-        INNER JOIN product p ON l.product_id = p.product_id
-        WHERE i.check_number = #{checkNumber}
+        p.product_id,
+        p.product_code,
+        p.product_name,
+        i.available_quantity,
+        (p.lot_unit * p.stock_lot_count) as product_count,
+        p.threshold
+        FROM product p
+        JOIN inventory i ON p.product_id = i.product_id
+        <if test="productCode != null and productCode != ''">
+            WHERE p.product_code LIKE CONCAT('%', #{productCode}, '%')
+        </if>
+        <if test="pageable.sort.sorted">
+            <trim prefix="ORDER BY">
+                <foreach item="order" index="i" collection="pageable.sort" separator=", ">
+                    ${order.property}
+                    <choose>
+                        <when test="order.direction.toString() == 'ASC'"> ASC</when>
+                        <otherwise> DESC</otherwise>
+                    </choose>
+                </foreach>
+            </trim>
+        </if>
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
     </select>
 
-    <select id="findById" parameterType="long" resultType="Inbound">
-        SELECT * FROM inbound WHERE inbound_id = #{inboundId}
+    <update id="updateInventory">
+        UPDATE inventory
+        SET available_quantity = available_quantity + #{lotCount},
+            last_updated = NOW()
+        WHERE product_id = #{productId}
+    </update>
+
+    <update id="updateInventoryQuantity">
+        UPDATE inventory
+        SET available_quantity = #{availableQuantity}
+        WHERE product_id = #{productId}
+    </update>
+
+    <update id="updateThreshold">
+        UPDATE product
+        SET threshold = #{threshold}
+        WHERE product_id = #{productId}
+    </update>
+
+    <select id="findByProductId">
+        SELECT *
+        FROM product
+        WHERE product_id = #{productId}
     </select>
 
-    <resultMap id="LotInfoResultMap" type="com.example.wms.product.adapter.in.dto.LotInfoDto">
-        <id property="productId" column="product_id" />
-        <result property="lotCount" column="lotCount" />
-        <result property="binCode" column="binCode" />
-    </resultMap>
+    <select id="findAvailableQuantity">
+        SELECT available_quantity
+        FROM inventory
+        WHERE product_id =#{productId}
+    </select>
 </mapper>
