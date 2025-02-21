@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.2.0'
+    id 'org.springframework.boot' version '2.7.18'
     id "org.asciidoctor.jvm.convert" version "3.3.2"
     id 'jacoco'
 }
@@ -30,43 +30,37 @@ repositories {
 
 dependencies {
     // Spring Boot
-    implementation 'org.springframework.boot:spring-boot-starter-web:3.2.0'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc:3.2.0'
-    implementation 'org.springframework.boot:spring-boot-starter-validation:3.2.0'
-    implementation 'org.springframework.boot:spring-boot-starter-security:3.2.0'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.18'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc:2.7.18'
+    implementation 'org.springframework.boot:spring-boot-starter-validation:2.7.18'
+    implementation 'org.springframework.boot:spring-boot-starter-security:2.7.18'
 
     // MySQL
     implementation 'mysql:mysql-connector-java:8.0.32'
-    implementation 'org.apache.tomcat:tomcat-jdbc:10.1.5'
+    implementation 'org.apache.tomcat:tomcat-jdbc:9.0.71'  // 변경
 
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
     // MyBatis
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.3.1'
     implementation 'org.mybatis:mybatis:3.5.9'
 
     // Redis
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis:3.2.0'
-
-    implementation 'io.netty:netty-transport-classes-epoll:4.1.70.Final'
-
-    // Lettuce 명시적 버전 추가
-    implementation 'io.lettuce:lettuce-core:6.3.1.RELEASE'
-
-    // Connection Pool
-    implementation 'org.apache.commons:commons-pool2:2.12.0'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis:2.7.18'
+    implementation 'io.lettuce:lettuce-core:6.1.10.RELEASE'
+    implementation 'org.apache.commons:commons-pool2:2.11.1'
 
     // Swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.15'  // 변경
 
     // AWS S3
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
     // Testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.0'
-    testImplementation 'org.springframework.security:spring-security-test:5.8.0'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.18'
+    testImplementation 'org.springframework.security:spring-security-test:5.7.11'
 
     // JWT
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
@@ -74,14 +68,16 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
     // WebSocket
-    implementation 'org.springframework.boot:spring-boot-starter-websocket:3.2.0'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket:2.7.18'
 
     // Selenium
     implementation 'org.seleniumhq.selenium:selenium-java:4.1.2'
 
-    // H2 Database (Runtime Only)
+    // H2 Database
     runtimeOnly 'com.h2database:h2:2.1.212'
 }
+
+// 나머지 테스트 및 Jacoco 설정은 유지
 
 tasks.named('jar') {
     enabled = false

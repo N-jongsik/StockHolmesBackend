@@ -8,6 +8,8 @@ services:
     environment:
       - TZ=Asia/Seoul
       - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATA_REDIS_HOST=redis
+
     networks:
       - servernetwork
     extra_hosts:

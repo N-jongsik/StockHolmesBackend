@@ -12,7 +12,7 @@ pipeline {
         RESOURCE_DIR = "./src/main/resources"
     }
     tools {
-        gradle 'gradle 8.11.1'
+        gradle 'gradle 7.6.1'
     }
     stages {
         stage('Checkout') {
