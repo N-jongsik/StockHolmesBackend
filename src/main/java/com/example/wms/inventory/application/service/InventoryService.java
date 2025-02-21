@@ -40,7 +40,6 @@ public class InventoryService implements InventoryUseCase {
     @Transactional(readOnly = true)
     public Page<ProductThresholdDto> getAllProductThresholds(String productCode, Pageable pageable) {
         Pageable safePageable = PageableUtils.convertToSafePageableStrict(pageable, ProductThresholdDto.class);
-
         List<ProductThresholdDto> productThresholdDtoList = inventoryPort.findAllProductThresholds(productCode, safePageable);
         long count = inventoryPort.countAllProductInventories(productCode);
 

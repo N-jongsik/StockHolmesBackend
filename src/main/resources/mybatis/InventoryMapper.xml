@@ -2,12 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.wms.infrastructure.mapper.InventoryMapper">
-    <select id="findAllProductInventories" resultType="productInfoDto">
+    <select id="findAllProductInventories">
         SELECT
         p.product_id,
         p.product_code,
         p.product_name,
-        i.available_quantity AS productCount
+        i.available_quantity AS product_count
         FROM product p
         JOIN inventory i ON p.product_id = i.product_id
         <if test="productCode != null and productCode != ''">
@@ -34,13 +34,13 @@
         </if>
     </select>
 
-    <select id="findAllProductThresholds" resultType="productThresholdDto">
+    <select id="findAllProductThresholds">
         SELECT
         p.product_id,
         p.product_code,
         p.product_name,
         i.available_quantity,
-        (p.lot_unit * p.stock_lot_count) as productCount,
+        (p.lot_unit * p.stock_lot_count) as product_count,
         p.threshold
         FROM product p
         JOIN inventory i ON p.product_id = i.product_id
