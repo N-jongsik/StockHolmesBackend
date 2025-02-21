@@ -42,5 +42,7 @@ public class InboundResDto {
     private String supplierName;
 
     private List<InboundProductDto> productList;
+
+    private List<LotResDto> lotList;
 }
 

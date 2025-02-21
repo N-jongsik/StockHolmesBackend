@@ -26,4 +26,5 @@ public class InboundAllProductDto {
     private Long supplierId;
     private String supplierName;
     private List<InboundProductDto> productList;
+    private List<LotResDto> lotList;
 }

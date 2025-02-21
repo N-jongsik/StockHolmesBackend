@@ -16,6 +16,7 @@
         b.supplier_id,
         s.supplier_name,
         l.lot_id,
+        l.lot_number,
         p.product_id,
         p.product_code,
         p.product_name,
@@ -104,6 +105,7 @@
         <result column="supplier_name" property="supplierName"/>
         <collection property="lotList" ofType="com.example.wms.inbound.adapter.in.dto.response.LotResDto">
             <result column="lot_id" property="lotId"/>
+            <result column="lot_number" property="lotNumber"/>
             <result column="product_id" property="productId"/>
             <result column="product_code" property="productCode"/>
             <result column="product_name" property="productName" />

@@ -16,4 +16,10 @@
         #{status, typeHandler=com.example.wms.product.application.domain.LotStatusTypeHandler}, #{inboundId},
         #{outboundId})
     </insert>
+
+    <select id="findMaxLONumber" resultType="java.lang.String">
+        SELECT lot_number
+        FROM lot
+        ORDER BY lot_number DESC LIMIT 1
+    </select>
 </mapper>

@@ -3,10 +3,12 @@ package com.example.wms.inbound.application.service;
 import com.example.wms.inbound.adapter.in.dto.response.InboundAllProductDto;
 import com.example.wms.inbound.adapter.in.dto.response.InboundProductDto;
 import com.example.wms.inbound.adapter.in.dto.response.InboundResDto;
+import com.example.wms.inbound.adapter.in.dto.response.LotResDto;
 import com.example.wms.inbound.application.domain.Inbound;
 import com.example.wms.inbound.application.port.in.GetInboundCheckUseCase;
 import com.example.wms.inbound.application.port.out.InboundRetrievalPort;
 import com.example.wms.infrastructure.pagination.util.PageableUtils;
+import com.example.wms.product.application.domain.Lot;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -41,6 +43,7 @@ public class GetInboundCheckService implements GetInboundCheckUseCase {
         }
 
         Map<Long, InboundResDto> inboundMap = new LinkedHashMap<>();
+        Map<Long, LotResDto> lotMap = new LinkedHashMap<>();
 
         for (InboundAllProductDto dto : inboundDtoList) {
 
@@ -59,6 +62,7 @@ public class GetInboundCheckService implements GetInboundCheckUseCase {
                             .supplierId(dto.getSupplierId())
                             .supplierName(dto.getSupplierName())
                             .productList(new ArrayList<>())
+                            .lotList(new ArrayList<>())
                             .build()
             );
 
@@ -77,6 +81,22 @@ public class GetInboundCheckService implements GetInboundCheckUseCase {
                         .collect(Collectors.toList());
 
                 existingResDto.getProductList().addAll(convertedProducts);
+            }
+
+
+            if (dto.getLotList() != null && !dto.getLotList().isEmpty()) {
+                List<LotResDto> convertedLots = dto.getLotList().stream()
+                        .map(lot -> LotResDto.builder()
+                                .lotId(lot.getLotId())
+                                .lotNumber(lot.getLotNumber())
+                                .productId(lot.getProductId())
+                                .productCode(lot.getProductCode())
+                                .productName(lot.getProductName())
+                                .productCount(lot.getProductCount())
+                                .locationBinCode(lot.getLocationBinCode())
+                                .build())
+                        .collect(Collectors.toList());
+                existingResDto.getLotList().addAll(convertedLots);
             }
 
         }
