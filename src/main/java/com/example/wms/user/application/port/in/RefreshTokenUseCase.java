@@ -6,9 +6,9 @@ import com.example.wms.user.application.domain.RefreshToken;
 public interface RefreshTokenUseCase {
 
     void saveRefreshToken(String email, String refreshToken);
-    void deleteByEmail(String email);
+    void deleteByStaffNumber(String email);
     void validateRefreshToken(String refreshToken, String email);
     RefreshToken findRefreshToken(String email);
-    String validateAndGetEmail(String refreshToken);
+    String validateAndGetStaffNumber(String refreshToken);
     void checkRefreshToken(String refreshToken, String email);
 }

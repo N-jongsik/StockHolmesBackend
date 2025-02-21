@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wms.infrastructure.mapper.DashboardMapper">
+    <select id="selectOutboundStatusCounts" resultType="com.example.wms.dashboard.adapter.in.dto.OutboundStatusResponseDto">
+        SELECT
+                (SELECT COUNT(*) FROM outbound_plan WHERE status = '출고예정') AS outboundSchedule,
+                (SELECT COUNT(*) FROM outbound_plan WHERE status = '출고지시') AS outboundAssign,
+                (SELECT COUNT(*) FROM outbound_plan WHERE status = '출고피킹') AS outboundPicking,
+                (SELECT COUNT(*) FROM outbound_plan WHERE status = '출고패킹') AS outboundPacking,
+                (SELECT COUNT(*) FROM outbound_plan op join outbound o on op.outbound_plan_id = o.outbound_plan_id
+                 WHERE op.status = '출하상차' AND DATE(o.outbound_loading_date) = CURDATE()) AS outboundLoading
+    </select>
+
+    <select id="selectInboundStatusCounts" resultType="com.example.wms.dashboard.adapter.in.dto.InboundStatusResponseDto">
+        SELECT
+                (SELECT COUNT(*) FROM inbound WHERE inbound_status = '입하예정') AS inboundSchedule,
+                (SELECT COUNT(*) FROM inbound WHERE inbound_status = '입하검사') AS inboundCheck,
+                (SELECT COUNT(*) FROM inbound WHERE inbound_status = '입고적치' AND DATE(put_away_date) = CURDATE()) AS inboundPutAway
+    </select>
+
+    <select id="selectOrderStatusCounts" resultType="com.example.wms.dashboard.adapter.in.dto.OrderStatusResponseDto">
+        SELECT
+                (SELECT COUNT(*) FROM `order` WHERE is_approved = true) AS approved,
+                (SELECT COUNT(*) FROM `order` WHERE is_approved = false) AS notApproved
+    </select>
+
+</mapper>

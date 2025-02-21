@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wms.infrastructure.mapper.OutboundMapper">
+    <insert id="insert" parameterType="com.example.wms.outbound.application.domain.Outbound" useGeneratedKeys="true" keyProperty="outboundId">
+        INSERT INTO outbound
+        (outbound_plan_id, outbound_assign_number, outbound_assign_date, outbound_picking_number, outbound_picking_date, outbound_packing_number, outbound_packing_date, outbound_loading_number, outbound_loading_date)
+        VALUES
+            (#{outboundPlanId}, #{outboundAssignNumber}, #{outboundAssignDate}, #{outboundPickingNumber}, #{outboundPickingDate}, #{outboundPackingNumber}, #{outboundPackingDate}, #{outboundLoadingNumber}, #{outboundLoadingDate})
+    </insert>
+
+    <!-- outbound 테이블 업데이트 (출고 지시 등록) -->
+    <update id="insertOutboundAssign">
+        UPDATE outbound
+        SET outbound_assign_number = #{outboundAssignNumber},
+            outbound_assign_date = #{outboundAssignDate}
+        WHERE outbound_id = #{outboundId}
+    </update>
+
+    <!-- 가장 큰 출고 지시 번호 조회 -->
+    <select id="findMaxOutboundAssignNumber" resultType="String">
+        SELECT outbound_assign_number
+        FROM outbound
+        ORDER BY outbound_assign_number DESC
+            LIMIT 1
+    </select>
+
+    <!-- 출고 ID로 출고 정보 조회 -->
+    <select id="findOutboundByOutboundId" resultType="com.example.wms.outbound.application.domain.Outbound">
+        SELECT *
+        FROM outbound
+        WHERE outbound_id = #{outboundId}
+    </select>
+
+    <!-- 출고 지시 삭제 -->
+    <update id="deleteOutboundAssign">
+        UPDATE outbound
+        SET outbound_assign_date = NULL,
+            outbound_assign_number = NULL
+        WHERE outbound_id = #{outboundId}
+    </update>
+
+    <!-- 출고 지시 수정 -->
+    <update id="updateOutboundAssign">
+        UPDATE outbound
+        SET outbound_assign_date = #{outboundAssignDate}
+        WHERE outbound_id = #{outboundId}
+    </update>
+
+    <!-- 출고 계획 ID로 출고 정보 조회 -->
+    <select id="findOutboundByPlanId" resultType="com.example.wms.outbound.application.domain.Outbound">
+        SELECT *
+        FROM outbound
+        WHERE outbound_plan_id = #{outboundPlanId}
+    </select>
+
+    <!-- 출고 계획 상태 업데이트 -->
+    <update id="updateOutboundPlanStatus">
+        UPDATE outbound_plan
+        SET status = #{status}
+        WHERE outbound_plan_id = #{outboundPlanId}
+    </update>
+</mapper>

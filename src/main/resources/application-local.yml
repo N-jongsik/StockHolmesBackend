@@ -21,16 +21,28 @@ spring:
   application:
     name: wms
 
+  sql:
+    init:
+      mode: always
+      schema: classpath:schema.sql
+      data: classpath:data.sql
+      encoding: UTF-8
+
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/wms
     username: root
-    password:
+    password: 1234
 
-  redis:
-    host: localhost
-    port: 6379
-    password: ""
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ""
+    web:
+      pageable:
+        default-page-size: 10
 
 logging:
   level:
@@ -62,16 +74,23 @@ server:
 build:
   date: "@build.date@"
 
-springfox:
-  documentation:
-    swagger:
-      use-model-v3: false
+#springfox:
+#  documentation:
+#    swagger:
+#      use-model-v3: false
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
 
 cloud:
   aws:
     credentials:
-      accessKey: ${secret.cloud.accessKey}
-      secretKey: ${secret.cloud.secretKey}
+      accessKey: test
+      secretKey: test
     s3:
       bucket: wms
     region:
@@ -83,9 +102,14 @@ jwt:
   refresh-expired-in: '1296000000'  # Refresh Token 만료 시간 (15일)
   access-expired-in: '18000000'      # Access Token 만료 시간 (5시간)
   cookieName: refreshToken
-  secret: ${secret-jwt.secret}
+  secret: 'XUrYUhZfrEWLtykR7h80CrcITM59YLt5CRi3AdqZu33'
 
 mybatis:
-  mapper-locations: classpath:mappers/*.xml
-  type-aliases-package: com.example.wms.user.application.domain
-
+  mapper-locations: classpath:/mybatis/**/*.xml
+  type-aliases-package: com.example.wms
+  configuration:
+    default-statement-timeout: 30
+    map-underscore-to-camel-case: true
+    jdbc-type-for-null: varchar
+    call-setters-on-nulls: true
+    auto-mapping-unknown-column-behavior: none

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wms.infrastructure.mapper.OutboundPlanProductMapper">
+
+    <!-- resultMap 정의 -->
+    <resultMap id="ProductInfoResultMap" type="com.example.wms.outbound.adapter.in.dto.ProductInfoDto">
+        <result property="productId" column="product_id"/>
+        <result property="productCode" column="product_code"/>
+        <result property="productCount" column="required_quantity"/>
+    </resultMap>
+
+    <!-- findProductInfoByOutboundPlanId 쿼리 -->
+    <select id="findProductInfoByOutboundPlanId" resultMap="ProductInfoResultMap">
+        SELECT
+        p.product_id AS product_id,
+        p.product_code AS product_code,
+        p.product_name AS product_name,
+        opp.required_quantity AS required_quantity
+        FROM outbound_plan_product opp
+        JOIN product p ON opp.product_id = p.product_id
+        WHERE opp.outbound_plan_id = #{outboundPlanId}
+    </select>
+
+    <select id="getRequiredQuantitiesPerProduct" resultMap="ABCAnalysisDataMap">
+        SELECT product_id, SUM(required_quantity) as total_required_quantity
+        FROM outbound_plan_product
+        GROUP BY product_id
+    </select>
+    
+    <resultMap id="ABCAnalysisDataMap" type="com.example.wms.outbound.adapter.in.dto.ABCAnalysisDataDto">
+        <result property="productId" column="product_id"/>
+        <result property="totalRequiredQuantity" column="total_required_quantity"/>
+    </resultMap>
+
+    <insert id="batchInsert">
+        INSERT INTO outbound_plan_product
+        (outbound_plan_id, product_id, required_quantity, stock_used_quantity, order_quantity, status)
+        VALUES
+        <foreach collection="products" item="product" separator=",">
+            (#{product.outboundPlanId}, #{product.productId}, #{product.requiredQuantity}, #{product.stockUsedQuantity}, #{product.orderQuantity}, #{product.status})
+        </foreach>
+    </insert>
+
+</mapper>

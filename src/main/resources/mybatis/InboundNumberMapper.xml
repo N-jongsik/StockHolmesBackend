@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.wms.infrastructure.mapper.InboundNumberMapper">
+  <select id="findMaxISNumber" resultType="java.lang.String">
+      SELECT schedule_number
+      FROM inbound
+      ORDER BY schedule_number DESC LIMIT 1
+  </select>
+
+  <select id="findMaxICNumber">
+      SELECT check_number
+      FROM inbound
+      ORDER BY check_number DESC LIMIT 1
+  </select>
+
+  <select id="findMaxPANumber">
+      SELECT put_away_number
+      FROM inbound
+      ORDER BY put_away_number DESC LIMIT 1
+  </select>
+</mapper>
+

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wms.infrastructure.mapper.LotMapper">
+    <update id="updateStatus">
+        UPDATE lot
+        SET status = #{status}
+        WHERE lot_id = #{lotId}
+    </update>
+
+    <insert id = "save" useGeneratedKeys="true" keyProperty="lotId">
+        INSERT INTO lot
+        ( lot_number, product_id, bin_id, status, inbound_id, outbound_id)
+        VALUES
+        (#{lotNumber}, #{productId}, #{binId},
+        #{status, typeHandler=com.example.wms.product.application.domain.LotStatusTypeHandler}, #{inboundId},
+        #{outboundId})
+    </insert>
+</mapper>

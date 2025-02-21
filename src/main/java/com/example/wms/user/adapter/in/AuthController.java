@@ -7,9 +7,9 @@ import com.example.wms.user.adapter.in.dto.response.AuthenticatedResDto;
 import com.example.wms.user.adapter.in.dto.response.TokenInfo;
 import com.example.wms.user.adapter.in.dto.response.UserInfoResDto;
 import com.example.wms.user.application.port.in.AuthUseCase;
-import com.example.wms.user.application.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,8 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.validation.Valid;
 
 @Tag(name = "auth", description = "auth domain apis")
 @Slf4j
@@ -38,10 +36,11 @@ public class AuthController {
 
     /**
      * 회원가입 처리
+     *
      * @param signUpReqDto 회원가입 요청 데이터
      * @return 성공 시 HTTP 201 상태 반환
      */
-    @Operation(summary = "회원가입", description = "필요한 정보를 입력하여 회원 가입합니다.")
+    @Operation(summary = "유저 등록", description = "필요한 정보를 입력하여 유저를 등록합니다.")
     @PostMapping("/register")
     public ResponseEntity<UserInfoResDto> addUser(@RequestBody @Valid SignUpReqDto signUpReqDto) {
 
@@ -71,7 +70,7 @@ public class AuthController {
      * @param loginReqDto 로그인 요청 데이터
      * @return 로그인 결과
      */
-    @Operation(summary = "로그인", description = "카카오 로그인합니다.")
+    @Operation(summary = "로그인", description = "일반 로그인합니다.")
     @PostMapping("/login")
     public ResponseEntity<UserInfoResDto> login(@RequestBody LoginReqDto loginReqDto) {
 

@@ -1,6 +1,5 @@
 package com.example.wms.user.adapter.out;
 
-import com.example.wms.infrastructure.mapper.AuthMapper;
 import com.example.wms.infrastructure.mapper.UserMapper;
 import com.example.wms.user.application.domain.User;
 import com.example.wms.user.application.domain.enums.UserExceptionMessage;
@@ -9,8 +8,6 @@ import com.example.wms.user.application.port.out.AuthPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-
-//repo에 저장 하는 곳
 @Component
 @RequiredArgsConstructor
 public class AuthAdapter implements AuthPort {

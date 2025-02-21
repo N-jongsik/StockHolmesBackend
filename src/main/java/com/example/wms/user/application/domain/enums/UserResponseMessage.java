@@ -1,7 +1,7 @@
 package com.example.wms.user.application.domain.enums;
 
 public enum UserResponseMessage {
-    CHECK_EMAIL_DUPLICATED_SUCCESS("이메일을 사용할 수 있습니다."),
+    CHECK_STAFF_NUMBER_DUPLICATED_SUCCESS("이메일을 사용할 수 있습니다."),
     SIGN_UP_SUCCESS("회원가입이 완료되었습니다."),
     LOGIN_SUCCESS("로그인이 완료되었습니다."),
     READ_ONE_SUCCESS("회원 정보를 조회했습니다."),

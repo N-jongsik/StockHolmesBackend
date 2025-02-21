@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.wms.infrastructure.mapper.BinMapper">
+
+    <select id="selectAllBinsWithDetails" resultType="com.example.wms.product.adapter.out.dto.FlatBinDto">
+        SELECT b.bin_id,
+               b.bin_code,
+               b.zone,
+               b.aisle,
+               b.row_num,
+               b.floor,
+               b.amount,
+               l.lot_id,
+               l.lot_number,
+               l.product_id,
+               l.status,
+               l.inbound_id,
+               l.outbound_id,
+               p.product_code,
+               p.product_name
+        FROM bin b
+                 LEFT JOIN lot l ON b.bin_id = l.bin_id
+                 LEFT JOIN product p ON l.product_id = p.product_id;
+    </select>
+
+    <select id="findAvailableBinIdInAisle" resultType="java.lang.Long">
+        SELECT bin_id
+        FROM bin
+        WHERE zone = #{zone}
+            AND aisle = #{aisle}
+        ORDER BY row ASC, floor ASC, amount ASC
+        LIMIT 1
+    </select>
+
+    <select id="findAvailableBinInRow" resultType="java.lang.Long">
+        SELECT bin_id
+        FROM bin
+        WHERE zone = #{zone}
+            AND aisle = #{aisle}
+            AND row_num = #{rowNum}
+        ORDER BY floor ASC, amount ASC
+        LIMIT 1
+    </select>
+
+    <select id="findBinIdByBinCode" resultType="java.lang.Long">
+        SELECT bin_id
+        FROM bin
+        WHERE bin_code = #{binCode}
+    </select>
+
+    <select id="findBinIdInZone" resultType="java.lang.Long">
+        SELECT bin_id
+        FROM bin
+        WHERE zone = #{zone}
+        ORDER BY row ASC, floor ASC
+        LIMIT 1
+    </select>
+
+    <select id="findBinIdsByBinPrefix" resultType="java.lang.Long">
+        SELECT bin_id
+        FROM bin
+        WHERE bin_code LIKE CONCAT(#{binPrefix}, '-%')
+        ORDER BY bin_code ASC
+    </select>
+
+    <select id="findExactBinIdByBinCode" resultType="java.lang.Long">
+        SELECT bin_id
+        FROM bin
+        WHERE bin_code = #{binCode}
+    </select>
+
+
+    <update id="incrementBinAmount">
+        UPDATE bin
+        SET amount = amount + #{lotCount}
+        WHERE bin_id = #{binId}
+    </update>
+
+
+</mapper>

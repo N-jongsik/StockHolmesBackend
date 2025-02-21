@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wms.infrastructure.mapper.SupplierMapper">
+    <select id="findSupplierWithPagination" resultType="com.example.wms.order.adapter.in.dto.SupplierResponseDto">
+        SELECT * FROM supplier
+        <if test="businessNumber != null and businessNumber != ''">
+            WHERE business_number LIKE CONCAT('%', #{businessNumber}, '%')
+        </if>
+        <if test="pageable.sort.sorted">
+            <trim prefix="ORDER BY">
+                <foreach item="order" index="i" collection="pageable.sort" separator=", ">
+                    ${order.property}
+                    <choose>
+                        <when test="order.direction.toString() == 'ASC'"> ASC</when>
+                        <otherwise> DESC</otherwise>
+                    </choose>
+                </foreach>
+            </trim>
+        </if>
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+    </select>
+
+    <select id="countAllSuppliers" resultType="long">
+        SELECT COUNT(*)
+        FROM supplier
+        <where>
+            <if test="businessNumber != null and businessNumber != ''">
+                business_number LIKE CONCAT('%', #{businessNumber}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="findProductsBySupplierIds" resultType="com.example.wms.order.adapter.in.dto.ProductInSupplierDto" parameterType="list">
+        SELECT product_id, supplier_id, product_name, product_code
+        FROM product
+        <choose>
+            <when test="supplierIds != null and supplierIds.size() > 0">
+                WHERE supplier_id IN
+                <foreach item="supplierId" collection="supplierIds" open="(" separator="," close=")">
+                    #{supplierId}
+                </foreach>
+            </when>
+            <otherwise>
+                WHERE 1=0
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findSupplierOverview">
+        select supplier_id, supplier_name
+        from supplier
+    </select>
+</mapper>

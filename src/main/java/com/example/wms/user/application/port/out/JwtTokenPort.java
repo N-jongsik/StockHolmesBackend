@@ -5,7 +5,7 @@ import org.springframework.security.core.Authentication;
 
 public interface JwtTokenPort {
     TokenInfo generateToken(Authentication authentication);
-    String getEmailFromToken(String token);
+    String getStaffNumberFromToken(String token);
     boolean validateToken(String token);
     boolean validateRefreshToken(String refreshToken);
     String getUsernameFromExpiredToken(String token);

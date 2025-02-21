@@ -1,51 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.wms.infrastructure.mapper.UserMapper">
+
+    <resultMap id="userResultMap" type="com.example.wms.user.application.domain.User">
+        <id property="userId" column="user_id"/>
+        <result property="name" column="name"/>
+        <result property="profileImage" column="profile_image"/>
+        <result property="staffNumber" column="staff_number"/>
+        <result property="password" column="password"/>
+        <result property="phone" column="phone"/>
+        <result property="gender" column="gender"/>
+        <result property="isActive" column="is_active"/>
+        <result property="address" column="address"/>
+        <result property="userRole" column="user_role"/>
+        <result property="birthDate" column="birth_date"/>
+        <result property="supplierId" column="supplier_id"/>
+    </resultMap>
+
     <!-- 회원가입 -->
-    <insert id="save" parameterType="com.example.wms.user.application.domain.User">
-        INSERT INTO users (staff_number, password, name, phone, gender, birth_date, supplier_id, user_role)
-        VALUES (#{staffNumber}, #{password}, #{name}, #{phone}, #{gender}, #{birthDate}, #{supplierId}, #{userRole})
+    <insert id="save" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO Users (staff_number, password, name, phone, gender, birth_date, supplier_id, user_role, address, is_active, created_at, updated_at)
+        VALUES (#{user.staffNumber}, #{user.password}, #{user.name}, #{user.phone}, #{user.gender}, #{user.birthDate}, #{user.supplierId}, #{user.userRole}, #{user.address}, #{user.isActive}, NOW(), NOW());
     </insert>
 
     <!-- 직원 번호로 사용자 조회 -->
-    <select id="findByStaffNumber" parameterType="String" resultType="com.example.wms.user.application.domain.User">
-        SELECT * FROM users WHERE staff_number = #{staffNumber}
+    <select id="findByStaffNumber" parameterType="String" resultMap="userResultMap">
+        SELECT * FROM Users WHERE staff_number = #{staffNumber}
     </select>
 
     <!-- 직원 번호로 이미 존재하는지 체크 -->
-    <select id="existsByStaffNumber" parameterType="String" resultType="boolean">
-        SELECT COUNT(*) > 0 FROM users WHERE staff_number = #{staffNumber}
+    <select id="existsByStaffNumber" parameterType="String" resultType="Integer">
+        SELECT COUNT(*) FROM Users WHERE staff_number = #{staffNumber};
     </select>
 
     <!-- 직원 번호로 사용자 삭제 -->
     <delete id="deleteByStaffNumber" parameterType="String">
-        DELETE FROM users WHERE staff_number = #{staffNumber}
+        DELETE FROM Users WHERE staff_number = #{staffNumber}
     </delete>
 
     <!-- 사용자 정보 업데이트 -->
     <update id="updateUser" parameterType="com.example.wms.user.application.domain.User">
-        UPDATE users
+        UPDATE Users
         SET
-        password = #{password},
-        name = #{name},
-        phone = #{phone},
-        gender = #{gender},
-        birth_date = #{birthDate},
-        supplier_id = #{supplierId},
-        user_role = #{userRole}
-        WHERE staff_number = #{staffNumber}
+            password = #{user.password},
+            name = #{user.name},
+            phone = #{user.phone},
+            gender = #{user.gender},
+            birth_date = #{user.birthDate},
+            supplier_id = #{user.supplierId},
+            user_role = #{user.userRole},
+            updated_at = NOW()
+        WHERE staff_number = #{user.staffNumber};
     </update>
 
     <!-- 사용자 ID로 조회 -->
-    <select id="findById" resultType="com.example.wms.user.application.domain.User">
-        SELECT * FROM users WHERE id = #{userId} LIMIT 1
-    </select>
-
-    <!-- 사용자 ID로 존재 여부 체크 -->
-    <select id="existsById" resultType="boolean">
-        SELECT COUNT(*) > 0 FROM users WHERE id = #{userId}
+    <select id="findById" parameterType="Long" resultMap="userResultMap">
+        SELECT * FROM Users WHERE user_id = #{userId} LIMIT 1;
     </select>
 
     <!-- 모든 사용자 조회 -->
-    <select id="findAll" resultType="com.example.wms.user.application.domain.User">
-        SELECT * FROM users
+    <select id="findAllUsers" resultMap="userResultMap">
+        SELECT * FROM Users
+        LIMIT #{limit} OFFSET #{offset};
     </select>
+
+    <!-- 역할에 따른 마지막 사번 조회 -->
+    <select id="findLastStaffNumberByRole" parameterType="String" resultType="String">
+        SELECT staff_number
+        FROM Users
+        WHERE staff_number LIKE CONCAT(#{prefix}, '%')
+        ORDER BY staff_number DESC
+            LIMIT 1
+    </select>
+
 </mapper>

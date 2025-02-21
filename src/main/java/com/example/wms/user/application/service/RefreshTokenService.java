@@ -45,7 +45,7 @@ public class RefreshTokenService implements RefreshTokenUseCase {
     // 리프레시 토큰을 삭제
     @Override
     @Transactional
-    public void deleteByEmail(String staffNumber) {
+    public void deleteByStaffNumber(String staffNumber) {
         refreshTokenPort.deleteByStaffNumber(staffNumber);
         log.info("[Refresh Token 삭제] Refresh Token 삭제 완료. 사번: {}", staffNumber);
     }
@@ -71,7 +71,7 @@ public class RefreshTokenService implements RefreshTokenUseCase {
         log.info("[Refresh Token 검증] Refresh Token 검증 성공.");
     }
 
-    // 이메일로 저장된 리프레시 토큰 찾기
+    // 사번으로 저장된 리프레시 토큰 찾기
     @Override
     public RefreshToken findRefreshToken(String staffNumber) {
         log.info("[Refresh Token 검색] 이메일에 대한 Refresh Token 검색. 사번: {}", staffNumber);
@@ -83,7 +83,7 @@ public class RefreshTokenService implements RefreshTokenUseCase {
     }
 
     // 리프레시 토큰을 검증하고 이메일 반환
-    public String validateAndGetEmail(String refreshToken) {
+    public String validateAndGetStaffNumber(String refreshToken) {
         try {
             return jwtTokenPort.getUsernameFromExpiredToken(refreshToken);
         } catch (ExpiredJwtException e) {

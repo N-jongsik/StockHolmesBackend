@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wms.infrastructure.mapper.OutboundAssignMapper">
+    <resultMap id="OutboundAssignResponseDtoResultMap" type="com.example.wms.outbound.adapter.in.dto.OutboundAssignResponseDto">
+        <!-- OutboundAssignResponseDto의 기본 필드 매핑 -->
+        <id property="outboundId" column="outbound_id"/>
+        <result property="outboundPlanId" column="outbound_plan_id"/>
+        <result property="process" column="process"/>
+        <result property="outboundScheduleNumber" column="outbound_schedule_number"/>
+        <result property="outboundAssignNumber" column="outbound_assign_number"/>
+        <result property="outboundAssignDate" column="outbound_assign_date"/>
+        <result property="productionPlanNumber" column="production_plan_number"/>
+        <result property="planDate" column="plan_date"/>
+
+        <!-- productList 컬렉션 매핑 -->
+        <collection property="productList" ofType="com.example.wms.outbound.adapter.in.dto.ProductInfoDto">
+            <id property="productId" column="product_id"/>
+            <result property="productCode" column="product_code"/>
+            <result property="productName" column="product_name"/>
+            <result property="productCount" column="productCount"/>
+        </collection>
+    </resultMap>
+
+    <select id="findOutboundAssignFilteringWithPageNation" resultMap="OutboundAssignResponseDtoResultMap">
+        SELECT
+        b.outbound_id,
+        b.outbound_plan_id,
+        b.process,
+        b.outbound_schedule_number,
+        b.outbound_assign_number,
+        b.outbound_assign_date,
+        b.production_plan_number,
+        b.plan_date,
+        -- Product 정보 컬럼
+        p.product_id,
+        p.product_code,
+        p.product_name,
+        opp.required_quantity AS productCount
+        FROM (
+        SELECT
+        o.outbound_id,
+        op.outbound_plan_id,
+        op.status AS process,
+        op.outbound_schedule_number,
+        o.outbound_assign_number,
+        o.outbound_assign_date,
+        op.production_plan_number,
+        op.plan_date
+        FROM outbound o
+        JOIN outbound_plan op ON o.outbound_plan_id = op.outbound_plan_id
+        <where>
+            outbound_assign_number IS NOT NULL
+            AND outbound_picking_number IS NULL
+            AND outbound_packing_number IS NULL
+            AND outbound_loading_number IS NULL
+            <!-- 시작일 조건 (startDate) -->
+            <if test="startDate != null">
+                AND outbound_assign_date <![CDATA[>=]]> #{startDate}
+            </if>
+            <!-- 종료일 조건 (endDate) -->
+            <if test="endDate != null">
+                AND outbound_assign_date <![CDATA[<=]]> #{endDate}
+            </if>
+            <!-- 번호 조건 (outboundAssignNumber) -->
+            <if test="outboundAssignNumber != null and outboundAssignNumber != ''">
+                AND outbound_assign_number LIKE CONCAT('%', #{outboundAssignNumber}, '%')
+            </if>
+        </where>
+        <!-- 정렬 조건 -->
+        <if test="pageable.sort.sorted">
+            <trim prefix="ORDER BY">
+                <foreach item="order" index="i" collection="pageable.sort" separator=", ">
+                    ${order.property}
+                    <choose>
+                        <when test="order.direction.toString() == 'ASC'">ASC</when>
+                        <otherwise>DESC</otherwise>
+                    </choose>
+                </foreach>
+            </trim>
+        </if>
+        <!-- 페이징 조건 -->
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+        ) b
+        LEFT JOIN outbound_plan_product opp ON b.outbound_plan_id = opp.outbound_plan_id
+        LEFT JOIN product p ON opp.product_id = p.product_id
+    </select>
+
+
+    <select id="findOutboundPlanByOutboundPlanId">
+        SELECT *
+        FROM outbound_plan
+        WHERE outbound_plan_id = #{outboundPlanId}
+    </select>
+
+    <select id="countAssign">
+        SELECT COUNT(*)
+        FROM outbound
+        <where>
+            outbound_assign_number IS NOT NULL AND outbound_picking_number IS NULL AND outbound_packing_number IS NULL AND outbound_loading_number IS NULL
+            <!-- 시작일 조건 (startDate) -->
+            <if test="startDate != null">
+                AND
+                outbound_assign_date <![CDATA[>=]]> #{startDate}
+            </if>
+
+            <!-- 종료일 조건 (endDate) -->
+            <if test="endDate != null">
+                AND
+                outbound_assign_date <![CDATA[<=]]> #{endDate}
+            </if>
+
+            <!-- 번호 조건 (outboundAssignNumber) -->
+            <if test="outboundAssignNumber != null and outboundAssignNumber != ''">
+                AND
+                outbound_assign_number LIKE CONCAT('%', #{outboundAssignNumber}, '%')
+            </if>
+        </where>
+    </select>
+
+    <update id="updateOutboundPlanStatus">
+        UPDATE outbound_plan
+        SET status = #{status}
+        WHERE outbound_plan_id = #{outboundPlanId}
+    </update>
+
+    <select id="findOutboundByOutboundId" resultType="Outbound">
+        SELECT *
+        FROM outbound
+        WHERE outbound_id = #{outboundId}
+    </select>
+
+
+</mapper>

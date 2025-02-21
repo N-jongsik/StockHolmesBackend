@@ -10,10 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "user", description = "user domain apis")
 @Slf4j
@@ -46,5 +45,15 @@ public class UserController {
     @GetMapping
     public ResponseEntity<UserInfoResDto> findUser() {
         return ResponseEntity.ok().body(userUseCase.findUser());
+    }
+
+
+    /**
+     * 모든 회원 정보 조회_
+     */
+    @Operation(summary = "모든 회원 정보 조회", description = "20명씩 페이지네이션한 회원 정보를 조회합니다.")
+    @GetMapping("/list")
+    public List<UserInfoResDto> findAllUsers(@RequestParam int page) {
+        return userUseCase.findAllUsers(20, page);
     }
 }

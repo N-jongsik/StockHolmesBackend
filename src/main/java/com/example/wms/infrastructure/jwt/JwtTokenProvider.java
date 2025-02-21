@@ -5,6 +5,7 @@ import com.example.wms.infrastructure.exception.TokenException;
 import com.example.wms.infrastructure.jwt.enums.JwtHeaderUtil;
 import com.example.wms.infrastructure.jwt.exception.ExpiredTokenException;
 import com.example.wms.infrastructure.jwt.exception.InvalidTokenException;
+import com.example.wms.user.application.port.out.JwtTokenPort;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -30,7 +31,7 @@ import static com.example.wms.infrastructure.jwt.enums.JwtExceptionMessage.INVAL
 
 @Slf4j
 @Component
-public class JwtTokenProvider {
+public class JwtTokenProvider implements JwtTokenPort {
 
     private final Key key;
     private final long ACCESS_TOKEN_EXPIRED_IN;
@@ -47,9 +48,9 @@ public class JwtTokenProvider {
     }
 
     /**
-     * 토큰에서 이메일을 추출합니다.
+     * 토큰에서 사번을 추출합니다.
      */
-    public String getEmailFromToken(String token) {
+    public String getStaffNumberFromToken(String token) {
         Claims claims = parseClaims(token);
         return claims.getSubject();
     }

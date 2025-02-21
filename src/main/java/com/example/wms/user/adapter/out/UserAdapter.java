@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -35,6 +37,11 @@ public class UserAdapter implements UserPort {
     public User findByStaffNumber(String staffNumber) {
         return userMapper.findByStaffNumber(staffNumber)
                 .orElseThrow(() -> new InvalidSignUpException(UserExceptionMessage.USER_NOT_FOUND.getMessage()));
+    }
+
+    @Override
+    public List<User> findAllUsers(int limit, int offset) {
+        return userMapper.findAllUsers(limit, offset);
     }
 
     // 활성화/비활성화 등록
