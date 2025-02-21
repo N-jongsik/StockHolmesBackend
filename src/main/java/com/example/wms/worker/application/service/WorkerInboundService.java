@@ -21,14 +21,9 @@ public class WorkerInboundService implements WorkerInboundUseCase {
     private final WorkerInboundPort workerInboundPort;
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<WorkerInboundResDto> getFilteredWorkerInboundList(LocalDate startDate, LocalDate endDate, Pageable pageable) {
-        Pageable safePageable = PageableUtils.convertToSafePageableStrict(pageable, WorkerInboundResDto.class);
-        List<WorkerInboundResDto> workerInboundList = workerInboundPort.findFilteredWorkerInboundList(startDate, endDate, pageable);
-        return new PageImpl<>(workerInboundList, pageable, workerInboundList.size());
+//    @Transactional(readOnly = true)
+    public List<WorkerInboundResDto> getFilteredWorkerInboundList(LocalDate todayDate) {
+        List<WorkerInboundResDto> workerInboundList = workerInboundPort.findFilteredWorkerInboundList(todayDate);
+        return workerInboundList;
     }
-
-
-
-
 }
