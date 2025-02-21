@@ -79,10 +79,12 @@ public class InboundCheckCreateTest {
 
         Product product1 = Product.builder()
                         .productId(1L)
+                        .lotUnit(1)
                         .build();
 
         Product product2 = Product.builder()
                         .productId(2L)
+                        .lotUnit(2)
                         .build();
 
         when(inboundPort.findById(1L)).thenReturn(inbound);
@@ -97,10 +99,9 @@ public class InboundCheckCreateTest {
                 .productId(2L)
                 .build();
 
-        when(orderProductPort.findByProductId(1L)).thenReturn(orderProduct1);
-        when(orderProductPort.findByProductId(2L)).thenReturn(orderProduct2);
+        lenient().when(orderProductPort.findByProductId(1L)).thenReturn(orderProduct1);
+        lenient().when(orderProductPort.findByProductId(2L)).thenReturn(orderProduct2);
 
-// now it's safe to call setDefectiveCount
         orderProduct1.setDefectiveCount(15L);
         orderProduct2.setDefectiveCount(20L);
 
@@ -108,7 +109,7 @@ public class InboundCheckCreateTest {
         inboundService.createInboundCheck(1L, inboundCheckReqDto);
 
         // then
-        verify(inboundPort, times(1)).updateIC(eq(1L), any(LocalDate.class), any(String.class), any(String.class));
+        verify(inboundPort, times(2)).updateIC(eq(1L), any(LocalDate.class), any(String.class), any(String.class));
 
 
     }

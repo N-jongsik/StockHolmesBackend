@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,7 +44,7 @@ class InboundCheckGetTest {
                         .scheduleNumber("IC202502010001")
                         .scheduleDate(LocalDate.now())
                         .checkDate(LocalDate.now())
-                        .checkNumber("CHK202502010001")
+                        .inboundCheckNumber("CHK202502010001")
                         .orderId(1L)
                         .orderNumber("OR202502010001")
                         .orderDate(LocalDate.now())
@@ -57,8 +56,8 @@ class InboundCheckGetTest {
                                         .productCode("a123")
                                         .productName("tire1")
                                         .productCount(30L)
-                                        .lotCount(3L)
-                                        .defectiveCount(2L) // 예제 데이터 추가
+                                        .stockLotCount(3L)
+                                        .defectiveCount(2L)
                                         .build()
                         ))
                         .build(),
@@ -70,7 +69,7 @@ class InboundCheckGetTest {
                         .scheduleNumber("IC202502010002")
                         .scheduleDate(LocalDate.now())
                         .checkDate(LocalDate.now())
-                        .checkNumber("CHK202502010002")
+                        .inboundCheckNumber("CHK202502010002")
                         .orderId(1L)
                         .orderNumber("OR202502010001")
                         .orderDate(LocalDate.now())
@@ -82,8 +81,8 @@ class InboundCheckGetTest {
                                         .productCode("b123")
                                         .productName("tire2")
                                         .productCount(50L)
-                                        .lotCount(5L)
-                                        .defectiveCount(3L) // 예제 데이터 추가
+                                        .stockLotCount(5L)
+                                        .defectiveCount(3L)
                                         .build()
                         ))
                         .build()
