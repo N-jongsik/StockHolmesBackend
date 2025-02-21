@@ -14,7 +14,6 @@ import com.example.wms.order.application.domain.Order;
 import com.example.wms.order.application.domain.OrderProduct;
 import com.example.wms.order.application.port.out.OrderPort;
 import com.example.wms.order.application.port.out.OrderProductPort;
-import com.example.wms.product.adapter.in.dto.LotInfoDto;
 import com.example.wms.product.application.domain.Lot;
 import com.example.wms.product.application.domain.LotStatus;
 import com.example.wms.product.application.domain.Product;
@@ -389,31 +388,7 @@ public class InboundService implements InboundUseCase {
         inboundPort.updateIC(inboundId, null, null, "입하예정");
     }
 
-    @Transactional
-    @Override
-    public InboundWorkerCheckResDto createInboundCheckByWorker(List<InboundCheckWorkerReqDto> workerCheckRequests) {
-        if(workerCheckRequests.isEmpty()) {
-            throw new IllegalArgumentException("검수할 품목이 없습니다.");
-        }
 
-        String scheduleNumber = workerCheckRequests.get(0).getScheduleNumber();
-        Long orderId = inboundPort.getOrderIdByScheduleNumber(scheduleNumber);
-
-        if (orderId == null) {
-            throw new IllegalArgumentException("해당 입하 예정 번호에 대한 주문을 찾을 수 없습니다: " + scheduleNumber);
-        }
-
-        for (InboundCheckWorkerReqDto reqDto : workerCheckRequests) {
-            inboundPort.updateOrderProduct(orderId, reqDto.getProductId(), reqDto.getIsDefective());
-        }
-
-        String checkNumber = makeNumber("IC");
-        inboundPort.updateInboundCheck(scheduleNumber, checkNumber);
-
-        List<LotInfoDto> lots = inboundPort.getLotsByCheckNumber(checkNumber);
-
-        return new InboundWorkerCheckResDto(checkNumber, lots);
-    }
 
     private Long findExactBinId(String locationBinCode) {
         if (locationBinCode.matches("[A-F]-\\d{2}-\\d{2}-\\d{2}")) {
