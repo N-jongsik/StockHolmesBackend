@@ -4,11 +4,11 @@ import com.example.wms.inbound.application.domain.Inbound;
 import com.example.wms.inbound.application.port.in.DeleteInboundCheckUseCase;
 import com.example.wms.inbound.application.port.out.InboundPort;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.Test;
 
 import java.time.LocalDate;
 

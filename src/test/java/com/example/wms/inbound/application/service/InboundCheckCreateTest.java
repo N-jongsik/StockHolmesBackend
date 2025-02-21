@@ -12,11 +12,11 @@ import com.example.wms.product.application.domain.Product;
 import com.example.wms.product.application.port.out.LotPort;
 import com.example.wms.product.application.port.out.ProductPort;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.Test;
 
 import java.time.LocalDate;
 import java.util.Arrays;

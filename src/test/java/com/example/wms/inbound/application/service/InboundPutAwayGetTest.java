@@ -5,7 +5,7 @@ import com.example.wms.inbound.adapter.in.dto.response.LotResDto;
 import com.example.wms.inbound.application.port.out.InboundRetrievalPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -38,8 +38,8 @@ public class InboundPutAwayGetTest {
     @BeforeEach
     void setUp() {
         List<LotResDto> productList = Arrays.asList(
-                new LotResDto(1001L, 1L, "A123", "Engine Part", 5L,"A-01-01-03"),
-                new LotResDto(1002L, 2L,"B456", "Brake Pad", 30L, "A-01-01-03")
+                new LotResDto(1001L,"11", 1L, "A123", "Engine Part", 5L,"A-01-01-03"),
+                new LotResDto(1002L,"11", 2L,"B456", "Brake Pad", 30L, "A-01-01-03")
         );
 
         mockInboundPutAwayList = Arrays.asList(

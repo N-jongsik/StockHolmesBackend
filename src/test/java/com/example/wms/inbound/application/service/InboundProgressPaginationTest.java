@@ -5,7 +5,7 @@ import com.example.wms.inbound.adapter.in.dto.response.InboundProgressResDto;
 import com.example.wms.inbound.application.port.out.InboundRetrievalPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -20,7 +20,6 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 @ExtendWith(MockitoExtension.class)
 public class InboundProgressPaginationTest {
