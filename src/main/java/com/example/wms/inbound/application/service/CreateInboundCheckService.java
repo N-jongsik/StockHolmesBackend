@@ -91,11 +91,12 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
                 // bin의 amount가 넣으려는 lot 개수보다 부족할 경우
                 if (binIds.size() < lotCount) {
                     for (int i = 0; i< binIds.size(); i++) {
-                        String lotBinCode = generateFullLotBinCode("F-01", i);
+                        String lotNumber = makeNumber("LO");
+
                         Lot lot = Lot.builder()
                                 .productId(productId)
                                 .binId(binIds.get(i))
-                                .lotNumber(lotBinCode)
+                                .lotNumber(lotNumber)
                                 .status(LotStatus.입고)
                                 .inboundId(inboundId)
                                 .build();
@@ -106,11 +107,12 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
 
                 else {
                     for (int i = 0; i < lotCount; i++) {
-                        String lotBinCode = generateFullLotBinCode(locationBinCode, i);
+                        String lotNumber = makeNumber("LO");
+
                         Lot lot = Lot.builder()
                                 .productId(productId)
                                 .binId(binIds.get(i))
-                                .lotNumber(lotBinCode)
+                                .lotNumber(lotNumber)
                                 .status(LotStatus.입고)
                                 .inboundId(inboundId)
                                 .build();
@@ -124,25 +126,10 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
     }
 
 
-    private String generateFullLotBinCode(String locationBinCode, int index) {
-
-        if (locationBinCode.matches("[A-F]-\\d{2}")) {
-            return locationBinCode + "-" + String.format("%02d", index+1) + "-" + String.format("%02d", index+1);
-        }
-
-        else if (locationBinCode.matches("[A-F]-\\d{2}-\\d{2}")) {
-            return locationBinCode + "-" + String.format("%02d", index+1);
-        }
-        return locationBinCode;
-    }
-
-
     private String makeNumber(String format) {
         String currentDate = LocalDate.now().toString().replace("-","");
         String number = switch (format) {
-            case "IS" -> assignInboundNumberPort.findMaxISNumber();
-            case "IC" -> assignInboundNumberPort.findMaxICNumber();
-            case "PA" -> assignInboundNumberPort.findMaxPANumber();
+            case "LO" -> assignInboundNumberPort.findMaxLONumber();
             default -> null;
         };
 
@@ -155,6 +142,4 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
 
         return format + currentDate + nextNumber;
     }
-
-
 }

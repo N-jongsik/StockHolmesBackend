@@ -4,5 +4,5 @@ public interface AssignInboundNumberPort {
     String findMaxISNumber();
     String findMaxICNumber();
     String findMaxPANumber();
-
+    String findMaxLONumber();
 }

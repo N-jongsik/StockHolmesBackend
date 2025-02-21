@@ -66,6 +66,7 @@ public class GetInboundPutAwayService implements GetInboundPutAwayUseCase {
                 List<LotResDto> convertedProducts = dto.getLotList().stream()
                         .map(product -> LotResDto.builder()
                                 .lotId(product.getLotId())
+                                .lotNumber(product.getLotNumber())
                                 .productId(product.getProductId())
                                 .productCode(product.getProductCode())
                                 .productName(product.getProductName())
