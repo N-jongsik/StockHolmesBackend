@@ -13,4 +13,5 @@ public interface BinPort {
     void incrementBinAmount(Long binId, Integer lotCount);
     Long findExactBinIdByBinCode(String binCode);
     List<Long> findBinIdsByBinPrefix(String binCode);
+    String findBinCode(Long binId);
 }
