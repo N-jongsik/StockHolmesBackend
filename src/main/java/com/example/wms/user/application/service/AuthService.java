@@ -16,8 +16,13 @@ import com.example.wms.user.application.port.out.AuthPort;
 import com.example.wms.user.application.port.out.UserQueryPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
 
 import static com.example.wms.infrastructure.security.util.SecurityUtils.getLoginUserStaffNumber;
 import static com.example.wms.user.application.domain.enums.UserExceptionMessage.DUPLICATED_STAFF_NUMBER;
@@ -68,12 +73,19 @@ public class AuthService implements AuthUseCase {
     public AuthenticatedResDto login(LoginReqDto loginReqDto) {
         TokenInfo tokenInfo = jwtTokenService.generateAndSaveTokens(loginReqDto.getStaffNumber(), loginReqDto.getPassword());
 
-        log.info("[로그인 성공] 사번: {}", loginReqDto.getStaffNumber());
-
         User user = userQueryPort.findByStaffNumber(loginReqDto.getStaffNumber())
                 .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND.getMessage()));
+
+        // SecurityContextHolder에 인증 정보 저장
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                user.getStaffNumber(), null, Collections.singletonList(new SimpleGrantedAuthority(user.getUserRole().name()))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
         logoutAccessTokenRedisRepository.deleteByStaffNumber(loginReqDto.getStaffNumber());
         refreshTokenService.saveRefreshToken(user.getStaffNumber(), tokenInfo.getRefreshToken());
+
+        log.info("[로그인 성공] 사번: {}", loginReqDto.getStaffNumber());
 
         return AuthenticatedResDto.builder()
                 .userInfo(UserInfoResDto.entityToResDto(user))

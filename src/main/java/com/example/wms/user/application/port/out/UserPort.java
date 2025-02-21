@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface UserPort {
     void deleteUser(String staffNumber); //회원 탈퇴
+
     User findByStaffNumber(String staffNumber); //정보조회
     List<User> findAllUsers(int limit, int offset);
 }

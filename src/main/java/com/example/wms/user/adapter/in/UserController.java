@@ -41,19 +41,27 @@ public class UserController {
     /**
      * 회원 정보 조회
      */
-    @Operation(summary = "회원 정보 조회", description = "회원 정보를 조회합니다.")
-    @GetMapping
+    @Operation(summary = "로그인한 회원 정보 조회", description = "로그인한 회원 정보를 조회합니다.")
+    @GetMapping("")
     public ResponseEntity<UserInfoResDto> findUser() {
         return ResponseEntity.ok().body(userUseCase.findUser());
     }
 
+    /**
+     * 사번으로 회원 정보 조회
+     */
+    @Operation(summary = "사번으로 회원 정보 조회", description = "사번으로 회원 정보를 조회합니다.")
+    @GetMapping("/staff-number")
+    public ResponseEntity<UserInfoResDto> findUserByStaffNumber(@RequestParam String staffNumber) {
+        return ResponseEntity.ok().body(userUseCase.findUserByStaffNumber(staffNumber));
+    }
 
     /**
      * 모든 회원 정보 조회_
      */
-    @Operation(summary = "모든 회원 정보 조회", description = "20명씩 페이지네이션한 회원 정보를 조회합니다.")
+    @Operation(summary = "모든 회원 정보 조회", description = "10명씩 페이지네이션한 회원 정보를 조회합니다.")
     @GetMapping("/list")
     public List<UserInfoResDto> findAllUsers(@RequestParam int page) {
-        return userUseCase.findAllUsers(20, page);
+        return userUseCase.findAllUsers(10, page);
     }
 }
