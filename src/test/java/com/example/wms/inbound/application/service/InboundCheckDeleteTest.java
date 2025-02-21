@@ -1,6 +1,7 @@
 package com.example.wms.inbound.application.service;
 
 import com.example.wms.inbound.application.domain.Inbound;
+import com.example.wms.inbound.application.port.in.DeleteInboundCheckUseCase;
 import com.example.wms.inbound.application.port.out.InboundPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,14 +13,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class InboundCheckDeleteTest {
 
     @InjectMocks
-    private InboundService inboundService;
+    private DeleteInboundCheckUseCase deleteInboundCheckService;
 
     @Mock
     private InboundPort inboundPort;
@@ -40,14 +40,11 @@ public class InboundCheckDeleteTest {
 
         when(inboundPort.findById(inboundId)).thenReturn(inbound);
 
-        inboundService.deleteInboundCheck(inboundId);
+        deleteInboundCheckService.deleteInboundCheck(inboundId);
         inbound.setInboundStatus("입하예정");
         assertEquals("입하예정",inbound.getInboundStatus());
 
         verify(inboundPort, times(1)).updateIC(eq(inboundId), eq(null), eq(null), eq("입하예정"));
-
-
-
 
     }
 }

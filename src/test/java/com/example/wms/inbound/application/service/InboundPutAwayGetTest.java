@@ -1,6 +1,5 @@
 package com.example.wms.inbound.application.service;
 
-import com.example.wms.inbound.adapter.in.dto.response.InboundProductDto;
 import com.example.wms.inbound.adapter.in.dto.response.InboundPutAwayResDto;
 import com.example.wms.inbound.adapter.in.dto.response.LotResDto;
 import com.example.wms.inbound.application.port.out.InboundRetrievalPort;
@@ -32,7 +31,7 @@ public class InboundPutAwayGetTest {
     InboundRetrievalPort inboundRetrievalPort;
 
     @InjectMocks
-    InboundService inboundService;
+    GetInboundPutAwayService inboundPutAwayService;
 
     private List<InboundPutAwayResDto> mockInboundPutAwayList;
 
@@ -68,7 +67,7 @@ public class InboundPutAwayGetTest {
                 .thenReturn(mockInboundPutAwayList.size());
 
         // when
-        Page<InboundPutAwayResDto> result = inboundService.getFilteredPutAway(inboundPutAwayNumber, startDate, endDate, pageable);
+        Page<InboundPutAwayResDto> result = inboundPutAwayService.getFilteredPutAway(inboundPutAwayNumber, startDate, endDate, pageable);
 
         // then
         assertThat(result).isNotNull();

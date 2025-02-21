@@ -29,7 +29,7 @@ public class InboundProgressPaginationTest {
     InboundRetrievalPort inboundRetrievalPort;
 
     @InjectMocks
-    InboundService inboundService;
+    GetInboundByProgressService getInboundByProgressService;
 
     private List<InboundProgressDetailDto> mockInboundList;
 
@@ -51,7 +51,7 @@ public class InboundProgressPaginationTest {
         when(inboundRetrievalPort.findAllInboundProgressWithPagination(startDate, endDate, pageable))
                 .thenReturn(mockInboundList);
 
-        Page<InboundProgressResDto> result = inboundService.getAllInboundProgressWithPagination(startDate, endDate, pageable);
+        Page<InboundProgressResDto> result = getInboundByProgressService.getAllInboundProgressWithPagination(startDate, endDate, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);

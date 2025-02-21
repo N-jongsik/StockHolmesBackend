@@ -28,7 +28,7 @@ import static org.mockito.Mockito.*;
 public class InboundCheckCreateTest {
 
     @InjectMocks
-    private InboundService inboundService;
+    private CreateInboundCheckService createInboundCheckService;
 
     @Mock
     private InboundPort inboundPort;
@@ -106,7 +106,7 @@ public class InboundCheckCreateTest {
         orderProduct2.setDefectiveCount(20L);
 
         // when
-        inboundService.createInboundCheck(1L, inboundCheckReqDto);
+        createInboundCheckService.createInboundCheck(1L, inboundCheckReqDto);
 
         // then
         verify(inboundPort, times(2)).updateIC(eq(1L), any(LocalDate.class), any(String.class), any(String.class));

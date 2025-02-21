@@ -42,10 +42,7 @@ public class InboundAdapter implements InboundPort {
         return inboundMapper.findOrderIdByScheduleNumber(scheduleNumber);
     }
 
-    @Override
-    public void updateInboundCheck(String scheduleNumber, String checkNumber) {
-        inboundMapper.updateInboundWorkerCheck(scheduleNumber, checkNumber);
-    }
+
 
     @Override
     public void updateOrderProduct(Long orderId, Long productId, Boolean isDefective) {

@@ -32,7 +32,7 @@ public class InboundProductPaginationTest {
     InboundRetrievalPort inboundRetrievalPort;
 
     @InjectMocks
-    InboundService inboundService;
+    GetAllInboundByProductService getAllInboundByProductService;
 
     private List<ProductInboundResDto> mockProductInboundList;
 
@@ -68,7 +68,7 @@ public class InboundProductPaginationTest {
                 .thenReturn(mockProductInboundList);
 
         // when
-        Page<ProductInboundResDto> result = inboundService.getAllInboundByProductWithPagination(startDate, endDate, pageable);
+        Page<ProductInboundResDto> result = getAllInboundByProductService.getAllInboundByProductWithPagination(startDate, endDate, pageable);
 
         // then
         assertThat(result).isNotNull();

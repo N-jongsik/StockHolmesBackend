@@ -16,7 +16,6 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class GetApprovedOrderService implements GetApprovedOrderUseCase {
 
-    private final InboundUseCase inboundService;
     private final InboundPort inboundPort;
     private final AssignInboundNumberPort assignInboundNumberPort;
 

@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 public class InboundCreateTest {
 
     @InjectMocks
-    private InboundService inboundService;
+    private CreateInboundPlanService inboundPlanService;
 
     @Mock
     private InboundPort inboundPort;
@@ -41,7 +41,7 @@ public class InboundCreateTest {
                 .inboundDate(LocalDate.of(2025,2,14))
                 .build();
 
-        inboundService.createInboundSchedule(order);
+        inboundPlanService.createInboundSchedule(order);
 
         verify(inboundPort, times(1)).save(any(Inbound.class));
     }
@@ -59,7 +59,7 @@ public class InboundCreateTest {
                 .orderDate(LocalDateTime.now())
                 .build();
 
-        inboundService.createInboundPlan(inboundReqDto);
+        inboundPlanService.createInboundPlan(inboundReqDto);
 
         verify(inboundPort, times(1)).save(any(Inbound.class));
     }
