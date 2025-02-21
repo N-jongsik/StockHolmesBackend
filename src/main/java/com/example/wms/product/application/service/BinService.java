@@ -82,6 +82,7 @@ public class BinService implements BinUseCase {
 
         if (locationBinCode.split("-").length == 4) {
             Long binId = binPort.findExactBinIdByBinCode(locationBinCode);
+
             binIds = (binId != null) ? List.of(binId) : List.of();
         } else {
             binIds = binPort.findBinIdsByBinPrefix(locationBinCode);
