@@ -36,6 +36,12 @@ public interface UserMapper {
 
     // 역할별 마지막 사번 조회
     String findLastStaffNumberByRole(@Param("prefix") String prefix);
+    // 사용자 권한 변경
+    void updateUserRole(@Param("staffNumber") String staffNumber, @Param("newRole") String newRole);
 
+    // 사용자 활성 상태 변경
+    void updateUserActive(@Param("staffNumber") String staffNumber, @Param("isActive") boolean isActive);
 
+    // 비밀번호 변경
+    void updateUserPassword(@Param("staffNumber") String staffNumber, @Param("newPassword") String newPassword);
 }

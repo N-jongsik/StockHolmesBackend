@@ -11,15 +11,14 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class UserAdapter implements UserPort {
-
     private final UserMapper userMapper;
     private final RedisTemplate<String, Object> redisTemplate;
-
     private static final String REFRESH_TOKEN_KEY_PREFIX = "refresh_token:";
 
     @Override
@@ -34,9 +33,8 @@ public class UserAdapter implements UserPort {
     }
 
     @Override
-    public User findByStaffNumber(String staffNumber) {
-        return userMapper.findByStaffNumber(staffNumber)
-                .orElseThrow(() -> new InvalidSignUpException(UserExceptionMessage.USER_NOT_FOUND.getMessage()));
+    public Optional<User> findByStaffNumber(String staffNumber) {
+        return userMapper.findByStaffNumber(staffNumber);
     }
 
     @Override
@@ -44,5 +42,13 @@ public class UserAdapter implements UserPort {
         return userMapper.findAllUsers(limit, offset);
     }
 
-    // 활성화/비활성화 등록
+    @Override
+    public boolean existsById(Long userId) {
+        return userMapper.existsById(userId);
+    }
+
+    @Override
+    public boolean existsByStaffNumber(String staffNumber) {
+        return userMapper.existsByStaffNumber(staffNumber);
+    }
 }

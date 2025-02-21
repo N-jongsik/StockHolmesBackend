@@ -23,7 +23,6 @@ import static com.example.wms.user.application.domain.enums.UserExceptionMessage
 public class UserService implements UserUseCase {
 
     private final AuthPort authPort;
-    private final UserQueryPort userQueryPort;
     private final JwtTokenPort jwtTokenPort;
     private final RefreshTokenPort refreshTokenPort;
     private final UserPort userPort;
@@ -31,7 +30,7 @@ public class UserService implements UserUseCase {
     public String generateStaffNumber(UserRole userRole) {
         String prefix = getRolePrefix(userRole);
 
-        String lastStaffNumber = userQueryPort.findLastStaffNumberByRole(prefix);
+        String lastStaffNumber = authPort.findLastStaffNumberByRole(prefix);
 
         // lastStaffNumber가 없으면 처음 생성되는 사번으로 처리
         int nextNumber = 1;
@@ -66,7 +65,8 @@ public class UserService implements UserUseCase {
     @Override
     public void deleteUser() {
         String staffNumber = getLoginUserStaffNumber();
-        User user = userPort.findByStaffNumber(staffNumber);
+        User user = userPort.findByStaffNumber(staffNumber)
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND.getMessage()));
 
         log.debug("[회원 탈퇴] 탈퇴 요청. 로그인 유저 : {}", user.getStaffNumber());
 
@@ -78,24 +78,29 @@ public class UserService implements UserUseCase {
     public UserInfoResDto findUser() {
         String staffNumber = getLoginUserStaffNumber();
 
-        return UserInfoResDto.entityToResDto(userPort.findByStaffNumber(staffNumber));
+        return UserInfoResDto.entityToResDto(
+                userPort.findByStaffNumber(staffNumber)
+                        .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND.getMessage()))
+        );
     }
 
     @Override
     public UserInfoResDto findUserByStaffNumber(String staffNumber) {
         log.info("[회원 조회] 사번으로 회원 조회 요청: {}", staffNumber);
-        User user = userPort.findByStaffNumber(staffNumber);
-        if (user == null) {
-            log.warn("[회원 조회] 사번에 해당하는 회원을 찾을 수 없습니다: {}", staffNumber);
-            throw new UserNotFoundException(USER_NOT_FOUND.getMessage());
-        }
-        log.info("[회원 조회] 사번으로 회원 조회 성공: {}", staffNumber);
-        return UserInfoResDto.entityToResDto(user);
+
+        return userPort.findByStaffNumber(staffNumber)
+                .map(user -> {
+                    log.info("[회원 조회] 사번으로 회원 조회 성공: {}", staffNumber);
+                    return UserInfoResDto.entityToResDto(user);
+                })
+                .orElseThrow(() -> {
+                    log.warn("[회원 조회] 사번에 해당하는 회원을 찾을 수 없습니다: {}", staffNumber);
+                    return new UserNotFoundException(USER_NOT_FOUND.getMessage());
+                });
     }
 
     @Override
     public List<UserInfoResDto> findAllUsers(int pageSize, int page) {
-
         if (page <= 0) {
             page = 1;
         }

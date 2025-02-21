@@ -57,4 +57,28 @@
     <select id="findLastStaffNumberByRole" parameterType="String" resultType="String">
         SELECT staff_number FROM users WHERE staff_number LIKE CONCAT(#{prefix}, '%') ORDER BY staff_number DESC LIMIT 1
     </select>
+
+    <!-- 사용자 권한 변경 -->
+    <update id="updateUserRole">
+        UPDATE users
+        SET user_role = #{newRole},
+            updated_at = NOW()
+        WHERE staff_number = #{staffNumber}
+    </update>
+
+    <!-- 사용자 활성 상태 변경 -->
+    <update id="updateUserActive">
+        UPDATE users
+        SET is_active = #{isActive},
+            updated_at = NOW()
+        WHERE staff_number = #{staffNumber}
+    </update>
+
+    <!-- 비밀번호 변경 -->
+    <update id="updateUserPassword">
+        UPDATE users
+        SET password = #{newPassword},
+            updated_at = NOW()
+        WHERE staff_number = #{staffNumber}
+    </update>
 </mapper>

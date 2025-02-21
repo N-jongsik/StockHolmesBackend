@@ -101,7 +101,8 @@ public class OrderController {
             @ParameterObject Pageable pageable
     ){
         String staffNumber =  getLoginUserStaffNumber();
-        User user = userPort.findByStaffNumber(staffNumber);
+        User user = userPort.findByStaffNumber(staffNumber)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         return ResponseEntity.ok(getOrderUseCase.getFilteredOrderWithSupplier(user.getSupplierId(),orderNumber, startDate, endDate, pageable));
     }
