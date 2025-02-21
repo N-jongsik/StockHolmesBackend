@@ -28,7 +28,7 @@ public class InventoryService implements InventoryUseCase {
         Map<String, String> fieldMapping = new HashMap<>();
         fieldMapping.put("productCount", "available_quantity"); // 명시적으로 매핑
 
-        Pageable safePageable = PageableUtils.convertToSafePageableStrict(pageable, ProductThresholdDto.class, fieldMapping);
+        Pageable safePageable = PageableUtils.convertToSafePageableStrict(pageable, ProductInfoDto.class, fieldMapping);
 
         List<ProductInfoDto> productInventoryList = inventoryPort.findAllProductInventories(productCode, safePageable);
         long count = inventoryPort.countAllProductInventories(productCode);
@@ -39,10 +39,7 @@ public class InventoryService implements InventoryUseCase {
     @Override
     @Transactional(readOnly = true)
     public Page<ProductThresholdDto> getAllProductThresholds(String productCode, Pageable pageable) {
-        Map<String, String> fieldMapping = new HashMap<>();
-        fieldMapping.put("productCount", "available_quantity");
-
-        Pageable safePageable = PageableUtils.convertToSafePageableStrict(pageable, ProductThresholdDto.class, fieldMapping);
+        Pageable safePageable = PageableUtils.convertToSafePageableStrict(pageable, ProductThresholdDto.class);
 
         List<ProductThresholdDto> productThresholdDtoList = inventoryPort.findAllProductThresholds(productCode, safePageable);
         long count = inventoryPort.countAllProductInventories(productCode);

@@ -17,7 +17,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -140,7 +142,7 @@ public class ProductService implements ProductUseCase {
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> getAllProducts(String productCode, Pageable pageable) {
         // 외부에서 받은 Pageable을 안전하게 변환 (유효하지 않은 정렬 조건이 있으면 예외 발생)
-        Pageable safePageable = PageableUtils.convertToSafePageableStrict(pageable, Product.class);
+        Pageable safePageable = PageableUtils.convertToSafePageableStrict(pageable, ProductResponseDto.class);
 
         // safePageable을 Mapper에 전달해서 DB 쿼리를 실행
         // (여기서는 Mapper의 반환타입이나 사용법에 따라 적절히 변환)
