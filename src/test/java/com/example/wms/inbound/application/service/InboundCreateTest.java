@@ -6,12 +6,11 @@ import com.example.wms.inbound.application.port.out.AssignInboundNumberPort;
 import com.example.wms.inbound.application.port.out.InboundPort;
 import com.example.wms.order.application.domain.Order;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
+import org.junit.Test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import static org.mockito.ArgumentMatchers.any;

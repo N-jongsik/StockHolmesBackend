@@ -5,7 +5,7 @@ import com.example.wms.inbound.adapter.in.dto.response.ProductInboundResDto;
 import com.example.wms.inbound.application.port.out.InboundRetrievalPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
