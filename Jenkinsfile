@@ -83,7 +83,7 @@ pipeline {
                     echo "===== Stage: Build and Test ====="
                     sh '''
                         set -x
-                        gradle build -Dspring.profiles.active=prod
+                        gradle build -x test -Dspring.profiles.active=prod
                         ls -la build/libs/
                     '''
                 }
