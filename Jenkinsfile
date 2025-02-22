@@ -130,21 +130,17 @@ pipeline {
                     echo "Deploying to ${deployEnv} environment"
 
                     try {
-                        // Stop the target environment's containers first
                         sh """
                             ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
                                 cd /home/ec2-user/backend
                                 docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml down || true
 
-                                # Clean up existing containers
                                 docker ps -a | grep "${port}" | grep "Exited" | awk "{print \\\$1}" | xargs -r docker rm
                             '
                         """
 
-                        // Transfer docker image
                         sh "docker save ${DOCKER_TAG} | ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} 'docker load'"
 
-                        // Start new containers
                         sh """
                             ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
                                 cd /home/ec2-user/backend
@@ -171,7 +167,6 @@ pipeline {
                         ).trim()
 
                         if (healthCheck == "success") {
-                            // Update nginx configuration
                             sh """
                                 ssh -o StrictHostKeyChecking=no ${NGINX_SERVER} "
                                     sudo sed -i 's/set \\\$deployment_env \\\".*\\\";/set \\\$deployment_env \\\"${deployEnv}\\\";/' /etc/nginx/conf.d/backend.conf
@@ -180,7 +175,6 @@ pipeline {
                                 "
                             """
 
-]
                             if (currentEnv != 'none' && currentEnv != deployEnv) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
@@ -190,7 +184,6 @@ pipeline {
                                 """
                             }
                         } else {
-]
                             sh """
                                 ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
                                     cd /home/ec2-user/backend
@@ -201,7 +194,6 @@ pipeline {
                         }
                     } catch (Exception e) {
                         echo "Deployment failed: ${e.message}"
-                        // Clean up failed deployment
                         sh """
                             ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
                                 cd /home/ec2-user/backend
@@ -225,6 +217,7 @@ pipeline {
             }
         }
     }
+
     post {
         success {
             slackSend (
