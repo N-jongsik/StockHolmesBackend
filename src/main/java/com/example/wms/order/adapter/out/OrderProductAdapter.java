@@ -28,4 +28,9 @@ public class OrderProductAdapter implements OrderProductPort {
     public OrderProduct findByOrderId(Long orderId, Long productId) {
        return  orderProductMapper.findByOrderId(orderId, productId);
     }
+
+    @Override
+    public void update(Long orderProductId, Long defectiveCount) {
+        orderProductMapper.update(orderProductId, defectiveCount);
+    }
 }
