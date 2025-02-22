@@ -42,7 +42,7 @@ public class InboundProgressPaginationTest {
 
     @Test
     @DisplayName("모든 입고진행별 입고 현황을 조회하는 테스트입니다.")
-    void testGetAllInboundProgressWithPagination() {
+    public void testGetAllInboundProgressWithPagination() {
         LocalDate startDate = LocalDate.of(2025, 2, 15);
         LocalDate endDate = LocalDate.of(2025, 2, 18);
         Pageable pageable = PageRequest.of(0, 10);

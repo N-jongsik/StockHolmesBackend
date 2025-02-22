@@ -11,7 +11,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkerInboundResDto {
+public class WorkerInboundCheckResDto {
+
     private Long inboundId;
-    private List<WorkerProductResDto> productList;
+    private String checkNumber;
+    private List<WorkerInboundCheckLotResDto> lotList;
 }
