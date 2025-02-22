@@ -92,7 +92,7 @@ public class CreateOutboundAssignService implements CreateOutboundAssignUseCase 
         Outbound outbound = createOrUpdateOutbound(outboundPlanId, existingOutbound);
 
         // 저장된 Outbound 정보로 Lot 처리 로직 수행
-        processLotsInternal(worker, outboundPlanProducts, outbound.getOutboundId());
+        processLotsInternal(worker, outboundPlanProducts, outbound.getOutboundId(), outboundPlanId);
 
         // outboundPlan status 바꿔주기
         OutboundPlan outboundPlan = getOutboundAssignPort.findOutboundPlanByOutboundPlanId(outboundPlanId);
@@ -147,7 +147,7 @@ public class CreateOutboundAssignService implements CreateOutboundAssignUseCase 
         }
     }
 
-    private List<OutboundLotDTO> processLotsInternal(String worker, List<OutboundPlanProduct> outboundPlanProducts, Long outboundId) {
+    private List<OutboundLotDTO> processLotsInternal(String worker, List<OutboundPlanProduct> outboundPlanProducts, Long outboundId, Long outboundPlanId) {
         List<OutboundLotDTO.LotLocation> allLotLocations = new ArrayList<>();
         Outbound outbound = getOutboundAssignPort.findOutboundByOutboundId(outboundId);
 
@@ -213,6 +213,7 @@ public class CreateOutboundAssignService implements CreateOutboundAssignUseCase 
         // 최종적으로 정렬된 위치 정보가 포함된 단일 DTO 반환
         return Collections.singletonList(OutboundLotDTO.builder()
                 .outboundId(outboundId)
+                .outboundPlanId(outboundPlanId)
                 .outboundAssignNumber(outbound.getOutboundAssignNumber())
                 .lotLocations(sortedLotLocations)
                 .build());
@@ -247,7 +248,7 @@ public class CreateOutboundAssignService implements CreateOutboundAssignUseCase 
             System.out.println("🌭 출고 계획 상품 조회" + planProducts);
 
             // 로트 처리 수행
-            List<OutboundLotDTO> outboundLots = processLotsInternal(worker, planProducts, outboundId);
+            List<OutboundLotDTO> outboundLots = processLotsInternal(worker, planProducts, outboundId, outboundPlanId);
             allResults.addAll(outboundLots);
         }
 

@@ -129,7 +129,7 @@
         WHERE outbound_id = #{outboundId}
     </select>
 
-    <select id="findOutboundsByScheduleDate">
+    <select id="findOutboundsByScheduleDate" resultType="com.example.wms.outbound.application.domain.Outbound">
         SELECT
             o.outbound_id,
             o.outbound_plan_id,
