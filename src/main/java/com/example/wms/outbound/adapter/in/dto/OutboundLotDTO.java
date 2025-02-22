@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class OutboundLotDTO {
     private Long outboundId;
+    private Long outboundPlanId;
     private String outboundAssignNumber;
     private List<LotLocation> lotLocations;
 
