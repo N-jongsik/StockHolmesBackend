@@ -38,7 +38,6 @@ public class OutboundPlanController {
     @Operation(summary = "출고 예정 생성하기", description = "outboundPlan & outboundPlanProduct 생성됨")
     public ResponseEntity<Void> createOutbound(@RequestBody OutboundPlanRequestDto outboundPlanRequestDto) {
         Long outboundPlanId = createOutboundPlanUseCase.createOutbound(outboundPlanRequestDto);
-        System.out.println("😶‍🌫️ 출고출고출고"+outboundPlanId);
         Notification notification = createOutboundPlanProductUseCase.createOutboundPlanProduct(outboundPlanId,outboundPlanRequestDto.getProductList());
         // UserRole 가져오기
         notificationUseCase.send(UserRole.ROLE_ADMIN, notification);
