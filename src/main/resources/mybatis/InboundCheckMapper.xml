@@ -72,7 +72,7 @@
         ) b
         INNER JOIN order_product op ON b.order_id = op.order_id
         INNER JOIN product p ON op.product_id = p.product_id
-        INNER JOIN lot l ON p.product_id = l.product_id
+        INNER JOIN lot l ON p.product_id = l.product_id AND l.inbound_id = b.inbound_id
         INNER JOIN bin bb ON l.bin_id = bb.bin_id
         INNER JOIN supplier s ON b.supplier_id = s.supplier_id
     </select>
