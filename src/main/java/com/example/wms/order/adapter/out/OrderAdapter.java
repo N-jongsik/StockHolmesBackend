@@ -1,5 +1,6 @@
 package com.example.wms.order.adapter.out;
 
+import com.example.wms.inbound.application.domain.Inbound;
 import com.example.wms.infrastructure.exception.NotFoundException;
 import com.example.wms.infrastructure.mapper.*;
 import com.example.wms.order.application.domain.Order;
@@ -57,8 +58,29 @@ public class OrderAdapter implements OrderPort {
         return returnOrderId;
     }
 
+    @Override
+    public Long createOrderWithSupplier(Long supplierId, Long inboundId) {
 
 
+        Order order = orderMapper.findOrderById(inboundMapper.findById(inboundId).getOrderId());
+
+        String orderNumber = generateOrderNumber();
+
+        Order newOrder = Order.builder()
+                .dailyPlanId(order.getDailyPlanId())
+                .supplierId(supplierId)
+                .orderNumber(orderNumber)
+                .orderDate(LocalDate.now())
+                .isApproved(true)
+                .isReturnOrder(true)
+                .orderStatus("처리중")
+                .inboundDate(LocalDate.now())
+                .build();
+
+        orderMapper.createOrder(newOrder);
+        return newOrder.getOrderId();
+
+    }
 
     private String generateOrderNumber() {
         String prefix = "OR" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
