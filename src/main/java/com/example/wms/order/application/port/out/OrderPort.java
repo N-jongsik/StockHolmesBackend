@@ -4,4 +4,5 @@ import com.example.wms.order.application.domain.Order;
 
 public interface OrderPort {
     Long createOrder(Long productId, Long inboundId, Long defectiveCount);
+    Long createOrderWithSupplier(Long supplierId, Long inboundId);
 }

@@ -17,12 +17,17 @@ import com.example.wms.product.application.domain.Product;
 import com.example.wms.product.application.port.in.BinUseCase;
 import com.example.wms.product.application.port.out.LotPort;
 import com.example.wms.product.application.port.out.ProductPort;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -48,93 +53,104 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
             throw new NotFoundException("inbound not found with id " + inboundId);
         }
 
-                    for (InboundCheckedProductReqDto checkedProduct : inboundCheckReqDto.getCheckedProductList()) { // 품목별 검사
+        Map<Long, List<DefectiveProductInfo>> supplierToDefectiveProducts = new HashMap<>();
 
+        for (InboundCheckedProductReqDto checkedProduct : inboundCheckReqDto.getCheckedProductList()) {
 
-                        Long productId = checkedProduct.getProductId();
-                        Integer defectiveCount = (checkedProduct.getDefectiveCount().intValue());
-                        Product product = productPort.findById(productId);
+            Long productId = checkedProduct.getProductId();
+            Integer defectiveCount = checkedProduct.getDefectiveCount().intValue();
+            Product product = productPort.findById(productId);
 
+            if (product == null) {
+                throw new NotFoundException("product not found with id : " + productId);
+            }
 
-                        if (product == null) {
-                            throw new NotFoundException("product not found with id :" + productId);
-                        }
+            OrderProduct existingOrderProduct = orderProductPort.findByOrderId(inbound.getOrderId(), productId);
+            orderProductPort.update(existingOrderProduct.getOrderProductId(), (long) defectiveCount);
+            int putAwayCount = (existingOrderProduct.getProductCount() - defectiveCount) / product.getLotUnit();
+            handleLotCreation(productId, inboundId, putAwayCount);
 
-                        long countLongValue = defectiveCount;
+            if (defectiveCount > 0) {
+                Long supplierId = product.getSupplierId();
+                DefectiveProductInfo defectiveInfo = new DefectiveProductInfo(
+                        productId,
+                        defectiveCount,
+                        product.getProductName()
+                );
 
-                        if (defectiveCount > 0) { // 계산한 불량 개수
+                supplierToDefectiveProducts.computeIfAbsent(supplierId, k -> new ArrayList<>())
+                        .add(defectiveInfo);
+            }
+        }
 
-                            Long orderId = orderPort.createOrder(productId, inboundId, countLongValue);
+        for (Map.Entry<Long, List<DefectiveProductInfo>> entry : supplierToDefectiveProducts.entrySet()) {
+            Long supplierId = entry.getKey();
+            List<DefectiveProductInfo> defectiveProducts = entry.getValue();
 
-                            OrderProduct orderProduct = OrderProduct.builder()
-                                    .orderId(orderId)
-                                    .productCount(defectiveCount)
-                                    .productId(productId)
-                                    .productName(product.getProductName())
-                                    .isDefective(true)
-                                    .defectiveCount(0L)
-                                    .build();
-                            orderProductPort.save(orderProduct);
-                        }
+            Long orderId = orderPort.createOrderWithSupplier(supplierId, inboundId);
 
-                        OrderProduct orderProduct = orderProductPort.findByOrderId(inbound.getOrderId(), productId);
-                        orderProductPort.update(orderProduct.getOrderProductId(), (long)defectiveCount);
-                        int putAwayCount = (orderProduct.getProductCount() - defectiveCount) / product.getLotUnit();
-                        String locationBinCode = productPort.getLocationBinCode(productId);
+            for (DefectiveProductInfo defectiveInfo : defectiveProducts) {
+                OrderProduct newOrderProduct = OrderProduct.builder()
+                        .orderId(orderId)
+                        .productCount(defectiveInfo.defectiveCount)
+                        .productId(defectiveInfo.productId)
+                        .productName(defectiveInfo.productName)
+                        .isDefective(true)
+                        .defectiveCount(0L)
+                        .build();
+                orderProductPort.save(newOrderProduct);
+            }
+        }
 
+        inboundPort.updateIC(inbound.getInboundId(), LocalDate.now(), makeNumber("IC"), "입하검사");
 
-                        List<Long> binIds = binUseCase.assignBinIdsToLots(locationBinCode, putAwayCount);
+    }
 
-                        //putAwayCount만큼 lot생성
-                        if (binIds.size() < putAwayCount) {
-                            for (int i = 0; i< binIds.size(); i++) {
-                                String lotNumber = makeNumber("LO");
+    @Getter
+    @AllArgsConstructor
+    private static class DefectiveProductInfo {
+        private Long productId;
+        private Integer defectiveCount;
+        private String productName;
+    }
 
-                                Lot lot = Lot.builder()
-                                        .productId(productId)
-                                        .binId(binIds.get(i))
-                                        .lotNumber(lotNumber)
-                                        .status(LotStatus.입고)
-                                        .inboundId(inboundId)
-                                        .build();
-                                lotPort.insertLot(lot);
+    private void handleLotCreation(Long productId, Long inboundId, int putAwayCount) {
+        String locationBinCode = productPort.getLocationBinCode(productId);
+        List<Long> binIds = binUseCase.assignBinIdsToLots(locationBinCode, putAwayCount);
 
-                            }
-                            int totalSize = putAwayCount - binIds.size();
-
-                            for (int j = 0; j < totalSize; j++) {
-                                String lotNumber2 = makeNumber("LO");
-
-                                Lot lot = Lot.builder()
-                                        .productId(productId)
-                                        .binId(100L+j)
-                                        .lotNumber(lotNumber2)
-                                        .status(LotStatus.입고)
-                                        .inboundId(inboundId)
-                                        .build();
-                                lotPort.insertLot(lot);
-                            }
-                        }
-
-                        else {
-                            for (int i = 0; i < putAwayCount; i++) {
-                                String lotNumber = makeNumber("LO");
-
-                                Lot lot = Lot.builder()
-                                        .productId(productId)
-                                        .binId(binIds.get(i))
-                                        .lotNumber(lotNumber)
-                                        .status(LotStatus.입고)
-                                        .inboundId(inboundId)
-                                        .build();
-                                lotPort.insertLot(lot);
-                            }
-                        }
-
-                        inboundPort.updateIC(inbound.getInboundId(), LocalDate.now(), makeNumber("IC"), "입하검사");
+        if (binIds.size() < putAwayCount) {
+            createLotsWithAssignedBins(productId, inboundId, binIds);
+            createLotsWithDefaultBins(productId, inboundId, putAwayCount - binIds.size());
+        } else {
+            createLotsWithAssignedBins(productId, inboundId, binIds.subList(0, putAwayCount));
         }
     }
 
+    private void createLotsWithAssignedBins(Long productId, Long inboundId, List<Long> binIds) {
+        for (Long binId : binIds) {
+            Lot lot = Lot.builder()
+                    .productId(productId)
+                    .binId(binId)
+                    .lotNumber(makeNumber("LO"))
+                    .status(LotStatus.입고)
+                    .inboundId(inboundId)
+                    .build();
+            lotPort.insertLot(lot);
+        }
+    }
+
+    private void createLotsWithDefaultBins(Long productId, Long inboundId, int count) {
+        for (int i = 0; i < count; i++) {
+            Lot lot = Lot.builder()
+                    .productId(productId)
+                    .binId(100L + i)
+                    .lotNumber(makeNumber("LO"))
+                    .status(LotStatus.입고)
+                    .inboundId(inboundId)
+                    .build();
+            lotPort.insertLot(lot);
+        }
+    }
 
     private String makeNumber(String format) {
         String currentDate = LocalDate.now().toString().replace("-","");
