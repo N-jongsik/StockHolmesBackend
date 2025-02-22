@@ -4,6 +4,5 @@ import lombok.Data;
 
 @Data
 public class TodayCountDto {
-    Integer inboundCount;
-    Integer outboundCount;
+    private Integer data;
 }

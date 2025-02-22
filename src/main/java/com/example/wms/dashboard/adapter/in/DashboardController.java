@@ -47,21 +47,37 @@ public class DashboardController {
         return ResponseEntity.ok(dashboardUseCase.getOrderStatus());
     }
 
-    @GetMapping("/today-received")
+    @GetMapping("/today-received-inbound")
     @Operation(
-            summary = "오늘 들어올 입출고 개수 조회",
-            description = "오늘 들어올 입출고 개수를 조회할 수 있습니다.\n"
+            summary = "오늘 들어올 입고 개수 조회",
+            description = "오늘 들어올 입고 개수를 조회할 수 있습니다.\n"
     )
-    public ResponseEntity<TodayCountDto> getTodayReceived() {
-        return ResponseEntity.ok(dashboardUseCase.getTodayReceived());
+    public ResponseEntity<TodayCountDto> getTodayReceivedInbound() {
+        return ResponseEntity.ok(dashboardUseCase.getTodayReceivedInbound());
+    }
+    @GetMapping("/today-received-outbound")
+    @Operation(
+            summary = "오늘 들어올 출고 개수 조회",
+            description = "오늘 들어올 출고 개수를 조회할 수 있습니다.\n"
+    )
+    public ResponseEntity<TodayCountDto> getTodayReceivedOutbound() {
+        return ResponseEntity.ok(dashboardUseCase.getTodayReceivedOutbound());
     }
 
-    @GetMapping("/today-completed")
+    @GetMapping("/today-completed-inbound")
     @Operation(
-            summary = "오늘 완료된 입출고 개수 조회",
-            description = "오늘 완료된 입출고 개수를 조회할 수 있습니다.\n"
+            summary = "오늘 완료된 입고 개수 조회",
+            description = "오늘 완료된 입고 개수를 조회할 수 있습니다.\n"
     )
-    public ResponseEntity<TodayCountDto> getTodayCompleted() {
-        return ResponseEntity.ok(dashboardUseCase.getTodayCompleted());
+    public ResponseEntity<TodayCountDto> getTodayCompletedInbound() {
+        return ResponseEntity.ok(dashboardUseCase.getTodayCompletedInbound());
+    }
+    @GetMapping("/today-completed-outbound")
+    @Operation(
+            summary = "오늘 완료된 출고 개수 조회",
+            description = "오늘 완료된 출고 개수를 조회할 수 있습니다.\n"
+    )
+    public ResponseEntity<TodayCountDto> getTodayCompletedOutbound() {
+        return ResponseEntity.ok(dashboardUseCase.getTodayCompletedOutbound());
     }
 }

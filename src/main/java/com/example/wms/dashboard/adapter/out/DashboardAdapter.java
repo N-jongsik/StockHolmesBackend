@@ -29,12 +29,22 @@ public class DashboardAdapter implements DashboardPort {
     }
 
     @Override
-    public TodayCountDto selectTodayReceivedCounts() {
-        return dashboardMapper.selectTodayReceivedCounts();
+    public TodayCountDto selectTodayReceivedInboundCounts() {
+        return dashboardMapper.selectTodayReceivedInboundCounts();
     }
 
     @Override
-    public TodayCountDto selectTodayCompletedCounts() {
-        return dashboardMapper.selectTodayCompletedCounts();
+    public TodayCountDto selectTodayReceivedOutboundCounts() {
+        return dashboardMapper.selectTodayReceivedOutboundCounts();
+    }
+
+    @Override
+    public TodayCountDto selectTodayCompletedInboundCounts() {
+        return dashboardMapper.selectTodayCompletedInboundCounts();
+    }
+
+    @Override
+    public TodayCountDto selectTodayCompletedOutboundCounts() {
+        return dashboardMapper.selectTodayCompletedOutboundCounts();
     }
 }

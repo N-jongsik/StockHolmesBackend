@@ -30,12 +30,21 @@ public class DashboardService implements DashboardUseCase {
     }
 
     @Override
-    public TodayCountDto getTodayReceived() {
-        return dashboardPort.selectTodayReceivedCounts();
+    public TodayCountDto getTodayReceivedInbound() {
+        return dashboardPort.selectTodayReceivedInboundCounts();
     }
 
     @Override
-    public TodayCountDto getTodayCompleted() {
-        return dashboardPort.selectTodayCompletedCounts();
+    public TodayCountDto getTodayReceivedOutbound() {
+        return dashboardPort.selectTodayReceivedOutboundCounts();
+    }
+
+    @Override
+    public TodayCountDto getTodayCompletedInbound() {
+        return dashboardPort.selectTodayCompletedInboundCounts();
+    }
+    @Override
+    public TodayCountDto getTodayCompletedOutbound() {
+        return dashboardPort.selectTodayCompletedOutboundCounts();
     }
 }

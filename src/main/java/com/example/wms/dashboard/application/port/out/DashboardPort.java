@@ -9,6 +9,8 @@ public interface DashboardPort {
     OutboundStatusResponseDto selectOutboundStatusCounts();
     InboundStatusResponseDto selectInboundStatusCounts();
     OrderStatusResponseDto selectOrderStatusCounts();
-    TodayCountDto selectTodayReceivedCounts();
-    TodayCountDto selectTodayCompletedCounts();
+    TodayCountDto selectTodayReceivedInboundCounts();
+    TodayCountDto selectTodayReceivedOutboundCounts();
+    TodayCountDto selectTodayCompletedInboundCounts();
+    TodayCountDto selectTodayCompletedOutboundCounts();
 }
