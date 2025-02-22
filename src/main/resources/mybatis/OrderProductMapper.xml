@@ -34,6 +34,12 @@
         FROM order_product
         WHERE order_id = #{orderId} AND product_id = #{productId}
     </select>
+
+    <update id="update">
+        UPDATE order_product
+        SET defective_count = #{defectiveCount}
+        WHERE order_product_id = #{orderProductId}
+    </update>
 </mapper>
 
 

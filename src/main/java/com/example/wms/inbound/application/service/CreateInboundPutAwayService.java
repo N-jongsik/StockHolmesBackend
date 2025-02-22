@@ -27,6 +27,7 @@ public class CreateInboundPutAwayService implements CreateInboundPutAwayUseCase 
 
     @Override
     public void createPutAway(Long inboundId) {
+
         Inbound inbound = inboundPort.findById(inboundId); // inbound 찾음
 
         if (inbound == null) {

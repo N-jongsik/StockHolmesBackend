@@ -52,10 +52,9 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
 
 
                         Long productId = checkedProduct.getProductId();
-                        Integer count = (checkedProduct.getDefectiveCount().intValue());
+                        Integer defectiveCount = (checkedProduct.getDefectiveCount().intValue());
                         Product product = productPort.findById(productId);
 
-                        int defectiveCount = count / product.getLotUnit();
 
                         if (product == null) {
                             throw new NotFoundException("product not found with id :" + productId);
@@ -64,25 +63,29 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
                         long countLongValue = defectiveCount;
 
                         if (defectiveCount > 0) { // 계산한 불량 개수
+
                             Long orderId = orderPort.createOrder(productId, inboundId, countLongValue);
 
                             OrderProduct orderProduct = OrderProduct.builder()
                                     .orderId(orderId)
-                                    .productCount(defectiveCount*product.getLotUnit())
+                                    .productCount(defectiveCount)
                                     .productId(productId)
                                     .productName(product.getProductName())
                                     .isDefective(true)
-                                    .defectiveCount((long)defectiveCount)
+                                    .defectiveCount(0L)
                                     .build();
                             orderProductPort.save(orderProduct);
                         }
+
                         OrderProduct orderProduct = orderProductPort.findByOrderId(inbound.getOrderId(), productId);
-                        int putAwayCount = (orderProduct.getProductCount() - count) / product.getLotUnit();
+                        orderProductPort.update(orderProduct.getOrderProductId(), (long)defectiveCount);
+                        int putAwayCount = (orderProduct.getProductCount() - defectiveCount) / product.getLotUnit();
                         String locationBinCode = productPort.getLocationBinCode(productId);
 
 
                         List<Long> binIds = binUseCase.assignBinIdsToLots(locationBinCode, putAwayCount);
 
+                        //putAwayCount만큼 lot생성
                         if (binIds.size() < putAwayCount) {
                             for (int i = 0; i< binIds.size(); i++) {
                                 String lotNumber = makeNumber("LO");

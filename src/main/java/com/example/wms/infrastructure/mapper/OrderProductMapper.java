@@ -17,4 +17,5 @@ public interface OrderProductMapper {
 
     OrderProduct findByOrderId(@Param("orderId") Long orderId, @Param("productId") Long productId);
 
+    void update(@Param("orderProductId") Long orderProductId, @Param("defectiveCount") Long defectiveCount);
 }
