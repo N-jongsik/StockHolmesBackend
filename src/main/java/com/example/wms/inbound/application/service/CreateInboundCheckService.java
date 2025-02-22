@@ -40,7 +40,7 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
 
     @Transactional
     @Override
-    public void createInboundCheck(Long inboundId, InboundCheckReqDto inboundCheckReqDto) {
+    public void createInboundCheck(Long inboundId, InboundCheckReqDto inboundCheckReqDto) { // 품목별 검사 개수
 
         Inbound inbound = inboundPort.findById(inboundId);
 
@@ -48,80 +48,91 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
             throw new NotFoundException("inbound not found with id " + inboundId);
         }
 
-        for (InboundCheckedProductReqDto checkedProduct : inboundCheckReqDto.getCheckedProductList()) {
+                    for (InboundCheckedProductReqDto checkedProduct : inboundCheckReqDto.getCheckedProductList()) { // 품목별 검사
+                        // productId랑 defectiveCount(40개 불량) 을 가져옴
 
-            Long productId = checkedProduct.getProductId();
-            Integer count = (checkedProduct.getDefectiveCount().intValue());
 
-            int defectiveCount = count / productPort.findById(productId).getLotUnit();
-            Product product = productPort.findById(productId);
+                        Long productId = checkedProduct.getProductId(); // productId
+                        Integer count = (checkedProduct.getDefectiveCount().intValue()); // defectiveCount 를 가져옴
+                        Product product = productPort.findById(productId); // product 객체를 가져옴
 
-            if (product == null) {
-                throw new NotFoundException("product not found with id :" + productId);
-            }
+                        int defectiveCount = count / product.getLotUnit();
 
-            long countLongValue = defectiveCount;
-            if (defectiveCount > 0) {
-                Long orderId = orderPort.createOrder(productId, inboundId, countLongValue);
-                OrderProduct orderProduct = OrderProduct.builder()
-                        .orderId(orderId)
-                        .productCount(defectiveCount*product.getLotUnit())
-                        .productId(productId)
-                        .productName(product.getProductName())
-                        .isDefective(true)
-                        .defectiveCount((long)defectiveCount)
-                        .build();
-                orderProductPort.save(orderProduct);
-            }
+                        if (product == null) {
+                            throw new NotFoundException("product not found with id :" + productId); // 없으면 처리
+                        }
 
-            List<InboundPutAwayReqDto> putAwayRequests = productPort.findPutAwayProductsByInboundId(inboundId)
-                    .stream()
-                    .map(p -> InboundPutAwayReqDto.builder()
-                            .productId(p.getProductId())
-                            .lotCount(countLongValue)
-                            .build())
-                    .collect(Collectors.toList());
+                        long countLongValue = defectiveCount; // 불량인 단위 개수를 long으로 바꿈
 
-            for (InboundPutAwayReqDto request : putAwayRequests) {
-                Integer lotCount = request.getLotCount().intValue();
-                String locationBinCode = productPort.getLocationBinCode(request.getProductId());
+                        if (defectiveCount > 0) { // 재발주
+                            Long orderId = orderPort.createOrder(productId, inboundId, countLongValue);
 
-                List<Long> binIds = binUseCase.assignBinIdsToLots(locationBinCode, lotCount);
+                            OrderProduct orderProduct = OrderProduct.builder()
+                                    .orderId(orderId)
+                                    .productCount(defectiveCount*product.getLotUnit())
+                                    .productId(productId)
+                                    .productName(product.getProductName())
+                                    .isDefective(true)
+                                    .defectiveCount((long)defectiveCount)
+                                    .build();
+                            orderProductPort.save(orderProduct);
+                        }
 
-                // bin의 amount가 넣으려는 lot 개수보다 부족할 경우
-                if (binIds.size() < lotCount) {
-                    for (int i = 0; i< binIds.size(); i++) {
-                        String lotNumber = makeNumber("LO");
+                        // 적치
+                        List<InboundPutAwayReqDto> putAwayRequests = productPort.findPutAwayProductsByInboundId(inboundId)
+                                .stream()
+                                .map(p -> InboundPutAwayReqDto.builder()
+                                        .productId(p.getProductId())
+                                        .lotCount(countLongValue) // lot 개수
+                                        .build())
+                                .collect(Collectors.toList());
 
-                        Lot lot = Lot.builder()
-                                .productId(productId)
-                                .binId(binIds.get(i))
-                                .lotNumber(lotNumber)
-                                .status(LotStatus.입고)
-                                .inboundId(inboundId)
-                                .build();
-                        lotPort.insertLot(lot);
+                        for (InboundPutAwayReqDto request : putAwayRequests) { // 현재 입하 테이블에 있는 품목 개수
+                            Integer lotCount = request.getLotCount().intValue();
+                            String locationBinCode = productPort.getLocationBinCode(request.getProductId());
 
-                    }
-                }
+                            OrderProduct orderProduct = orderProductPort.findByOrderId(inbound.getOrderId(), productId);
+                            int putAwayCount = (orderProduct.getProductCount() - count) / product.getLotUnit();
+                            // order 이미 존재하는 Order를 찾고 order_product 찾고 - count 값을 불러오면 - defective
+                            List<Long> binIds = binUseCase.assignBinIdsToLots(locationBinCode, lotCount);
 
-                else {
-                    for (int i = 0; i < lotCount; i++) {
-                        String lotNumber = makeNumber("LO");
 
-                        Lot lot = Lot.builder()
-                                .productId(productId)
-                                .binId(binIds.get(i))
-                                .lotNumber(lotNumber)
-                                .status(LotStatus.입고)
-                                .inboundId(inboundId)
-                                .build();
-                        lotPort.insertLot(lot);
-                    }
-                }
 
-            }
-            inboundPort.updateIC(inbound.getInboundId(), LocalDate.now(), makeNumber("IC"), "입하검사");
+                            // lot 생성할 때 order_product 의 count 값이랑 - defective 를 뺀 값만큼 Lot를 생성  / lot _unit -> lotCount 값으로 업데이트
+                            // bin의 amount가 넣으려는 lot 개수보다 부족할 경우
+                            if (binIds.size() < putAwayCount) {
+                                for (int i = 0; i< binIds.size(); i++) {
+                                    String lotNumber = makeNumber("LO");
+
+                                    Lot lot = Lot.builder()
+                                            .productId(productId)
+                                            .binId(binIds.get(i))
+                                            .lotNumber(lotNumber)
+                                            .status(LotStatus.입고)
+                                            .inboundId(inboundId)
+                                            .build();
+                                    lotPort.insertLot(lot);
+
+                                }
+                            }
+
+                            else {
+                                for (int i = 0; i < putAwayCount; i++) {
+                                    String lotNumber = makeNumber("LO");
+
+                                    Lot lot = Lot.builder()
+                                            .productId(productId)
+                                            .binId(binIds.get(i))
+                                            .lotNumber(lotNumber)
+                                            .status(LotStatus.입고)
+                                            .inboundId(inboundId)
+                                            .build();
+                                    lotPort.insertLot(lot);
+                                }
+                            }
+
+                        }
+                        inboundPort.updateIC(inbound.getInboundId(), LocalDate.now(), makeNumber("IC"), "입하검사");
         }
     }
 

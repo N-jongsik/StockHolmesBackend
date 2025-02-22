@@ -28,6 +28,12 @@
         VALUES
         (#{orderProduct.orderId}, #{orderProduct.productCount}, #{orderProduct.productId}, #{orderProduct.productName}, #{orderProduct.isDefective}, #{orderProduct.defectiveCount})
     </insert>
+
+    <select id="findByOrderId" resultType="com.example.wms.order.application.domain.OrderProduct">
+        SELECT *
+        FROM order_product
+        WHERE order_id = #{orderId} AND product_id = #{productId}
+    </select>
 </mapper>
 
 

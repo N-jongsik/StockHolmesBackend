@@ -14,4 +14,7 @@ public interface OrderProductMapper {
     OrderProduct findByProductId(@Param("productId") Long productId);
 
     void save(@Param("orderProduct") OrderProduct orderProduct);
+
+    OrderProduct findByOrderId(@Param("orderId") Long orderId, @Param("productId") Long productId);
+
 }
