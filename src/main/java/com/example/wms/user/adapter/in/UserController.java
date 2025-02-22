@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
-public class UserController {
+public class  UserController {
     private final UserUseCase userUseCase;
 
     @Value("${jwt.cookieName}")
@@ -63,7 +64,7 @@ public class UserController {
      */
     @Operation(summary = "모든 회원 정보 조회", description = "페이지네이션한 회원 정보를 조회합니다.")
     @GetMapping("/list")
-    public ResponseEntity<Page<UserInfoResDto>> findAllUsers(Pageable pageable) {
+    public ResponseEntity<Page<UserInfoResDto>> findAllUsers(@ParameterObject Pageable pageable) {
         return ResponseEntity.ok(userUseCase.findAllUsers(pageable));
     }
 }
