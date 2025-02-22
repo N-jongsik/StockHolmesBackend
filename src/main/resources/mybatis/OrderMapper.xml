@@ -182,7 +182,6 @@
         FROM `order` o
         WHERE 1=1
         AND o.supplier_id = #{supplierId}
-        AND o.is_approved = false
         LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
         ) o
         JOIN supplier s ON o.supplier_id = s.supplier_id
@@ -213,7 +212,6 @@
         SELECT COUNT(*)
         FROM `order` o
         WHERE o.supplier_id = #{supplierId}
-        AND o.is_approved = false
         <if test="startDate != null">
             AND o.order_date <![CDATA[>=]]> #{startDate}
         </if>

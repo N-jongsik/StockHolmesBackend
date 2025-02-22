@@ -31,5 +31,6 @@ public class OutboundLotDTO {
         private Integer floor; // 랙의 층(1~6)
         private String productName;
         private String productCode;
+        private String productImage;
     }
 }
