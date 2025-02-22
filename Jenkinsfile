@@ -3,17 +3,13 @@ pipeline {
     parameters {
         choice(
             name: 'DEPLOY_ENV',
-            choices: ['auto', 'blue', 'green'],
-            description: '배포 환경 선택 (auto는 자동으로 전환)'
+            choices: ['blue', 'green'],
+            description: '배포 환경 선택'
         )
     }
     environment {
         DOCKER_TAG = "backend:${BUILD_NUMBER}"
         RESOURCE_DIR = "./src/main/resources"
-        BACKEND_SERVER = "ec2-user@api.stockholmes.store"
-        NGINX_SERVER = "ec2-user@ip-172-31-43-48"
-        BLUE_PORT = "8011"
-        GREEN_PORT = "8012"
     }
     tools {
         gradle 'gradle 7.6.1'
@@ -34,12 +30,13 @@ pipeline {
             steps {
                 script {
                     echo "===== Stage: Get Commit Message ====="
-                    env.GIT_COMMIT_MESSAGE = sh(
+                    def gitCommitMessage = sh(
                         script: "git log -1 --pretty=%B",
                         returnStdout: true
                     ).trim()
-                    echo "Commit Message: ${env.GIT_COMMIT_MESSAGE}"
+                    echo "Commit Message: ${gitCommitMessage}"
                     echo "Branch Name: ${env.BRANCH_NAME}"
+                    env.GIT_COMMIT_MESSAGE = gitCommitMessage
                 }
             }
         }
@@ -77,13 +74,13 @@ pipeline {
             }
         }
 
-        stage('Build and Test') {
+        stage('Build') {
             steps {
                 script {
-                    echo "===== Stage: Build and Test ====="
+                    echo "===== Stage: Build ====="
                     sh '''
                         set -x
-                        gradle build -x test -Dspring.profiles.active=prod
+                        gradle build -Dspring.profiles.active=prod -x test
                         ls -la build/libs/
                     '''
                 }
@@ -133,21 +130,22 @@ pipeline {
                     echo "Deploying to ${deployEnv} environment"
 
                     try {
+                        // Stop the target environment's containers first
                         sh """
                             ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
                                 cd /home/ec2-user/backend
+                                docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml down || true
 
                                 # Clean up existing containers
                                 docker ps -a | grep "${port}" | grep "Exited" | awk "{print \\\$1}" | xargs -r docker rm
-
-                                # Stop current containers
-                                docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml down || true
                             '
+                        """
 
-                            # Transfer docker image
-                            docker save ${DOCKER_TAG} | ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} 'docker load'
+                        // Transfer docker image
+                        sh "docker save ${DOCKER_TAG} | ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} 'docker load'"
 
-                            # Start new containers
+                        // Start new containers
+                        sh """
                             ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
                                 cd /home/ec2-user/backend
                                 export BUILD_NUMBER=${BUILD_NUMBER}
@@ -173,6 +171,7 @@ pipeline {
                         ).trim()
 
                         if (healthCheck == "success") {
+                            // Update nginx configuration
                             sh """
                                 ssh -o StrictHostKeyChecking=no ${NGINX_SERVER} "
                                     sudo sed -i 's/set \\\$deployment_env \\\".*\\\";/set \\\$deployment_env \\\"${deployEnv}\\\";/' /etc/nginx/conf.d/backend.conf
@@ -181,6 +180,7 @@ pipeline {
                                 "
                             """
 
+]
                             if (currentEnv != 'none' && currentEnv != deployEnv) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
@@ -190,10 +190,25 @@ pipeline {
                                 """
                             }
                         } else {
+]
+                            sh """
+                                ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
+                                    cd /home/ec2-user/backend
+                                    docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml down
+                                '
+                            """
                             error "New environment health check failed"
                         }
                     } catch (Exception e) {
                         echo "Deployment failed: ${e.message}"
+                        // Clean up failed deployment
+                        sh """
+                            ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
+                                cd /home/ec2-user/backend
+                                docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml down || true
+                            '
+                        """
+
                         if (currentEnv != 'none') {
                             echo "Rolling back to previous environment: ${currentEnv}"
                             sh """
