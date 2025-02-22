@@ -9,6 +9,8 @@ public interface DashboardUseCase {
     OutboundStatusResponseDto getOutboundStatus();
     InboundStatusResponseDto getInboundStatus();
     OrderStatusResponseDto getOrderStatus();
-    TodayCountDto getTodayReceived();
-    TodayCountDto getTodayCompleted();
+    TodayCountDto getTodayReceivedInbound();
+    TodayCountDto getTodayReceivedOutbound();
+    TodayCountDto getTodayCompletedInbound();
+    TodayCountDto getTodayCompletedOutbound();
 }
