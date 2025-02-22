@@ -3,13 +3,17 @@ pipeline {
     parameters {
         choice(
             name: 'DEPLOY_ENV',
-            choices: ['blue', 'green'],
-            description: '배포 환경 선택'
+            choices: ['auto', 'blue', 'green'],
+            description: '배포 환경 선택 (auto는 자동으로 전환)'
         )
     }
     environment {
         DOCKER_TAG = "backend:${BUILD_NUMBER}"
         RESOURCE_DIR = "./src/main/resources"
+        BACKEND_SERVER = "ec2-user@api.stockholmes.store"
+        NGINX_SERVER = "ec2-user@ip-172-31-43-48"
+        BLUE_PORT = "8011"
+        GREEN_PORT = "8012"
     }
     tools {
         gradle 'gradle 7.6.1'
@@ -30,13 +34,12 @@ pipeline {
             steps {
                 script {
                     echo "===== Stage: Get Commit Message ====="
-                    def gitCommitMessage = sh(
+                    env.GIT_COMMIT_MESSAGE = sh(
                         script: "git log -1 --pretty=%B",
                         returnStdout: true
                     ).trim()
-                    echo "Commit Message: ${gitCommitMessage}"
+                    echo "Commit Message: ${env.GIT_COMMIT_MESSAGE}"
                     echo "Branch Name: ${env.BRANCH_NAME}"
-                    env.GIT_COMMIT_MESSAGE = gitCommitMessage
                 }
             }
         }
@@ -74,13 +77,13 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build and Test') {
             steps {
                 script {
-                    echo "===== Stage: Build ====="
+                    echo "===== Stage: Build and Test ====="
                     sh '''
                         set -x
-                        gradle build -Dspring.profiles.active=prod -x test
+                        gradle build -Dspring.profiles.active=prod
                         ls -la build/libs/
                     '''
                 }
@@ -105,8 +108,8 @@ pipeline {
             steps {
                 script {
                     def currentEnv = sh(
-                        script: '''
-                            ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
+                        script: """
+                            ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
                                 if docker ps | grep -q "spring-wms-blue"; then
                                     echo "blue"
                                 elif docker ps | grep -q "spring-wms-green"; then
@@ -115,53 +118,94 @@ pipeline {
                                     echo "none"
                                 fi
                             '
-                        ''',
+                        """,
                         returnStdout: true
                     ).trim()
 
                     echo "Current environment: ${currentEnv}"
-                    def deployEnv = params.DEPLOY_ENV ?: (currentEnv == 'blue' ? 'green' : 'blue')
-                    def port = deployEnv == 'blue' ? '8011' : '8012'
 
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
-                            cd /home/ec2-user/backend
+                    def deployEnv = params.DEPLOY_ENV
+                    if (deployEnv == 'auto') {
+                        deployEnv = (currentEnv == 'blue') ? 'green' : 'blue'
+                    }
+                    def port = (deployEnv == 'blue') ? BLUE_PORT : GREEN_PORT
 
-                            # Clean up existing containers
-                            docker ps -a | grep "${port}" | grep "Exited" | awk "{print \\\$1}" | xargs -r docker rm
+                    echo "Deploying to ${deployEnv} environment"
 
-                            # Stop current containers
-                            docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml down || true
-                        '
-
-                        # Transfer docker image
-                        docker save ${DOCKER_TAG} | ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store 'docker load'
-
-                        # Start new containers
-                        ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
-                            cd /home/ec2-user/backend
-                            export BUILD_NUMBER=${BUILD_NUMBER}
-                            docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml up -d
-
-                            echo "Waiting for container to start..."
-                            sleep 10
-                        '
-
-                        # Update Nginx configuration
-                        ssh -o StrictHostKeyChecking=no ec2-user@ip-172-31-43-48 "
-                            sudo sed -i 's/set \\\$deployment_env \\\".*\\\";/set \\\$deployment_env \\\"${deployEnv}\\\";/' /etc/nginx/conf.d/backend.conf
-                            echo '${deployEnv}' | sudo tee /etc/nginx/deployment_env
-                            sudo nginx -t && sudo systemctl reload nginx
-                        "
-
-                        # Clean up previous environment
-                        if [ '${currentEnv}' != 'none' ]; then
-                            ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
+                    try {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
                                 cd /home/ec2-user/backend
-                                docker-compose -p spring-wms-${currentEnv} -f docker-compose.${currentEnv}.yml down
+
+                                # Clean up existing containers
+                                docker ps -a | grep "${port}" | grep "Exited" | awk "{print \\\$1}" | xargs -r docker rm
+
+                                # Stop current containers
+                                docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml down || true
                             '
-                        fi
-                    """
+
+                            # Transfer docker image
+                            docker save ${DOCKER_TAG} | ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} 'docker load'
+
+                            # Start new containers
+                            ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
+                                cd /home/ec2-user/backend
+                                export BUILD_NUMBER=${BUILD_NUMBER}
+                                docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml up -d
+                            '
+                        """
+
+                        def healthCheck = sh(
+                            script: """
+                                ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
+                                    for i in {1..30}; do
+                                        if curl -s http://localhost:${port}/actuator/health | grep -q "\\"status\\":\\"UP\\""; then
+                                            echo "success"
+                                            exit 0
+                                        fi
+                                        sleep 2
+                                    done
+                                    echo "failure"
+                                    exit 1
+                                '
+                            """,
+                            returnStdout: true
+                        ).trim()
+
+                        if (healthCheck == "success") {
+                            sh """
+                                ssh -o StrictHostKeyChecking=no ${NGINX_SERVER} "
+                                    sudo sed -i 's/set \\\$deployment_env \\\".*\\\";/set \\\$deployment_env \\\"${deployEnv}\\\";/' /etc/nginx/conf.d/backend.conf
+                                    echo '${deployEnv}' | sudo tee /etc/nginx/deployment_env
+                                    sudo nginx -t && sudo systemctl reload nginx
+                                "
+                            """
+
+                            if (currentEnv != 'none' && currentEnv != deployEnv) {
+                                sh """
+                                    ssh -o StrictHostKeyChecking=no ${BACKEND_SERVER} '
+                                        cd /home/ec2-user/backend
+                                        docker-compose -p spring-wms-${currentEnv} -f docker-compose.${currentEnv}.yml down
+                                    '
+                                """
+                            }
+                        } else {
+                            error "New environment health check failed"
+                        }
+                    } catch (Exception e) {
+                        echo "Deployment failed: ${e.message}"
+                        if (currentEnv != 'none') {
+                            echo "Rolling back to previous environment: ${currentEnv}"
+                            sh """
+                                ssh -o StrictHostKeyChecking=no ${NGINX_SERVER} "
+                                    sudo sed -i 's/set \\\$deployment_env \\\".*\\\";/set \\\$deployment_env \\\"${currentEnv}\\\";/' /etc/nginx/conf.d/backend.conf
+                                    echo '${currentEnv}' | sudo tee /etc/nginx/deployment_env
+                                    sudo nginx -t && sudo systemctl reload nginx
+                                "
+                            """
+                        }
+                        throw e
+                    }
                 }
             }
         }
