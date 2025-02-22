@@ -78,6 +78,12 @@
         WHERE bin_id = #{binId}
     </update>
 
+    <select id="findBinByBinId" resultType="com.example.wms.product.application.domain.Bin">
+        SELECT *
+        FROM bin
+        WHERE bin_id = #{binId}
+    </select>
+
     <select id="findBinCode" resultType="java.lang.String">
         SELECT bin_code
         FROM bin
