@@ -12,7 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkerInboundResDto {
-
     private Long inboundId;
     private List<WorkerProductResDto> productList;
 }

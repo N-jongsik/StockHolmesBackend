@@ -15,4 +15,5 @@ public interface BinPort {
     Long findExactBinIdByBinCode(String binCode);
     List<Long> findBinIdsByBinPrefix(String binCode);
     Bin findBinByBinId(Long binId);
+    String findBinCode(Long binId);
 }

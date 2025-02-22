@@ -5,7 +5,7 @@ import com.example.wms.inbound.adapter.in.dto.response.SupplierInboundResDto;
 import com.example.wms.inbound.application.port.out.InboundRetrievalPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -29,7 +29,7 @@ public class InboundSupplierPaginationTest {
     InboundRetrievalPort inboundRetrievalPort;
 
     @InjectMocks
-    InboundService inboundService;
+    GetInboundBySupplierService getInboundBySupplierService;
 
     private List<SupplierInboundResDto> mockSupplierInboundList;
 
@@ -46,7 +46,7 @@ public class InboundSupplierPaginationTest {
 
     @Test
     @DisplayName("납품업체별 입고 현황 조회를 테스트합니다.")
-    void testGetAllInboundBySupplierWithPagination() {
+    public void testGetAllInboundBySupplierWithPagination() {
         LocalDate startDate = LocalDate.of(2025,2,15);
         LocalDate endDate = LocalDate.of(2025,2,18);
         Pageable pageable = PageRequest.of(0,10);
@@ -54,7 +54,7 @@ public class InboundSupplierPaginationTest {
         when(inboundRetrievalPort.findAllInboundBySupplierWithPagination(startDate, endDate, pageable))
                 .thenReturn(mockSupplierInboundList);
 
-        Page<SupplierInboundResDto> result = inboundService.getAllInboundBySupplierWithPagination(startDate, endDate, pageable);
+        Page<SupplierInboundResDto> result = getInboundBySupplierService.getAllInboundBySupplierWithPagination(startDate, endDate, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);

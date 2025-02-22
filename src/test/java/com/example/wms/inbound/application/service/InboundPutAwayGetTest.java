@@ -1,12 +1,11 @@
 package com.example.wms.inbound.application.service;
 
-import com.example.wms.inbound.adapter.in.dto.response.InboundProductDto;
 import com.example.wms.inbound.adapter.in.dto.response.InboundPutAwayResDto;
 import com.example.wms.inbound.adapter.in.dto.response.LotResDto;
 import com.example.wms.inbound.application.port.out.InboundRetrievalPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -32,15 +31,15 @@ public class InboundPutAwayGetTest {
     InboundRetrievalPort inboundRetrievalPort;
 
     @InjectMocks
-    InboundService inboundService;
+    GetInboundPutAwayService inboundPutAwayService;
 
     private List<InboundPutAwayResDto> mockInboundPutAwayList;
 
     @BeforeEach
     void setUp() {
         List<LotResDto> productList = Arrays.asList(
-                new LotResDto(1001L, 1L, "A123", "Engine Part", 5L,"A-01-01-03"),
-                new LotResDto(1002L, 2L,"B456", "Brake Pad", 30L, "A-01-01-03")
+                new LotResDto(1001L,"11", 1L, "A123", "Engine Part", 5L,"A-01-01-03"),
+                new LotResDto(1002L,"11", 2L,"B456", "Brake Pad", 30L, "A-01-01-03")
         );
 
         mockInboundPutAwayList = Arrays.asList(
@@ -55,7 +54,7 @@ public class InboundPutAwayGetTest {
 
     @Test
     @DisplayName("입고 적치 목록 조회를 테스트합니다.")
-    void testGetAllInboundPutAway() {
+    public void testGetAllInboundPutAway() {
 
         // given
         String inboundPutAwayNumber = "PA202502150001";
@@ -68,7 +67,7 @@ public class InboundPutAwayGetTest {
                 .thenReturn(mockInboundPutAwayList.size());
 
         // when
-        Page<InboundPutAwayResDto> result = inboundService.getFilteredPutAway(inboundPutAwayNumber, startDate, endDate, pageable);
+        Page<InboundPutAwayResDto> result = inboundPutAwayService.getFilteredPutAway(inboundPutAwayNumber, startDate, endDate, pageable);
 
         // then
         assertThat(result).isNotNull();

@@ -11,4 +11,5 @@ public interface InboundNumberMapper {
     String findMaxICNumber();
 
     String findMaxPANumber();
+
 }

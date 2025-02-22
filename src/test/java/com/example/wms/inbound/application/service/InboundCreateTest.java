@@ -6,12 +6,11 @@ import com.example.wms.inbound.application.port.out.AssignInboundNumberPort;
 import com.example.wms.inbound.application.port.out.InboundPort;
 import com.example.wms.order.application.domain.Order;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
+import org.junit.Test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,7 +21,7 @@ import static org.mockito.Mockito.verify;
 public class InboundCreateTest {
 
     @InjectMocks
-    private InboundService inboundService;
+    private CreateInboundPlanService inboundPlanService;
 
     @Mock
     private InboundPort inboundPort;
@@ -41,7 +40,7 @@ public class InboundCreateTest {
                 .inboundDate(LocalDate.of(2025,2,14))
                 .build();
 
-        inboundService.createInboundSchedule(order);
+        inboundPlanService.createInboundSchedule(order);
 
         verify(inboundPort, times(1)).save(any(Inbound.class));
     }
@@ -59,7 +58,7 @@ public class InboundCreateTest {
                 .orderDate(LocalDateTime.now())
                 .build();
 
-        inboundService.createInboundPlan(inboundReqDto);
+        inboundPlanService.createInboundPlan(inboundReqDto);
 
         verify(inboundPort, times(1)).save(any(Inbound.class));
     }

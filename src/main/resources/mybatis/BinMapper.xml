@@ -54,7 +54,7 @@
         SELECT bin_id
         FROM bin
         WHERE zone = #{zone}
-        ORDER BY row ASC, floor ASC
+        ORDER BY row_num ASC, floor ASC
         LIMIT 1
     </select>
 
@@ -80,6 +80,12 @@
 
     <select id="findBinByBinId" resultType="com.example.wms.product.application.domain.Bin">
         SELECT *
+        FROM bin
+        WHERE bin_id = #{binId}
+    </select>
+
+    <select id="findBinCode" resultType="java.lang.String">
+        SELECT bin_code
         FROM bin
         WHERE bin_id = #{binId}
     </select>

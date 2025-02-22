@@ -12,11 +12,11 @@ import com.example.wms.product.application.domain.Product;
 import com.example.wms.product.application.port.out.LotPort;
 import com.example.wms.product.application.port.out.ProductPort;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.Test;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.*;
 public class InboundCheckCreateTest {
 
     @InjectMocks
-    private InboundService inboundService;
+    private CreateInboundCheckService createInboundCheckService;
 
     @Mock
     private InboundPort inboundPort;
@@ -49,7 +49,6 @@ public class InboundCheckCreateTest {
     private ProductPort productPort;
 
     @Test
-    @DisplayName("관리자가 입하 검사를 생성하면 InboundCheckPort의 update 메서드가 호출되어야 한다.")
     public void testCreateInboundCheck() {
 
         // given
@@ -106,7 +105,7 @@ public class InboundCheckCreateTest {
         orderProduct2.setDefectiveCount(20L);
 
         // when
-        inboundService.createInboundCheck(1L, inboundCheckReqDto);
+        createInboundCheckService.createInboundCheck(1L, inboundCheckReqDto);
 
         // then
         verify(inboundPort, times(2)).updateIC(eq(1L), any(LocalDate.class), any(String.class), any(String.class));

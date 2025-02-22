@@ -19,4 +19,8 @@ public interface LotMapper {
     void updateOutboundIdForLots(@Param("lotIds") List<Long> lotIds,
                                  @Param("outboundId") Long outboundId);
 
+    Long save(Lot lot);
+    String findMaxLONumber();
+    Long findLot(Long binId);
+    Lot findById(Long lotId);
 }

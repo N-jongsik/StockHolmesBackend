@@ -6,7 +6,6 @@ import com.example.wms.inbound.adapter.in.dto.response.InboundResDto;
 import com.example.wms.inbound.application.port.out.InboundRetrievalPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -15,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -24,13 +24,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class InboundCheckGetTest {
+public class InboundCheckGetTest {
 
     @Mock
     InboundRetrievalPort inboundRetrievalPort;
 
     @InjectMocks
-    InboundService inboundService;
+    GetInboundCheckService getInboundCheckService;
 
     private List<InboundAllProductDto> mockInboundCheckProductList;
 
@@ -89,28 +89,10 @@ class InboundCheckGetTest {
         );
     }
 
-    @Test
-    @DisplayName("입하 검사 전체 목록을 정상적으로 조회하는 경우를 테스트합니다.")
-    void testGetInboundCheck() {
-        Pageable pageable = PageRequest.of(0,10);
-        when(inboundRetrievalPort.findInboundProductListWithPagination(any(Pageable.class)))
-                .thenReturn(mockInboundCheckProductList);
-
-        when(inboundRetrievalPort.countAllInboundPlan()).thenReturn(mockInboundCheckProductList.size());
-
-        Page<InboundResDto> result = inboundService.getInboundPlans(pageable);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(mockInboundCheckProductList.size());
-        assertThat(result.getTotalElements()).isEqualTo(mockInboundCheckProductList.size());
-
-        verify(inboundRetrievalPort, times(1)).findInboundProductListWithPagination(any(Pageable.class));
-        verify(inboundRetrievalPort, times(1)).countAllInboundPlan();
-    }
 
     @Test
     @DisplayName("입하 검사 전체 목록을 입하번호 및 기간별로 조회하는 경우를 테스트합니다.")
-    void testGetFilteredInboundChecks() {
+    public void testGetFilteredInboundChecks() {
 
         // given
         String inboundCheckNumber = "IC202502150001";
@@ -126,7 +108,7 @@ class InboundCheckGetTest {
                 .thenReturn(mockInboundCheckProductList.size());
 
         // when
-        Page<InboundResDto> result = inboundService.getFilteredInboundPlans(inboundCheckNumber, startDate, endDate, pageable);
+        Page<InboundResDto> result = getInboundCheckService.getFilteredInboundCheck(inboundCheckNumber, startDate, endDate, pageable);
 
         // then
         assertThat(result).isNotNull();

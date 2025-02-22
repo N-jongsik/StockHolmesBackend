@@ -20,7 +20,14 @@
         p.product_name,
         op.product_count AS product_count,
         p.stock_lot_count AS stock_lot_count,
-        op.defective_count AS defective_count
+        op.defective_count AS defective_count,
+        l.lot_id,
+        l.lot_number,
+        p.product_id,
+        p.product_code,
+        p.product_name,
+        (p.stock_lot_count * p.lot_unit) AS product_count,
+        l.lot_number AS location_bin_code
         FROM (
         SELECT
         i.inbound_id,
@@ -65,6 +72,7 @@
         ) b
         INNER JOIN order_product op ON b.order_id = op.order_id
         INNER JOIN product p ON op.product_id = p.product_id
+        INNER JOIN lot l ON p.product_id = l.product_id
         INNER JOIN supplier s ON b.supplier_id = s.supplier_id
     </select>
 
@@ -110,5 +118,15 @@
             <result property="stockLotCount" column="stock_lot_count"/>
             <result property="defectiveCount" column="defective_count"/>
         </collection>
+        <collection property="lotList" ofType="com.example.wms.inbound.adapter.in.dto.response.LotResDto">
+            <id property="lotId" column="lot_id"/>
+            <result property="lotNumber" column="lot_number"/>
+            <result property="productId" column="product_id"/>
+            <result property="productCode" column="product_code"/>
+            <result property="productName" column="product_name"/>
+            <result property="productCount" column="product_count"/>
+            <result property="locationBinCode" column="location_bin_code"/>
+        </collection>
+
     </resultMap>
 </mapper>

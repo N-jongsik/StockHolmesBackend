@@ -5,7 +5,7 @@ import com.example.wms.inbound.adapter.in.dto.response.ProductInboundResDto;
 import com.example.wms.inbound.application.port.out.InboundRetrievalPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -32,7 +32,7 @@ public class InboundProductPaginationTest {
     InboundRetrievalPort inboundRetrievalPort;
 
     @InjectMocks
-    InboundService inboundService;
+    GetAllInboundByProductService getAllInboundByProductService;
 
     private List<ProductInboundResDto> mockProductInboundList;
 
@@ -55,7 +55,7 @@ public class InboundProductPaginationTest {
 
     @Test
     @DisplayName("품목 별 입고조회를 테스트합니다.")
-    void testGetAllInboundByProductWithPagination() {
+    public void testGetAllInboundByProductWithPagination() {
 
         // given
         LocalDate startDate = LocalDate.of(2025,2,15);
@@ -68,7 +68,7 @@ public class InboundProductPaginationTest {
                 .thenReturn(mockProductInboundList);
 
         // when
-        Page<ProductInboundResDto> result = inboundService.getAllInboundByProductWithPagination(startDate, endDate, pageable);
+        Page<ProductInboundResDto> result = getAllInboundByProductService.getAllInboundByProductWithPagination(startDate, endDate, pageable);
 
         // then
         assertThat(result).isNotNull();

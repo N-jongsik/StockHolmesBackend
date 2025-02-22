@@ -14,6 +14,6 @@ public class CreateOutboundPlanAdapter implements CreateOutboundPlanPort {
 
     @Override
     public void save(OutboundPlan outboundPlan) {
-        outboundPlanMapper.insert(outboundPlan);
+         outboundPlanMapper.insert(outboundPlan);
     }
 }

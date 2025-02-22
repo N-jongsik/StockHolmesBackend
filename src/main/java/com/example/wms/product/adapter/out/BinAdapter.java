@@ -57,5 +57,9 @@ public class BinAdapter implements BinPort {
     @Override
     public Bin findBinByBinId(Long binId) {
         return binMapper.findBinByBinId(binId);
+  
+    @Override
+    public String findBinCode(Long binId) {
+        return binMapper.findBinCode(binId);
     }
 }

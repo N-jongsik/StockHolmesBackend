@@ -15,4 +15,7 @@ public interface LotPort {
     void updateOutboundIdForLots(List<Long> lotIds, Long outboundId);
 
     List<Lot> findLotsByProductIdAndCreateDate(Long productId, int requiredLotCount, LocalDate createDate);
+    Long insertLot(Lot lot);
+    Long findLot(Long binId);
+    Lot findById(Long lotId);
 }

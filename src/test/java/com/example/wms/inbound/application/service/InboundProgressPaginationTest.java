@@ -5,7 +5,7 @@ import com.example.wms.inbound.adapter.in.dto.response.InboundProgressResDto;
 import com.example.wms.inbound.application.port.out.InboundRetrievalPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -21,7 +21,6 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 @ExtendWith(MockitoExtension.class)
 public class InboundProgressPaginationTest {
 
@@ -29,7 +28,7 @@ public class InboundProgressPaginationTest {
     InboundRetrievalPort inboundRetrievalPort;
 
     @InjectMocks
-    InboundService inboundService;
+    GetInboundByProgressService getInboundByProgressService;
 
     private List<InboundProgressDetailDto> mockInboundList;
 
@@ -43,7 +42,7 @@ public class InboundProgressPaginationTest {
 
     @Test
     @DisplayName("모든 입고진행별 입고 현황을 조회하는 테스트입니다.")
-    void testGetAllInboundProgressWithPagination() {
+    public void testGetAllInboundProgressWithPagination() {
         LocalDate startDate = LocalDate.of(2025, 2, 15);
         LocalDate endDate = LocalDate.of(2025, 2, 18);
         Pageable pageable = PageRequest.of(0, 10);
@@ -51,7 +50,7 @@ public class InboundProgressPaginationTest {
         when(inboundRetrievalPort.findAllInboundProgressWithPagination(startDate, endDate, pageable))
                 .thenReturn(mockInboundList);
 
-        Page<InboundProgressResDto> result = inboundService.getAllInboundProgressWithPagination(startDate, endDate, pageable);
+        Page<InboundProgressResDto> result = getInboundByProgressService.getAllInboundProgressWithPagination(startDate, endDate, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);

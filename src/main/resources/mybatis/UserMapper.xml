@@ -28,9 +28,12 @@
     </select>
 
     <!-- 직원 번호로 이미 존재하는지 체크 -->
-    <select id="existsByStaffNumber" parameterType="String" resultType="Integer">
-        SELECT COUNT(*) FROM users WHERE staff_number = #{staffNumber};
+    <select id="existsByStaffNumber" parameterType="string" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM users
+        WHERE staff_number = #{staffNumber}
     </select>
+
 
     <!-- 직원 번호로 사용자 삭제 -->
     <delete id="deleteByStaffNumber" parameterType="String">
@@ -56,5 +59,34 @@
     <!-- 역할에 따른 마지막 사번 조회 -->
     <select id="findLastStaffNumberByRole" parameterType="String" resultType="String">
         SELECT staff_number FROM users WHERE staff_number LIKE CONCAT(#{prefix}, '%') ORDER BY staff_number DESC LIMIT 1
+    </select>
+
+    <!-- 사용자 권한 변경 -->
+    <update id="updateUserRole">
+        UPDATE users
+        SET user_role = #{newRole},
+            updated_at = NOW()
+        WHERE staff_number = #{staffNumber}
+    </update>
+
+    <!-- 사용자 활성 상태 변경 -->
+    <update id="updateUserActive">
+        UPDATE users
+        SET is_active = #{isActive},
+            updated_at = NOW()
+        WHERE staff_number = #{staffNumber}
+    </update>
+
+    <!-- 비밀번호 변경 -->
+    <update id="updateUserPassword">
+        UPDATE users
+        SET password = #{newPassword},
+            updated_at = NOW()
+        WHERE staff_number = #{staffNumber}
+    </update>
+
+    <!-- 전체 사용자 수 조회 -->
+    <select id="countTotalUsers" resultType="long">
+        SELECT COUNT(*) FROM users
     </select>
 </mapper>

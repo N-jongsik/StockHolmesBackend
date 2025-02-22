@@ -12,7 +12,6 @@ public interface InboundPort {
     Inbound findById(Long inboundId);
     void updateIC(Long inboundId, LocalDate checkDate, String checkNumber, String inboundStatus);
     Long getOrderIdByScheduleNumber(String scheduleNumber);
-    void updateInboundCheck(String scheduleNumber, String checkNumber);
     void updateOrderProduct(Long orderId, Long productId, Boolean isDefective);
     List<LotInfoDto> getLotsByScheduleNumber(String scheduleNumber);
     List<LotInfoDto> getLotsByCheckNumber(String checkNumber);

@@ -89,13 +89,13 @@
     </select>
 
 
-    <select id="findOutboundPlanByOutboundPlanId">
+    <select id="findOutboundPlanByOutboundPlanId" resultType="com.example.wms.outbound.application.domain.OutboundPlan">
         SELECT *
         FROM outbound_plan
         WHERE outbound_plan_id = #{outboundPlanId}
     </select>
 
-    <select id="countAllPicking">
+    <select id="countAllPicking" resultType="int">
         SELECT COUNT(*)
         FROM outbound
         <where>

@@ -45,7 +45,7 @@
         FROM product;
     </select>
 
-    <select id="getSupplierIdByProductId">
+    <select id="getSupplierIdByProductId" resultType="java.lang.Long">
         SELECT supplier_id
         FROM product
         WHERE product_id = #{productId};
@@ -112,7 +112,7 @@
         WHERE i.inbound_id = #{inboundId}
     </select>
 
-    <select id="selectProductOverview">
+    <select id="selectProductOverview" resultType="com.example.wms.product.adapter.in.dto.ProductOverviewDto">
         SELECT product_id, product_name, product_code FROM product
     </select>
 </mapper>
