@@ -27,7 +27,7 @@ public class CreateInboundPutAwayService implements CreateInboundPutAwayUseCase 
 
     @Override
     public void createPutAway(Long inboundId) {
-        Inbound inbound = inboundPort.findById(inboundId);
+        Inbound inbound = inboundPort.findById(inboundId); // inbound 찾음
 
         if (inbound == null) {
             throw new NotFoundException("Inbound not found with id " + inboundId);
@@ -36,7 +36,8 @@ public class CreateInboundPutAwayService implements CreateInboundPutAwayUseCase 
         String putAwayNumber = makeNumber("PA");
         LocalDate putAwayDate = LocalDate.now();
         String inboundStatus = "입고적치";
-        inboundPort.updatePA(inboundId, putAwayDate, putAwayNumber, inboundStatus);
+
+        inboundPort.updatePA(inboundId, putAwayDate, putAwayNumber, inboundStatus); // inbound 업데이트
 
         List<InboundPutAwayReqDto> putAwayRequests = productPort.findPutAwayProductsByInboundId(inboundId)
                 .stream()
@@ -48,12 +49,13 @@ public class CreateInboundPutAwayService implements CreateInboundPutAwayUseCase 
 
         for (InboundPutAwayReqDto request : putAwayRequests) {
             Long productId = request.getProductId();
-            int lotCount = request.getLotCount().intValue();
+            Long lotCount = request.getLotCount();
+
             Product product = productPort.findById(productId);
             Integer lotUnit = product.getLotUnit();
-            Integer totalCount = lotCount * lotUnit;
-            inventoryPort.updateInventory(productId, totalCount);
-            productPort.updateRequiredQuantity(productId, lotCount);
+            long totalCount = lotCount * lotUnit;
+            inventoryPort.updateInventory(productId, (int)totalCount);
+            productPort.updateRequiredQuantity(productId, lotCount.intValue());
         }
     }
 

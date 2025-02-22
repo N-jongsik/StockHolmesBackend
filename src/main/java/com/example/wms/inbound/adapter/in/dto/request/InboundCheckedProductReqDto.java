@@ -10,12 +10,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "품목 별 입하 검사 결과 등록 요청 dto")
 public class InboundCheckedProductReqDto {
 
-    @Schema(description = "품목 id", example = "101")
     private Long productId;
 
-    @Schema(description = "품목별 불합격 수량", example = "50 defective를 lot_unit으로 나눠야함 ")
     private Long defectiveCount;
 }

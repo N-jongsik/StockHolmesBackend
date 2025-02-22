@@ -64,7 +64,7 @@
     <update id="updateInventory">
         UPDATE inventory
         SET available_quantity = available_quantity + #{lotCount},
-            last_updated = NOW()
+            last_updated = CURDATE()
         WHERE product_id = #{productId}
     </update>
 
