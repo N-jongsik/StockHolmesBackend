@@ -52,4 +52,9 @@ public class BinAdapter implements BinPort {
     public List<Long> findBinIdsByBinPrefix(String binCode) {
         return binMapper.findBinIdsByBinPrefix(binCode);
     }
+
+    @Override
+    public String findBinCode(Long binId) {
+        return binMapper.findBinCode(binId);
+    }
 }

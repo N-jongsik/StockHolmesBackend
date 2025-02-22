@@ -5,13 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkerInboundResDto {
-    private Long inboundId;
-    private List<WorkerProductResDto> productList;
+public class WorkerInboundCheckLotResDto {
+
+    private Long lotId;
+    private String lotCode;
+    private Long productId;
+    private String productName;
+    private String productCode;
+    private String binCode;
 }

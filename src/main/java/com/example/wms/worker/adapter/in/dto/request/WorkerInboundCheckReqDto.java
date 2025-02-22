@@ -1,4 +1,4 @@
-package com.example.wms.worker.adapter.in.dto.response;
+package com.example.wms.worker.adapter.in.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkerInboundResDto {
-    private Long inboundId;
-    private List<WorkerProductResDto> productList;
+public class WorkerInboundCheckReqDto {
+    private List<WorkerInboundCheckProductReqDto> productList;
 }

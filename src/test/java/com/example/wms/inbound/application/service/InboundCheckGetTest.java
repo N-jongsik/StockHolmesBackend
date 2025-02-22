@@ -92,7 +92,7 @@ public class InboundCheckGetTest {
 
     @Test
     @DisplayName("입하 검사 전체 목록을 입하번호 및 기간별로 조회하는 경우를 테스트합니다.")
-    void testGetFilteredInboundChecks() {
+    public void testGetFilteredInboundChecks() {
 
         // given
         String inboundCheckNumber = "IC202502150001";

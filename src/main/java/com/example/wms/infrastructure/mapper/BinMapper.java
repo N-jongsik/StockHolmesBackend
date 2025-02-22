@@ -16,4 +16,5 @@ public interface BinMapper {
     List<Long> findBinIdsByBinPrefix(@Param("binPrefix") String binPrefix);
     Long findExactBinIdByBinCode(@Param("binCode") String binCode);
     void incrementBinAmount(Long binId, Integer lotCount);
+    String findBinCode(@Param("binId") Long binId);
 }

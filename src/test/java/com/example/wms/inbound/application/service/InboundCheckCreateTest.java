@@ -49,7 +49,6 @@ public class InboundCheckCreateTest {
     private ProductPort productPort;
 
     @Test
-    @DisplayName("관리자가 입하 검사를 생성하면 InboundCheckPort의 update 메서드가 호출되어야 한다.")
     public void testCreateInboundCheck() {
 
         // given

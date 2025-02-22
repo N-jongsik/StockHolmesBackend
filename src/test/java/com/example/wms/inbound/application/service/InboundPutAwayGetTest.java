@@ -54,7 +54,7 @@ public class InboundPutAwayGetTest {
 
     @Test
     @DisplayName("입고 적치 목록 조회를 테스트합니다.")
-    void testGetAllInboundPutAway() {
+    public void testGetAllInboundPutAway() {
 
         // given
         String inboundPutAwayNumber = "PA202502150001";
