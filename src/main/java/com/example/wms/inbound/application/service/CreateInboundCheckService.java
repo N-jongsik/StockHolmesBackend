@@ -2,12 +2,12 @@ package com.example.wms.inbound.application.service;
 
 import com.example.wms.inbound.adapter.in.dto.request.InboundCheckReqDto;
 import com.example.wms.inbound.adapter.in.dto.request.InboundCheckedProductReqDto;
-import com.example.wms.inbound.adapter.in.dto.request.InboundPutAwayReqDto;
 import com.example.wms.inbound.application.domain.Inbound;
 import com.example.wms.inbound.application.port.in.CreateInboundCheckUseCase;
 import com.example.wms.inbound.application.port.out.AssignInboundNumberPort;
 import com.example.wms.inbound.application.port.out.InboundPort;
 import com.example.wms.infrastructure.exception.NotFoundException;
+import com.example.wms.inventory.application.port.out.InventoryPort;
 import com.example.wms.order.application.domain.OrderProduct;
 import com.example.wms.order.application.port.out.OrderPort;
 import com.example.wms.order.application.port.out.OrderProductPort;
@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -42,6 +41,8 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
     private final OrderProductPort orderProductPort;
     private final BinUseCase binUseCase;
     private final LotPort lotPort;
+    private final InventoryPort inventoryPort;
+
 
     @Transactional
     @Override
@@ -124,6 +125,8 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
         } else {
             createLotsWithAssignedBins(productId, inboundId, binIds.subList(0, putAwayCount));
         }
+        inventoryPort.updateInventory(productId, putAwayCount);
+        productPort.updateRequiredQuantity(productId, putAwayCount);
     }
 
     private void createLotsWithAssignedBins(Long productId, Long inboundId, List<Long> binIds) {
@@ -150,6 +153,8 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
                     .build();
             lotPort.insertLot(lot);
         }
+
+
     }
 
     private String makeNumber(String format) {

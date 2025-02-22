@@ -62,19 +62,23 @@ public class GetInboundPutAwayService implements GetInboundPutAwayUseCase {
 
             InboundPutAwayResDto existingPutAwayResDto = inboundPutAwayMap.get(dto.getInboundId());
 
-            if (dto.getLotList() != null && !dto.getLotList().isEmpty()) {
-                List<LotResDto> convertedProducts = dto.getLotList().stream()
-                        .map(product -> LotResDto.builder()
-                                .lotId(product.getLotId())
-                                .lotNumber(product.getLotNumber())
-                                .productId(product.getProductId())
-                                .productName(product.getProductName())
-                                .productCount(product.getProductCount())
-                                .locationBinCode(product.getLocationBinCode())
-                                .build())
-                        .collect(Collectors.toList());
-                existingPutAwayResDto.getLotList().addAll(convertedProducts);
+            Map<Long, LotResDto> lotMap = existingPutAwayResDto.getLotList().stream()
+                    .collect(Collectors.toMap(
+                            LotResDto::getLotId,
+                            lot -> lot,
+                            (existing, replacement) -> existing,
+                            LinkedHashMap::new
+                    ));
+
+            if (dto.getLotList() != null) {
+                for (LotResDto lot : dto.getLotList()) {
+                    if (lot.getProductCode() != null) {
+                        lotMap.putIfAbsent(lot.getLotId(), lot);
+                    }
+                }
             }
+
+            existingPutAwayResDto.setLotList(new ArrayList<>(lotMap.values()));
         }
         return new ArrayList<>(inboundPutAwayMap.values());
     }
