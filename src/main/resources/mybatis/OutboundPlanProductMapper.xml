@@ -6,6 +6,7 @@
     <resultMap id="ProductInfoResultMap" type="com.example.wms.outbound.adapter.in.dto.ProductInfoDto">
         <result property="productId" column="product_id"/>
         <result property="productCode" column="product_code"/>
+        <result property="productName" column="product_name"/>
         <result property="productCount" column="required_quantity"/>
     </resultMap>
 

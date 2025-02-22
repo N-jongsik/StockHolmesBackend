@@ -86,7 +86,7 @@
         WHERE product_id = #{productId}
     </select>
 
-    <select id="findAvailableQuantity">
+    <select id="findAvailableQuantity" resultType="Integer">
         SELECT available_quantity
         FROM inventory
         WHERE product_id =#{productId}
