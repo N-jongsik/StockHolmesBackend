@@ -124,6 +124,7 @@
             (#{planDate}, #{status}, #{outboundScheduleNumber}, #{outboundScheduleDate}, #{productionPlanNumber})
     </insert>
 
+
     <!-- outboundPlan 삭제하기 -->
     <delete id="deleteById" parameterType="java.lang.Long">
         DELETE FROM outbound_plan WHERE outbound_plan_id = #{outboundPlanId}
