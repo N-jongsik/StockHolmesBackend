@@ -8,7 +8,6 @@ import java.util.List;
 
 public interface LotPort {
     void updateStatus(Long lotId, String status);
-    void insertLot(Lot lot);
     List<Lot> findLotsByProductId(Long productId, int requiredLotCount);
     List<Lot> findLotsSupplierByProductId(Long productId, int requiredLotCount);
 

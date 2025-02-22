@@ -9,7 +9,6 @@ import java.util.List;
 @Mapper
 public interface LotMapper {
     void updateStatus(Long lotId, String status);
-    void save(Lot lot);
     List<Lot> findLotsByProductId(@Param("productId") Long productId,
                                   @Param("requiredLotCount") int requiredLotCount);
 
