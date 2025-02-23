@@ -127,7 +127,7 @@ pipeline {
                         ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
                             cd /home/ec2-user/backend
                             docker container prune -f
-                            docker ps -a | grep '${port}' | awk '"'"'{print $1}'"'"' | xargs -r docker rm -f
+                            docker ps -a | grep '${port}' | awk '"'"'{print \$1}'"'"' | xargs -r docker rm -f
                             docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml down || true
                         '
 
