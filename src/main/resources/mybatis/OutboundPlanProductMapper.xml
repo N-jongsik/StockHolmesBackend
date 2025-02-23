@@ -33,7 +33,7 @@
         <result property="totalRequiredQuantity" column="total_required_quantity"/>
     </resultMap>
 
-    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="product.outboundPlanProductId">
+    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="outboundPlanProductId">
         INSERT INTO outbound_plan_product
         (outbound_plan_id, product_id, required_quantity, stock_used_quantity, order_quantity, status)
         VALUES
