@@ -21,5 +21,6 @@ public class FlatBinDto {
     private Long outboundId;
     private String productCode;
     private String productName;
+    private String productImage;
 }
 
