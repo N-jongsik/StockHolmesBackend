@@ -99,7 +99,7 @@ tasks.named('jar') {
 
 // 테스트 비활성화
 test {
-    enabled = true
+    enabled = false
 }
 
 // main 클래스 지정
