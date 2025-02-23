@@ -2,8 +2,6 @@ package com.example.wms.worker.adapter.in;
 
 import com.example.wms.outbound.adapter.in.dto.OutboundLotDTO;
 import com.example.wms.outbound.application.port.in.CreateOutboundAssignUseCase;
-import com.example.wms.worker.adapter.in.dto.WorkerOutboundDto;
-import com.example.wms.worker.application.port.in.WorkerOutboundUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
