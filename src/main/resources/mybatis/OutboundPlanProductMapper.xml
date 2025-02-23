@@ -33,7 +33,7 @@
         <result property="totalRequiredQuantity" column="total_required_quantity"/>
     </resultMap>
 
-    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="outbound_plan_product_id">
+    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="product.outboundPlanProductId">
         INSERT INTO outbound_plan_product
         (outbound_plan_id, product_id, required_quantity, stock_used_quantity, order_quantity, status)
         VALUES
@@ -41,5 +41,6 @@
             (#{product.outboundPlanId}, #{product.productId}, #{product.requiredQuantity}, #{product.stockUsedQuantity}, #{product.orderQuantity}, #{product.status})
         </foreach>
     </insert>
+
 
 </mapper>
