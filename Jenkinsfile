@@ -126,42 +126,63 @@ pipeline {
                     sh """
                         ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
                             cd /home/ec2-user/backend
-
-                            # Clean up existing containers
-                            docker ps -a | grep "${port}" | grep "Exited" | awk "{print \\\$1}" | xargs -r docker rm
-
-                            # Stop current containers
+                            docker container prune -f
+                            docker ps -a | grep '${port}' | awk '"'"'{print \$1}'"'"' | xargs -r docker rm -f
                             docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml down || true
                         '
 
-                        # Transfer docker image
                         docker save ${DOCKER_TAG} | ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store 'docker load'
 
-                        # Start new containers
                         ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
                             cd /home/ec2-user/backend
                             export BUILD_NUMBER=${BUILD_NUMBER}
                             docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml up -d
-
                             echo "Waiting for container to start..."
                             sleep 10
                         '
 
-                        # Update Nginx configuration
-                        ssh -o StrictHostKeyChecking=no ec2-user@ip-172-31-43-48 "
+                        ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store "
                             sudo sed -i 's/set \\\$deployment_env \\\".*\\\";/set \\\$deployment_env \\\"${deployEnv}\\\";/' /etc/nginx/conf.d/backend.conf
                             echo '${deployEnv}' | sudo tee /etc/nginx/deployment_env
                             sudo nginx -t && sudo systemctl reload nginx
                         "
+                    """
 
-                        # Clean up previous environment
-                        if [ '${currentEnv}' != 'none' ]; then
+
+                    def isHealthy = sh(
+                        script: '''
+                            ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
+                                max_attempts=5
+                                attempt=0
+                                while [ $attempt -lt $max_attempts ]; do
+                                    health_response=$(curl -s -o /dev/null -w "%{http_code}" https://api.stockholmes.store/api/health)
+                                    if [ "$health_response" = "200" ]; then
+                                        echo "Container is healthy"
+                                        exit 0
+                                    fi
+                                    attempt=$((attempt + 1))
+                                    echo "Health check attempt $attempt failed. Retrying in 10 seconds..."
+                                    sleep 10
+                                done
+                                echo "Container health check failed after $max_attempts attempts"
+                                exit 1
+                            '
+                        ''',
+                        returnStatus: true
+                    )
+
+                    if (isHealthy != 0) {
+                        error "Container deployment failed health check"
+                    }
+
+                    if (currentEnv != 'none') {
+                        sh """
                             ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
                                 cd /home/ec2-user/backend
                                 docker-compose -p spring-wms-${currentEnv} -f docker-compose.${currentEnv}.yml down
                             '
-                        fi
-                    """
+                        """
+                    }
                 }
             }
         }
@@ -169,25 +190,13 @@ pipeline {
     post {
         success {
             slackSend (
-                message: """
-                    :white_check_mark: 배포 성공 ! :white_check_mark:
-
-                    *Job*: ${env.JOB_NAME} [${env.BUILD_NUMBER}]
-                    *빌드 URL*: <${env.BUILD_URL}|링크>
-                    *최근 커밋 메시지*: ${env.GIT_COMMIT_MESSAGE}
-                """
+                message: ":white_check_mark: 배포 성공! Job: ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
             )
         }
 
         failure {
             slackSend (
-                message: """
-                    :x: 배포 실패 :x:
-
-                    *Job*: ${env.JOB_NAME} [${env.BUILD_NUMBER}]
-                    *빌드 URL*: <${env.BUILD_URL}|링크>
-                    *최근 커밋 메시지*: ${env.GIT_COMMIT_MESSAGE}
-                """
+                message: ":x: 배포 실패! Job: ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
             )
         }
     }
