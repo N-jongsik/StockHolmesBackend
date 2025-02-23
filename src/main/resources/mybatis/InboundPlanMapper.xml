@@ -35,7 +35,9 @@
         FROM inbound i
         INNER JOIN `order` o ON i.order_id = o.order_id
         <where>
-            i.schedule_number IS NOT NULL AND check_number IS NULL
+            i.schedule_number IS NOT NULL
+            AND check_number IS NULL
+            AND put_away_number IS NULL
             <if test="startDate != null">
                 AND schedule_date <![CDATA[>=]]> #{startDate}
             </if>
@@ -70,7 +72,9 @@
         SELECT COUNT(*)
         FROM inbound
         <where>
-            schedule_number is not null AND check_number is null
+            schedule_number IS NOT NULL
+            AND check_number IS NULL
+            AND put_away_number IS NULL
             <if test="startDate != null">
                 AND
                 schedule_date <![CDATA[>=]]> #{startDate}

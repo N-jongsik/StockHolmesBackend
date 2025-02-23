@@ -2,7 +2,6 @@ package com.example.wms.worker.application.service;
 
 import com.example.wms.inbound.application.port.out.AssignInboundNumberPort;
 import com.example.wms.inbound.application.port.out.InboundPort;
-import com.example.wms.infrastructure.pagination.util.PageableUtils;
 import com.example.wms.product.application.domain.Lot;
 import com.example.wms.product.application.domain.LotStatus;
 import com.example.wms.product.application.port.out.BinPort;

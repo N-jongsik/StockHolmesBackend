@@ -38,7 +38,9 @@
         FROM inbound i
         INNER JOIN `order` o ON i.order_id = o.order_id
         <where>
-            i.put_away_number IS NOT NULL
+            schedule_number IS NOT NULL
+            AND check_number IS NOT NULL
+            AND put_away_number IS NOT NULL
             <if test="startDate != null">
                 AND put_away_date <![CDATA[>=]]> #{startDate}
             </if>
@@ -73,7 +75,7 @@
         SELECT COUNT(*)
         FROM inbound
         <where>
-            put_away_number IS NOT NULL
+            schedule_number IS NOT NULL AND check_number IS NOT NULL AND put_away_number IS NOT NULL
             <if test="startDate != null">
                 AND
                 put_away_date <![CDATA[>=]]> #{startDate}
@@ -85,8 +87,7 @@
             </if>
 
             <if test="inboundPutAwayNumber != null and inboundPutAwayNumber != ''">
-                AND
-                put_away_number LIKE CONCAT('%', #{inboundPutAwayNumber}, '%')
+                AND put_away_number LIKE CONCAT('%', #{inboundPutAwayNumber}, '%')
             </if>
         </where>
     </select>

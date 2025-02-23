@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS product (
                                         lead_time INT, -- 이 품목이 납품업체로부터 납품될 때까지 걸리는 시간
                                         location_bin_code VARCHAR(50), -- 위치 BIN 코드
                                         abc_grade CHAR(1), -- ABC 등급
+                                        product_image VARCHAR(255),
                                         created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 생성 날짜
                                         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- 수정 날짜
                                         FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id) -- 외래키: supplier 테이블 참조
