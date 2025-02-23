@@ -20,7 +20,7 @@
         p.product_id,
         p.product_code,
         p.product_name,
-        (p.stock_lot_count * p.lot_unit) AS product_count,
+        p.lot_unit AS product_count,
         bin.bin_code AS location_bin_code
         FROM (
         SELECT
