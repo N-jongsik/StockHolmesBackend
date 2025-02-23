@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/outboundAssign")
@@ -35,7 +34,8 @@ public class OutboundAssignController {
     @PostMapping("register/{outboundPlanId}")
     @Operation(summary = "출고 지시 등록", description = "outbound 테이블 생성됨")
     public ResponseEntity<Void> createOutboundAssign(@PathVariable Long outboundPlanId){
-        Notification notification = createOutboundAssignUseCase.createOutboundAssign(outboundPlanId);
+        String worker = "create";
+        Notification notification = createOutboundAssignUseCase.createOutboundAssign(worker, outboundPlanId);
         notificationUseCase.send(UserRole.ROLE_ADMIN, notification);
         return ResponseEntity.ok().build();
     }

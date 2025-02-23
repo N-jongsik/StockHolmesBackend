@@ -2,6 +2,7 @@ package com.example.wms.inbound.adapter.out;
 
 import com.example.wms.inbound.application.port.out.AssignInboundNumberPort;
 import com.example.wms.infrastructure.mapper.InboundNumberMapper;
+import com.example.wms.infrastructure.mapper.LotMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 public class AssignInboundNumberAdapter implements AssignInboundNumberPort {
 
     private final InboundNumberMapper inboundNumberMapper;
+    private final LotMapper lotMapper;
 
     @Override
     public String findMaxISNumber() {
@@ -25,4 +27,10 @@ public class AssignInboundNumberAdapter implements AssignInboundNumberPort {
     public String findMaxPANumber() {
         return inboundNumberMapper.findMaxPANumber();
     }
+
+    @Override
+    public String findMaxLONumber() {
+        return lotMapper.findMaxLONumber();
+    }
+
 }

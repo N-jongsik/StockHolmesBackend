@@ -47,6 +47,7 @@ public class CreateOutboundPlanService implements CreateOutboundPlanUseCase {
 
         // DB에 저장하기
         createOutboundPlanPort.save(outboundPlan);
+        System.out.println("🤬 "+outboundPlan.getOutboundPlanId());
         return outboundPlan.getOutboundPlanId();
     }
 }

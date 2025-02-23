@@ -9,6 +9,7 @@ import com.example.wms.outbound.application.domain.Outbound;
 import com.example.wms.outbound.application.domain.OutboundPlan;
 import com.example.wms.outbound.application.port.out.GetOutboundAssignPort;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -45,5 +46,10 @@ public class GetOutboundAssignAdapter implements GetOutboundAssignPort {
     @Override
     public Outbound findOutboundByOutboundId(Long outboundId) {
         return outboundAssignMapper.findOutboundByOutboundId(outboundId);
+    }
+
+    @Override
+    public List<Outbound> findOutboundsByScheduleDate(@Param("scheduleDate") LocalDate scheduleDate) {
+        return outboundAssignMapper.findOutboundsByScheduleDate(scheduleDate);
     }
 }

@@ -6,6 +6,9 @@ import com.example.wms.product.application.port.out.LotPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class LotAdapter implements LotPort {
@@ -19,7 +22,37 @@ public class LotAdapter implements LotPort {
     }
 
     @Override
-    public void insertLot(Lot lot) {
-        lotMapper.save(lot);
+    public Long insertLot(Lot lot) {
+        return lotMapper.save(lot);
+    }
+
+    @Override
+    public Long findLot(Long binId) {
+        return lotMapper.findLot(binId);
+    }
+
+    @Override
+    public Lot findById(Long lotId) {
+        return lotMapper.findById(lotId);
+    }
+
+    @Override
+    public List<Lot> findLotsByProductId(Long productId, int requiredLotCount) {
+        return lotMapper.findLotsByProductId(productId, requiredLotCount);
+    }
+
+    @Override
+    public List<Lot> findLotsSupplierByProductId(Long productId, int requiredLotCount) {
+        return lotMapper.findLotsSupplierByProductId(productId, requiredLotCount);
+    }
+
+    @Override
+    public void updateOutboundIdForLots(List<Long> lotIds, Long outboundId) {
+        lotMapper.updateOutboundIdForLots(lotIds, outboundId);
+    }
+
+    @Override
+    public List<Lot> findLotsByProductIdAndCreateDate(Long productId, int requiredLotCount, LocalDate createDate) {
+        return List.of();
     }
 }

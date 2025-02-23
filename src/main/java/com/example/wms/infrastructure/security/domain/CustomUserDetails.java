@@ -20,11 +20,18 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> auth = new ArrayList<>();
-
-        if (this.user.getUserRole().equals(UserRole.ROLE_ADMIN)) {
-            auth.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        } else {
-            auth.add(new SimpleGrantedAuthority("ROLE_USER"));
+        switch (this.user.getUserRole()) {
+            case ROLE_ADMIN:
+                auth.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                break;
+            case ROLE_SUPPLIER:
+                auth.add(new SimpleGrantedAuthority("ROLE_SUPPLIER"));
+                break;
+            case ROLE_WORKER:
+                auth.add(new SimpleGrantedAuthority("ROLE_WORKER"));
+                break;
+            default:
+                auth.add(new SimpleGrantedAuthority("ROLE_USER"));
         }
         return auth;
     }

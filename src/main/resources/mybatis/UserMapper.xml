@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.wms.infrastructure.mapper.UserMapper">
-
     <resultMap id="userResultMap" type="com.example.wms.user.application.domain.User">
         <id property="userId" column="user_id"/>
         <result property="name" column="name"/>
@@ -19,58 +18,75 @@
 
     <!-- 회원가입 -->
     <insert id="save" useGeneratedKeys="true" keyProperty="userId">
-        INSERT INTO Users (staff_number, password, name, phone, gender, birth_date, supplier_id, user_role, address, is_active, created_at, updated_at)
+        INSERT INTO users (staff_number, password, name, phone, gender, birth_date, supplier_id, user_role, address, is_active, created_at, updated_at)
         VALUES (#{user.staffNumber}, #{user.password}, #{user.name}, #{user.phone}, #{user.gender}, #{user.birthDate}, #{user.supplierId}, #{user.userRole}, #{user.address}, #{user.isActive}, NOW(), NOW());
     </insert>
 
     <!-- 직원 번호로 사용자 조회 -->
     <select id="findByStaffNumber" parameterType="String" resultMap="userResultMap">
-        SELECT * FROM Users WHERE staff_number = #{staffNumber}
+        SELECT * FROM users WHERE staff_number = #{staffNumber}
     </select>
 
     <!-- 직원 번호로 이미 존재하는지 체크 -->
-    <select id="existsByStaffNumber" parameterType="String" resultType="Integer">
-        SELECT COUNT(*) FROM Users WHERE staff_number = #{staffNumber};
+    <select id="existsByStaffNumber" parameterType="string" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM users
+        WHERE staff_number = #{staffNumber}
     </select>
+
 
     <!-- 직원 번호로 사용자 삭제 -->
     <delete id="deleteByStaffNumber" parameterType="String">
-        DELETE FROM Users WHERE staff_number = #{staffNumber}
+        DELETE FROM users WHERE staff_number = #{staffNumber}
     </delete>
 
     <!-- 사용자 정보 업데이트 -->
     <update id="updateUser" parameterType="com.example.wms.user.application.domain.User">
-        UPDATE Users
-        SET
-            password = #{user.password},
-            name = #{user.name},
-            phone = #{user.phone},
-            gender = #{user.gender},
-            birth_date = #{user.birthDate},
-            supplier_id = #{user.supplierId},
-            user_role = #{user.userRole},
-            updated_at = NOW()
+        UPDATE users SET password = #{user.password}, name = #{user.name}, phone = #{user.phone}, gender = #{user.gender}, birth_date = #{user.birthDate}, supplier_id = #{user.supplierId}, user_role = #{user.userRole}, updated_at = NOW()
         WHERE staff_number = #{user.staffNumber};
     </update>
 
     <!-- 사용자 ID로 조회 -->
     <select id="findById" parameterType="Long" resultMap="userResultMap">
-        SELECT * FROM Users WHERE user_id = #{userId} LIMIT 1;
+        SELECT * FROM users WHERE user_id = #{userId} LIMIT 1;
     </select>
 
     <!-- 모든 사용자 조회 -->
     <select id="findAllUsers" resultMap="userResultMap">
-        SELECT * FROM Users
-        LIMIT #{limit} OFFSET #{offset};
+        SELECT * FROM users LIMIT #{limit} OFFSET #{offset};
     </select>
 
     <!-- 역할에 따른 마지막 사번 조회 -->
     <select id="findLastStaffNumberByRole" parameterType="String" resultType="String">
-        SELECT staff_number
-        FROM Users
-        WHERE staff_number LIKE CONCAT(#{prefix}, '%')
-        ORDER BY staff_number DESC
-            LIMIT 1
+        SELECT staff_number FROM users WHERE staff_number LIKE CONCAT(#{prefix}, '%') ORDER BY staff_number DESC LIMIT 1
     </select>
 
+    <!-- 사용자 권한 변경 -->
+    <update id="updateUserRole">
+        UPDATE users
+        SET user_role = #{newRole},
+            updated_at = NOW()
+        WHERE staff_number = #{staffNumber}
+    </update>
+
+    <!-- 사용자 활성 상태 변경 -->
+    <update id="updateUserActive">
+        UPDATE users
+        SET is_active = #{isActive},
+            updated_at = NOW()
+        WHERE staff_number = #{staffNumber}
+    </update>
+
+    <!-- 비밀번호 변경 -->
+    <update id="updateUserPassword">
+        UPDATE users
+        SET password = #{newPassword},
+            updated_at = NOW()
+        WHERE staff_number = #{staffNumber}
+    </update>
+
+    <!-- 전체 사용자 수 조회 -->
+    <select id="countTotalUsers" resultType="long">
+        SELECT COUNT(*) FROM users
+    </select>
 </mapper>

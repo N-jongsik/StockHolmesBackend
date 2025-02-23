@@ -34,7 +34,8 @@
         SELECT product_id, supplier_id, product_name, product_code
         FROM product
         <choose>
-            <when test="supplierIds != null and supplierIds.size() > 0">
+            <!-- supplierIds가 null이 아니고, 비어있지 않은 경우에만 WHERE 절 실행 -->
+            <when test="supplierIds != null and supplierIds != {}">
                 WHERE supplier_id IN
                 <foreach item="supplierId" collection="supplierIds" open="(" separator="," close=")">
                     #{supplierId}
@@ -46,7 +47,7 @@
         </choose>
     </select>
 
-    <select id="findSupplierOverview">
+    <select id="findSupplierOverview" resultType="com.example.wms.order.adapter.in.dto.SupplierOverviewDto">
         select supplier_id, supplier_name
         from supplier
     </select>

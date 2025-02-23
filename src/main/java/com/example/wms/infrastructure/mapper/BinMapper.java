@@ -1,6 +1,7 @@
 package com.example.wms.infrastructure.mapper;
 
 import com.example.wms.product.adapter.out.dto.FlatBinDto;
+import com.example.wms.product.application.domain.Bin;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -16,4 +17,6 @@ public interface BinMapper {
     List<Long> findBinIdsByBinPrefix(@Param("binPrefix") String binPrefix);
     Long findExactBinIdByBinCode(@Param("binCode") String binCode);
     void incrementBinAmount(Long binId, Integer lotCount);
+    Bin findBinByBinId(Long binId);
+    String findBinCode(@Param("binId") Long binId);
 }

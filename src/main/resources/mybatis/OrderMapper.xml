@@ -133,7 +133,7 @@
 
 
 
-    <select id="countAllOrder">
+    <select id="countAllOrder" resultType="int">
         SELECT COUNT(*)
         FROM `order` o
         <if test="startDate != null">
@@ -182,7 +182,7 @@
         FROM `order` o
         WHERE 1=1
         AND o.supplier_id = #{supplierId}
-        AND o.is_approved = false
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
         ) o
         JOIN supplier s ON o.supplier_id = s.supplier_id
         LEFT JOIN order_product op ON o.order_id = op.order_id
@@ -206,14 +206,12 @@
         </if>
         o.order_date DESC
 
-        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
     </select>
 
-    <select id="countAllOrderSupplier">
+    <select id="countAllOrderSupplier" resultType="int">
         SELECT COUNT(*)
         FROM `order` o
         WHERE o.supplier_id = #{supplierId}
-        AND o.is_approved = false
         <if test="startDate != null">
             AND o.order_date <![CDATA[>=]]> #{startDate}
         </if>

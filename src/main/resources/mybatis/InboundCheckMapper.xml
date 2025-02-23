@@ -18,9 +18,16 @@
         p.product_id,
         p.product_code,
         p.product_name,
-        op.product_count AS product_count,
+        op.product_count,
         p.stock_lot_count AS stock_lot_count,
-        op.defective_count AS defective_count
+        op.defective_count AS defective_count,
+        l.lot_id,
+        l.lot_number,
+        p.product_id,
+        p.product_code,
+        p.product_name,
+        p.lot_unit,
+        bb.bin_code AS location_bin_code
         FROM (
         SELECT
         i.inbound_id,
@@ -37,7 +44,8 @@
         FROM inbound i
         INNER JOIN `order` o ON i.order_id = o.order_id
         <where>
-            check_number IS NOT NULL
+            schedule_number IS NOT NULL
+            AND check_number IS NOT NULL
             AND put_away_number IS NULL
             <if test="startDate != null">
                 AND check_date <![CDATA[>=]]> #{startDate}
@@ -65,6 +73,8 @@
         ) b
         INNER JOIN order_product op ON b.order_id = op.order_id
         INNER JOIN product p ON op.product_id = p.product_id
+        INNER JOIN lot l ON p.product_id = l.product_id AND l.inbound_id = b.inbound_id
+        INNER JOIN bin bb ON l.bin_id = bb.bin_id
         INNER JOIN supplier s ON b.supplier_id = s.supplier_id
     </select>
 
@@ -72,7 +82,7 @@
         SELECT COUNT(*)
         FROM inbound
         <where>
-            check_number is not null AND put_away_number is null
+            schedule_number IS NOT NULL AND check_number IS NOT NULL AND put_away_number IS NULL
             <if test="startDate != null">
                 AND
                 check_date <![CDATA[>=]]> #{startDate}
@@ -110,5 +120,15 @@
             <result property="stockLotCount" column="stock_lot_count"/>
             <result property="defectiveCount" column="defective_count"/>
         </collection>
+        <collection property="lotList" ofType="com.example.wms.inbound.adapter.in.dto.response.LotResDto">
+            <id property="lotId" column="lot_id"/>
+            <result property="lotNumber" column="lot_number"/>
+            <result property="productId" column="product_id"/>
+            <result property="productCode" column="product_code"/>
+            <result property="productName" column="product_name"/>
+            <result property="productCount" column="lot_unit"/>
+            <result property="locationBinCode" column="location_bin_code"/>
+        </collection>
+
     </resultMap>
 </mapper>

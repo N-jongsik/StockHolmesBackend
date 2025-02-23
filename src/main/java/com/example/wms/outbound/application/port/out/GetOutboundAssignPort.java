@@ -4,6 +4,7 @@ import com.example.wms.outbound.adapter.in.dto.OutboundAssignResponseDto;
 import com.example.wms.outbound.adapter.in.dto.ProductInfoDto;
 import com.example.wms.outbound.application.domain.Outbound;
 import com.example.wms.outbound.application.domain.OutboundPlan;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
@@ -15,4 +16,5 @@ public interface GetOutboundAssignPort {
     OutboundPlan findOutboundPlanByOutboundPlanId(Long outboundPlanId);
     Integer countAssign(String outboundAssignNumber, LocalDate startDate, LocalDate endDate);
     Outbound findOutboundByOutboundId(Long outboundId);
+    List<Outbound> findOutboundsByScheduleDate(@Param("scheduleDate") LocalDate scheduleDate);
 }

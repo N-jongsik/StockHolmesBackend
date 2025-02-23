@@ -1,10 +1,8 @@
 package com.example.wms.inbound.application.domain;
 
-import com.example.wms.infrastructure.entity.BaseEntity;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter

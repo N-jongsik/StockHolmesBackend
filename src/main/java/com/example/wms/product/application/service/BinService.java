@@ -62,6 +62,7 @@ public class BinService implements BinUseCase {
                             flat.getProductId() != null ? ProductInBinDto.builder()
                                     .productCode(flat.getProductCode())
                                     .productName(flat.getProductName())
+                                    .productImageUrl(flat.getProductImage())
                                     .build()
                                     : null // Product 데이터가 없을 경우 null 처리
                     )
@@ -82,6 +83,7 @@ public class BinService implements BinUseCase {
 
         if (locationBinCode.split("-").length == 4) {
             Long binId = binPort.findExactBinIdByBinCode(locationBinCode);
+
             binIds = (binId != null) ? List.of(binId) : List.of();
         } else {
             binIds = binPort.findBinIdsByBinPrefix(locationBinCode);

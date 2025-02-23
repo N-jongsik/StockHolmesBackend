@@ -13,7 +13,7 @@
         WHERE product_id = #{productId}
     </update>
 
-    <insert id="batchInsert">
+    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="orderProductId">
         INSERT INTO order_product (order_id, product_count, product_id, is_defective, product_name)
         VALUES
         <foreach collection="products" item="product" separator=",">
@@ -28,6 +28,18 @@
         VALUES
         (#{orderProduct.orderId}, #{orderProduct.productCount}, #{orderProduct.productId}, #{orderProduct.productName}, #{orderProduct.isDefective}, #{orderProduct.defectiveCount})
     </insert>
+
+    <select id="findByOrderId" resultType="com.example.wms.order.application.domain.OrderProduct">
+        SELECT *
+        FROM order_product
+        WHERE order_id = #{orderId} AND product_id = #{productId}
+    </select>
+
+    <update id="update">
+        UPDATE order_product
+        SET defective_count = #{defectiveCount}
+        WHERE order_product_id = #{orderProductId}
+    </update>
 </mapper>
 
 

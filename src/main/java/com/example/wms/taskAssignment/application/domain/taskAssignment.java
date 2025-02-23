@@ -1,6 +1,5 @@
 package com.example.wms.taskAssignment.application.domain;
 
-import com.example.wms.infrastructure.entity.BaseEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -10,7 +9,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class taskAssignment extends BaseEntity {
+public class taskAssignment {
     private Long taskId;
 
     private Long userId;

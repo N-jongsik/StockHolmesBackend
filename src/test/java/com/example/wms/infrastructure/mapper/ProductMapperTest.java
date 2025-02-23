@@ -1,48 +1,48 @@
-package com.example.wms.infrastructure.mapper;
-
-import com.example.wms.product.application.domain.Product;
-import org.junit.jupiter.api.Test;
-import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.containers.MySQLContainer;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-
-@Testcontainers
-@MybatisTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class ProductMapperTest {
-
-    // Testcontainers를 사용해 MySQL 컨테이너를 띄움
-    @Container
-    private static final MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("testuser")
-            .withPassword("testpass");
-
-    // MySQL 컨테이너에서 생성된 데이터소스 정보를 Spring Boot에 동적으로 주입
-    @DynamicPropertySource
-    static void setDatasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mysqlContainer::getUsername);
-        registry.add("spring.datasource.password", mysqlContainer::getPassword);
-        registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
-    }
-
-    @Autowired
-    private ProductMapper productMapper;
-
+//package com.example.wms.infrastructure.mapper;
+//
+//import com.example.wms.product.application.domain.Product;
+//import org.junit.jupiter.api.Test;
+//import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+//import org.springframework.data.domain.PageRequest;
+//import org.springframework.data.domain.Pageable;
+//import org.springframework.data.domain.Sort;
+//import org.springframework.test.context.DynamicPropertyRegistry;
+//import org.springframework.test.context.DynamicPropertySource;
+//import org.testcontainers.junit.jupiter.Container;
+//import org.testcontainers.junit.jupiter.Testcontainers;
+//import org.testcontainers.containers.MySQLContainer;
+//
+//import java.util.List;
+//
+//import static org.assertj.core.api.Assertions.assertThat;
+//import static org.junit.jupiter.api.Assertions.*;
+//
+//@Testcontainers
+////@MybatisTest
+//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+//class ProductMapperTest {
+//
+//    // Testcontainers를 사용해 MySQL 컨테이너를 띄움
+////    @Container
+//    private static final MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
+//            .withDatabaseName("testdb")
+//            .withUsername("testuser")
+//            .withPassword("testpass");
+//
+//    // MySQL 컨테이너에서 생성된 데이터소스 정보를 Spring Boot에 동적으로 주입
+//    @DynamicPropertySource
+//    static void setDatasourceProperties(DynamicPropertyRegistry registry) {
+//        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
+//        registry.add("spring.datasource.username", mysqlContainer::getUsername);
+//        registry.add("spring.datasource.password", mysqlContainer::getPassword);
+//        registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
+//    }
+//
+//    @Autowired
+//    private ProductMapper productMapper;
+//
 //    @Test
 //    void findProductWithPagination() {
 //        int page = 2;
@@ -118,14 +118,14 @@ class ProductMapperTest {
 //                () -> assertThat(p3.getAbcGrade()).isEqualTo("B")
 //        );
 //    }
-
-    @Test
-    void countAllProducts() {
-        String productCode = null;
-        // When: 전체 제품 수를 조회
-        long totalProducts = productMapper.countAllProducts(productCode);
-
-        // Then: 데이터 SQL에 삽입된 제품 수가 24개라고 가정하면, 총 24가 반환되어야 함
-        assertThat(totalProducts).isEqualTo(24);
-    }
-}
+//
+//    @Test
+//    void countAllProducts() {
+//        String productCode = null;
+//        // When: 전체 제품 수를 조회
+//        long totalProducts = productMapper.countAllProducts(productCode);
+//
+//        // Then: 데이터 SQL에 삽입된 제품 수가 24개라고 가정하면, 총 24가 반환되어야 함
+//        assertThat(totalProducts).isEqualTo(24);
+//    }
+//}

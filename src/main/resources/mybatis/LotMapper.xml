@@ -16,4 +16,64 @@
         #{status, typeHandler=com.example.wms.product.application.domain.LotStatusTypeHandler}, #{inboundId},
         #{outboundId})
     </insert>
+
+    <select id="findLotsByProductId" resultType="com.example.wms.product.application.domain.Lot">
+        SELECT lot_id, bin_id
+        FROM lot
+        WHERE product_id = #{productId}
+          AND outbound_id IS NULL
+        ORDER BY created_at ASC
+            LIMIT #{requiredLotCount}
+    </select>
+
+    <select id="findLotsSupplierByProductId" resultType="com.example.wms.product.application.domain.Lot">
+        SELECT lot_id, bin_id
+        FROM lot
+        WHERE product_id = #{productId}
+        ORDER BY created_at ASC
+            LIMIT #{requiredLotCount}
+    </select>
+
+    <update id="updateOutboundIdForLots">
+        UPDATE lot
+        SET outbound_id = #{outboundId}, status = "출고중"
+        WHERE lot_id IN
+        <foreach collection="lotIds" item="lotId" open="(" separator="," close=")">
+            #{lotId}
+        </foreach>
+    </update>
+
+    <select id="findLotByProductId">
+        SELECT *
+        FROM lot
+        WHERE product_id = #{productId}
+    </select>
+
+    <select id="findMaxLONumber" resultType="java.lang.String">
+        SELECT lot_number
+        FROM lot
+        ORDER BY lot_number DESC LIMIT 1
+    </select>
+
+    <select id="findLot" resultType="java.lang.Long">
+        SELECT lot_id
+        FROM lot
+        WHERE product_id = #{productId}
+    </select>
+
+    <select id="findById" resultMap="LotResultMap">
+        SELECT *
+        FROM lot
+        WHERE lot_id = #{lotId}
+    </select>
+
+    <resultMap id="LotResultMap" type="com.example.wms.product.application.domain.Lot">
+        <id column="lot_id" property="lotId"/>
+        <result column="lot_number" property="lotNumber"/>
+        <result column="product_id" property="productId"/>
+        <result column="bin_id" property="binId"/>
+        <result column="status" property="status"/>
+        <result column="inbound_id" property="inboundId"/>
+        <result column="outbound_id" property="outboundId"/>
+    </resultMap>
 </mapper>

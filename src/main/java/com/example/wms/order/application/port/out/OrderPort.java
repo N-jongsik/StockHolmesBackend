@@ -1,5 +1,8 @@
 package com.example.wms.order.application.port.out;
 
+import com.example.wms.order.application.domain.Order;
+
 public interface OrderPort {
-    void createOrder(Long productId, Long inboundId, Long defectiveCount);
+    Long createOrder(Long productId, Long inboundId, Long defectiveCount);
+    Long createOrderWithSupplier(Long supplierId, Long inboundId);
 }

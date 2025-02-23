@@ -1,5 +1,6 @@
 package com.example.wms.order.adapter.out;
 
+import com.example.wms.inbound.application.domain.Inbound;
 import com.example.wms.infrastructure.exception.NotFoundException;
 import com.example.wms.infrastructure.mapper.*;
 import com.example.wms.order.application.domain.Order;
@@ -31,10 +32,9 @@ public class OrderAdapter implements OrderPort {
     private final InboundMapper inboundMapper;
 
     @Override
-    public void createOrder(Long productId, Long inboundId, Long defectiveCount) {
+    public Long createOrder(Long productId, Long inboundId, Long defectiveCount) {
 
         Product product = productPort.findById(productId);
-        Long orderId;
 
         if (product == null) {
             throw new NotFoundException("Product not found for ID : " + productId);
@@ -53,23 +53,34 @@ public class OrderAdapter implements OrderPort {
                     .orderStatus("처리중")
                     .inboundDate(LocalDate.now())
                     .build();
-            orderId = orderMapper.createOrder(order);
-            System.out.println("🍏"+ orderId);
-
-
-        OrderProduct orderProduct = OrderProduct.builder()
-                .orderId(orderId)
-                .productCount(defectiveCount.intValue()*product.getLotUnit())
-                .productId(productId)
-                .productName(product.getProductName())
-                .isDefective(true)
-                .defectiveCount(defectiveCount)
-                .build();
-        orderProductPort.save(orderProduct);
+            orderMapper.createOrder(order);
+            Long returnOrderId = order.getOrderId();
+        return returnOrderId;
     }
 
+    @Override
+    public Long createOrderWithSupplier(Long supplierId, Long inboundId) {
 
 
+        Order order = orderMapper.findOrderById(inboundMapper.findById(inboundId).getOrderId());
+
+        String orderNumber = generateOrderNumber();
+
+        Order newOrder = Order.builder()
+                .dailyPlanId(order.getDailyPlanId())
+                .supplierId(supplierId)
+                .orderNumber(orderNumber)
+                .orderDate(LocalDate.now())
+                .isApproved(true)
+                .isReturnOrder(true)
+                .orderStatus("처리중")
+                .inboundDate(LocalDate.now())
+                .build();
+
+        orderMapper.createOrder(newOrder);
+        return newOrder.getOrderId();
+
+    }
 
     private String generateOrderNumber() {
         String prefix = "OR" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));

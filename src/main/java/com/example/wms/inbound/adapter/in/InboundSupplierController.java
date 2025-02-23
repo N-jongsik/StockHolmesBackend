@@ -1,8 +1,9 @@
 package com.example.wms.inbound.adapter.in;
 
 import com.example.wms.inbound.adapter.in.dto.response.SupplierInboundResDto;
-import com.example.wms.inbound.application.service.InboundService;
+import com.example.wms.inbound.application.port.in.GetAllInboundBySupplierUseCase;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,9 +20,10 @@ import java.time.LocalDate;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/inboundSupplier")
+@Tag(name = "납품업체별 입고 조회 API")
 public class InboundSupplierController {
 
-    private final InboundService inboundService;
+    private final GetAllInboundBySupplierUseCase getAllInboundBySupplierUseCase;
 
     @GetMapping
     @Operation(summary = "납품업체별 입고 목록 조회하기" , description = "필터링 값이 없으면 전체 조회합니다.")
@@ -32,7 +34,7 @@ public class InboundSupplierController {
             @RequestParam(defaultValue = "10") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<SupplierInboundResDto> response = inboundService.getAllInboundBySupplierWithPagination(startDate, endDate, pageable);
+        Page<SupplierInboundResDto> response = getAllInboundBySupplierUseCase.getAllInboundBySupplierWithPagination(startDate, endDate, pageable);
 
         return ResponseEntity.ok(response);
     }
