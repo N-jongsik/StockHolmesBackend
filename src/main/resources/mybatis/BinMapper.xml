@@ -19,7 +19,8 @@
                l.inbound_id,
                l.outbound_id,
                p.product_code,
-               p.product_name
+               p.product_name,
+               p.product_image
         FROM bin b
                  LEFT JOIN lot l ON b.bin_id = l.bin_id
                  LEFT JOIN product p ON l.product_id = p.product_id;
