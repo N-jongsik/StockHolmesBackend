@@ -36,21 +36,21 @@ public class OutboundPlanController {
     @Operation(summary = "출고 예정 생성하기", description = "outboundPlan & outboundPlanProduct 생성됨")
     public ResponseEntity<Void> createOutbound(@RequestBody OutboundPlanRequestDto outboundPlanRequestDto) {
         // 요청 데이터 로그 출력
-        log.info("Received request to create outbound with data: {}", outboundPlanRequestDto);
+        log.info("출고 예정 생성 요청 데이터: {}", outboundPlanRequestDto);
 
         Long outboundPlanId = createOutboundPlanUseCase.createOutbound(outboundPlanRequestDto);
 
-        log.info("Created outbound plan with ID: {}", outboundPlanId);
+        log.info("생성된 출고 예정 ID: {}", outboundPlanId);
 
         Notification notification = createOutboundPlanProductUseCase.createOutboundPlanProduct(outboundPlanId, outboundPlanRequestDto.getProductList());
 
-        log.info("Created outbound plan product with notification: {}", notification);
+        log.info("생성된 출고 예정 제품 알림: {}", notification);
 
         // UserRole 가져오기
         notificationUseCase.send(UserRole.ROLE_ADMIN, notification);
 
         // 최종 응답 로그
-        log.info("Successfully completed outbound creation for outbound plan ID: {}", outboundPlanId);
+        log.info("출고 예정 생성 완료, 출고 예정 ID: {}", outboundPlanId);
 
         return ResponseEntity.ok().build();
     }
