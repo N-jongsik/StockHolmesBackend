@@ -21,4 +21,5 @@ public class Product {
     private Integer leadTime; // 이 품목이 납품업체로부터 납품될 때 까지 걸리는 시간
     private String locationBinCode;
     private String abcGrade;
+    private String productImage;
 }
