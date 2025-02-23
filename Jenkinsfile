@@ -120,7 +120,10 @@ pipeline {
                     ).trim()
 
                     echo "Current environment: ${currentEnv}"
-                    def deployEnv = params.DEPLOY_ENV ?: (currentEnv == 'blue' ? 'green' : 'blue')
+                    def deployEnv = params.DEPLOY_ENV ?: (currentEnv == 'green' ? 'blue' : 'green')
+                    if (currentEnv == 'none') {
+                        deployEnv = 'blue'
+                    }
                     def port = deployEnv == 'blue' ? '8011' : '8012'
 
                     try {
@@ -170,7 +173,7 @@ pipeline {
                             "
 
                             # Clean up previous environment
-                            if [ '${currentEnv}' != 'none' ]; then
+                            if [ '${currentEnv}' != 'none' ] && [ '${currentEnv}' != '${deployEnv}' ]; then
                                 ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
                                     cd /home/ec2-user/backend
                                     docker-compose -p spring-wms-${currentEnv} -f docker-compose.${currentEnv}.yml down
@@ -191,6 +194,8 @@ pipeline {
                                 '
                             """
                             echo "Rolled back to previous environment: ${currentEnv}"
+                        } else {
+                            echo "No previous environment to roll back to."
                         }
                         currentBuild.result = 'FAILURE'
                         error("Deployment failed")
