@@ -70,7 +70,8 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             "/api/pdf/generate",
             "/api/inbound",
             "/api/dashboard",
-            "/api/worker/outbound"
+            "/api/worker/outbound",
+            "/api/health"
     };
 
     @Override

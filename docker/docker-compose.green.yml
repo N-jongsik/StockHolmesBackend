@@ -1,4 +1,3 @@
-# docker-compose.green.yml
 version: '3'
 services:
   spring-wms-green:
@@ -15,6 +14,12 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
 
 networks:
   servernetwork:
