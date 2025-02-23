@@ -23,6 +23,18 @@ public class GetInboundPlanService implements GetInboundPlanUseCase {
 
     private final GetInboundPlanPort getInboundPlanPort;
 
+    @Override
+    public Page<InboundResDto> getFilteredInboundPlans(String inboundScheduleNumber, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        Pageable safePageable = PageableUtils.convertToSafePageableStrict(pageable, Inbound.class);
+        List<InboundAllProductDto> inboundAllProductDtoList = getInboundPlanPort.findInboundFilteringWithPagination(inboundScheduleNumber, startDate, endDate, safePageable);
+
+        Integer count = getInboundPlanPort.countFilteredInboundPlan(inboundScheduleNumber, startDate, endDate);
+
+        List<InboundResDto> inboundResDtoList = convertToInboundResDto(inboundAllProductDtoList);
+
+        return new PageImpl<>(inboundResDtoList,pageable,count);
+    }
+
     private List<InboundResDto> convertToInboundResDto(List<InboundAllProductDto> inboundDtoList) {
         if (inboundDtoList.isEmpty()) {
             return Collections.emptyList();
@@ -72,15 +84,5 @@ public class GetInboundPlanService implements GetInboundPlanUseCase {
         return new ArrayList<>(inboundMap.values());
     }
 
-    @Override
-    public Page<InboundResDto> getFilteredInboundPlans(String inboundScheduleNumber, LocalDate startDate, LocalDate endDate, Pageable pageable) {
-        Pageable safePageable = PageableUtils.convertToSafePageableStrict(pageable, Inbound.class);
-        List<InboundAllProductDto> inboundAllProductDtoList = getInboundPlanPort.findInboundFilteringWithPagination(inboundScheduleNumber, startDate, endDate, safePageable);
 
-        Integer count = getInboundPlanPort.countFilteredInboundPlan(inboundScheduleNumber, startDate, endDate);
-
-        List<InboundResDto> inboundResDtoList = convertToInboundResDto(inboundAllProductDtoList);
-
-        return new PageImpl<>(inboundResDtoList,pageable,count);
-    }
 }

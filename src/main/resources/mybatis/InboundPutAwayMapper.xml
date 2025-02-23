@@ -20,21 +20,21 @@
         p.product_id,
         p.product_code,
         p.product_name,
-        (p.stock_lot_count * p.lot_unit) AS product_count,
-        l.lot_number AS location_bin_code
+        p.lot_unit AS product_count,
+        bin.bin_code AS location_bin_code
         FROM (
         SELECT
-        i.inbound_id,
-        i.inbound_status,
-        i.created_at,
-        i.schedule_number,
-        i.check_number,
-        i.put_away_number,
-        i.put_away_date,
-        i.order_id,
-        o.order_number,
-        o.order_date,
-        o.supplier_id
+            i.inbound_id,
+            i.inbound_status,
+            i.created_at,
+            i.schedule_number,
+            i.check_number,
+            i.put_away_number,
+            i.put_away_date,
+            i.order_id,
+            o.order_number,
+            o.order_date,
+            o.supplier_id
         FROM inbound i
         INNER JOIN `order` o ON i.order_id = o.order_id
         <where>
@@ -66,6 +66,7 @@
         INNER JOIN lot l ON b.inbound_id = l.inbound_id
         INNER JOIN product p ON l.product_id = p.product_id
         INNER JOIN supplier s ON b.supplier_id = s.supplier_id
+        INNER JOIN bin ON l.bin_id = bin.bin_id
     </select>
 
     <select id="countFilteredPutAway" resultType="int">

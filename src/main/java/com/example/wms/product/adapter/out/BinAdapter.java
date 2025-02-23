@@ -2,6 +2,7 @@ package com.example.wms.product.adapter.out;
 
 import com.example.wms.infrastructure.mapper.BinMapper;
 import com.example.wms.product.adapter.out.dto.FlatBinDto;
+import com.example.wms.product.application.domain.Bin;
 import com.example.wms.product.application.port.out.BinPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -54,7 +55,13 @@ public class BinAdapter implements BinPort {
     }
 
     @Override
+    public Bin findBinByBinId(Long binId) {
+        return binMapper.findBinByBinId(binId);
+    }
+
+    @Override
     public String findBinCode(Long binId) {
         return binMapper.findBinCode(binId);
     }
+
 }

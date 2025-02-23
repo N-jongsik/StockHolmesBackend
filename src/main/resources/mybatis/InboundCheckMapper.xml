@@ -18,7 +18,7 @@
         p.product_id,
         p.product_code,
         p.product_name,
-        op.product_count AS product_count,
+        op.product_count,
         p.stock_lot_count AS stock_lot_count,
         op.defective_count AS defective_count,
         l.lot_id,
@@ -26,8 +26,8 @@
         p.product_id,
         p.product_code,
         p.product_name,
-        (p.stock_lot_count * p.lot_unit) AS product_count,
-        l.lot_number AS location_bin_code
+        p.lot_unit,
+        bb.bin_code AS location_bin_code
         FROM (
         SELECT
         i.inbound_id,
@@ -72,7 +72,8 @@
         ) b
         INNER JOIN order_product op ON b.order_id = op.order_id
         INNER JOIN product p ON op.product_id = p.product_id
-        INNER JOIN lot l ON p.product_id = l.product_id
+        INNER JOIN lot l ON p.product_id = l.product_id AND l.inbound_id = b.inbound_id
+        INNER JOIN bin bb ON l.bin_id = bb.bin_id
         INNER JOIN supplier s ON b.supplier_id = s.supplier_id
     </select>
 
@@ -124,7 +125,7 @@
             <result property="productId" column="product_id"/>
             <result property="productCode" column="product_code"/>
             <result property="productName" column="product_name"/>
-            <result property="productCount" column="product_count"/>
+            <result property="productCount" column="lot_unit"/>
             <result property="locationBinCode" column="location_bin_code"/>
         </collection>
 

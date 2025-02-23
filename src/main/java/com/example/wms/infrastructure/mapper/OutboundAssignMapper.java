@@ -31,4 +31,7 @@ public interface OutboundAssignMapper {
     void updateOutboundPlanStatus(@Param("outboundPlanId") Long outboundPlanId,@Param("status") String status);
 
     Outbound findOutboundByOutboundId(@Param("outboundId") Long outboundId);
+
+    List<Outbound> findOutboundsByScheduleDate(@Param("scheduleDate") LocalDate scheduleDate);
+
 }

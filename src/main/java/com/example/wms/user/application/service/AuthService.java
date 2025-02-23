@@ -126,7 +126,7 @@ public class AuthService implements AuthUseCase {
         User user = authPort.findByStaffNumber(staffNumber)
                 .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND.getMessage()));
 
-        UserRole userRole = UserRole.getUserRole(newRole);
+        UserRole userRole = UserRole.valueOf(newRole);
 
         authPort.updateUserRole(staffNumber, userRole.name());
 
