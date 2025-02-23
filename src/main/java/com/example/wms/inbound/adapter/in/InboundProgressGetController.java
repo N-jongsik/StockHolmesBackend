@@ -3,6 +3,7 @@ package com.example.wms.inbound.adapter.in;
 import com.example.wms.inbound.adapter.in.dto.response.InboundProgressResDto;
 import com.example.wms.inbound.application.service.GetInboundByProgressService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/inboundProcess")
+@Tag(name = "입고진행별 입고 조회 API")
 public class InboundProgressGetController {
 
     private final GetInboundByProgressService getInboundByProgressService;

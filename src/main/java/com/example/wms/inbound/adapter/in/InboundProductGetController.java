@@ -5,6 +5,7 @@ import com.example.wms.inbound.application.port.in.GetAllInboundByProductWithPag
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springdoc.api.annotations.ParameterObject;
@@ -22,6 +23,7 @@ import java.time.LocalDate;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/inboundProduct")
+@Tag(name = "품목별 입고 조회 API")
 public class InboundProductGetController {
 
     private final GetAllInboundByProductWithPaginationUseCase getAllInboundByProductWithPaginationUseCase;

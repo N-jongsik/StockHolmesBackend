@@ -4,6 +4,7 @@ import com.example.wms.inbound.adapter.in.dto.response.InboundPutAwayResDto;
 import com.example.wms.inbound.application.port.in.CreateInboundPutAwayUseCase;
 import com.example.wms.inbound.application.port.in.GetInboundPutAwayUseCase;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/inboundPutAway")
+@Tag(name = "입고 적치 API")
 public class InboundPutAwayCreateController {
 
     private final CreateInboundPutAwayUseCase createInboundPutAwayUseCase;
