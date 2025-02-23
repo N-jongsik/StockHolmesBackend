@@ -123,45 +123,78 @@ pipeline {
                     def deployEnv = params.DEPLOY_ENV ?: (currentEnv == 'blue' ? 'green' : 'blue')
                     def port = deployEnv == 'blue' ? '8011' : '8012'
 
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
-                            cd /home/ec2-user/backend
-
-                            # Clean up existing containers
-                            docker ps -a | grep "${port}" | grep "Exited" | awk "{print \\\$1}" | xargs -r docker rm
-
-                            # Stop current containers
-                            docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml down || true
-                        '
-
-                        # Transfer docker image
-                        docker save ${DOCKER_TAG} | ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store 'docker load'
-
-                        # Start new containers
-                        ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
-                            cd /home/ec2-user/backend
-                            export BUILD_NUMBER=${BUILD_NUMBER}
-                            docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml up -d
-
-                            echo "Waiting for container to start..."
-                            sleep 10
-                        '
-
-                        # Update Nginx configuration
-                        ssh -o StrictHostKeyChecking=no ec2-user@ip-172-31-43-48 "
-                            sudo sed -i 's/set \\\$deployment_env \\\".*\\\";/set \\\$deployment_env \\\"${deployEnv}\\\";/' /etc/nginx/conf.d/backend.conf
-                            echo '${deployEnv}' | sudo tee /etc/nginx/deployment_env
-                            sudo nginx -t && sudo systemctl reload nginx
-                        "
-
-                        # Clean up previous environment
-                        if [ '${currentEnv}' != 'none' ]; then
+                    try {
+                        sh """
                             ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
                                 cd /home/ec2-user/backend
-                                docker-compose -p spring-wms-${currentEnv} -f docker-compose.${currentEnv}.yml down
+
+                                # Clean up existing containers
+                                docker ps -a | grep "${port}" | grep "Exited" | awk "{print \\\$1}" | xargs -r docker rm
+
+                                # Stop current containers
+                                docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml down || true
                             '
-                        fi
-                    """
+
+                            # Transfer docker image
+                            docker save ${DOCKER_TAG} | ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store 'docker load'
+
+                            # Start new containers
+                            ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
+                                cd /home/ec2-user/backend
+                                export BUILD_NUMBER=${BUILD_NUMBER}
+                                docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml up -d
+
+                                echo "Waiting for container to start..."
+                                sleep 30
+
+                                # Health check
+                                for i in {1..10}; do
+                                    if curl -s http://localhost:${port}/api/health | grep -q "OK"; then
+                                        echo "Health check passed"
+                                        break
+                                    fi
+                                    if [ $i -eq 10 ]; then
+                                        echo "Health check failed after 10 attempts"
+                                        exit 1
+                                    fi
+                                    echo "Waiting for health check... Attempt $i"
+                                    sleep 10
+                                done
+                            '
+
+                            # Update Nginx configuration
+                            ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store "
+                                sudo sed -i 's/set \\\$deployment_env \\\".*\\\";/set \\\$deployment_env \\\"${deployEnv}\\\";/' /etc/nginx/conf.d/backend.conf
+                                echo '${deployEnv}' | sudo tee /etc/nginx/deployment_env
+                                sudo nginx -t && sudo systemctl reload nginx
+                            "
+
+                            # Clean up previous environment
+                            if [ '${currentEnv}' != 'none' ]; then
+                                ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
+                                    cd /home/ec2-user/backend
+                                    docker-compose -p spring-wms-${currentEnv} -f docker-compose.${currentEnv}.yml down
+                                '
+                            fi
+                        """
+                    } catch (Exception e) {
+                        echo "Deployment failed: ${e.getMessage()}"
+                        // 롤백 로직
+                        if (currentEnv != 'none') {
+                            sh """
+                                ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
+                                    cd /home/ec2-user/backend
+                                    docker-compose -p spring-wms-${currentEnv} -f docker-compose.${currentEnv}.yml up -d
+                                    sudo sed -i 's/set \\\$deployment_env \\\".*\\\";/set \\\$deployment_env \\\"${currentEnv}\\\";/' /etc/nginx/conf.d/backend.conf
+                                    echo '${currentEnv}' | sudo tee /etc/nginx/deployment_env
+                                    sudo nginx -t && sudo systemctl reload nginx
+                                '
+                            """
+                            echo "Rolled back to previous environment: ${currentEnv}"
+                        }
+                        currentBuild.result = 'FAILURE'
+                        error("Deployment failed")
+                    }
                 }
             }
         }
