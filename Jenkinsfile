@@ -130,7 +130,7 @@ pipeline {
                                 attempt=0
                                 while [ \\\$attempt -lt \\\$max_attempts ]; do
                                     # /api/health 엔드포인트로 헬스 체크
-                                    health_response=\\\$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${port}/api/health)
+                                    health_response=\\\$(curl -s -o /dev/null -w "%{http_code}" https://api.stockholmes.store/api/health)
 
                                     if [ "\\\$health_response" = "200" ]; then
                                         echo "Container is healthy"
