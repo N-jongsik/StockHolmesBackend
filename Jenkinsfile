@@ -127,7 +127,7 @@ pipeline {
                         ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
                             cd /home/ec2-user/backend
                             docker container prune -f
-                            docker ps -a | grep "${port}" | awk "{print \\\$1}" | xargs -r docker rm -f
+                            docker ps -a | grep "${port}" | awk "{print \\$1}" | xargs -r docker rm -f
                             docker-compose -p spring-wms-${deployEnv} -f docker-compose.${deployEnv}.yml down || true
                         '
 
@@ -153,17 +153,17 @@ pipeline {
                             ssh -o StrictHostKeyChecking=no ec2-user@api.stockholmes.store '
                                 max_attempts=5
                                 attempt=0
-                                while [ \\\$attempt -lt \\\$max_attempts ]; do
-                                    health_response=\\\$(curl -s -o /dev/null -w "%{http_code}" https://api.stockholmes.store/api/health)
-                                    if [ "\\\$health_response" = "200" ]; then
+                                while [ $attempt -lt $max_attempts ]; do
+                                    health_response=$(curl -s -o /dev/null -w "%{http_code}" https://api.stockholmes.store/api/health)
+                                    if [ "$health_response" = "200" ]; then
                                         echo "Container is healthy"
                                         exit 0
                                     fi
-                                    attempt=\\\$((attempt + 1))
-                                    echo "Health check attempt \\\$attempt failed. Retrying in 10 seconds..."
+                                    attempt=$((attempt + 1))
+                                    echo "Health check attempt $attempt failed. Retrying in 10 seconds..."
                                     sleep 10
                                 done
-                                echo "Container health check failed after \\\$max_attempts attempts"
+                                echo "Container health check failed after $max_attempts attempts"
                                 exit 1
                             '
                         ''',
@@ -186,7 +186,6 @@ pipeline {
             }
         }
     }
-
     post {
         success {
             slackSend (
