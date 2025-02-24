@@ -5,8 +5,6 @@ import com.example.wms.inbound.application.port.in.CreateInboundPutAwayUseCase;
 import com.example.wms.inbound.application.port.out.AssignInboundNumberPort;
 import com.example.wms.inbound.application.port.out.InboundPort;
 import com.example.wms.infrastructure.exception.NotFoundException;
-import com.example.wms.inventory.application.port.out.InventoryPort;
-import com.example.wms.product.application.port.out.ProductPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +15,6 @@ import java.time.LocalDate;
 public class CreateInboundPutAwayService implements CreateInboundPutAwayUseCase {
 
     private final InboundPort inboundPort;
-    private final ProductPort productPort;
-    private final InventoryPort inventoryPort;
     private final AssignInboundNumberPort assignInboundNumberPort;
 
     @Override
