@@ -69,7 +69,7 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
             OrderProduct existingOrderProduct = orderProductPort.findByOrderId(inbound.getOrderId(), productId);
             orderProductPort.update(existingOrderProduct.getOrderProductId(), (long) defectiveCount);
             int putAwayCount = (existingOrderProduct.getProductCount() - defectiveCount);
-            handleLotCreation(productId, inboundId, putAwayCount);
+            handleLotCreation(productId, inboundId, putAwayCount, putAwayCount / product.getLotUnit());
 
             if (defectiveCount > 0) {
                 Long supplierId = product.getSupplierId();
@@ -115,18 +115,18 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
         private String productName;
     }
 
-    private void handleLotCreation(Long productId, Long inboundId, int putAwayCount) {
+    private void handleLotCreation(Long productId, Long inboundId, int putAwayCount, int lotCount) {
         String locationBinCode = productPort.getLocationBinCode(productId);
-        List<Long> binIds = binUseCase.assignBinIdsToLots(locationBinCode, putAwayCount);
+        List<Long> binIds = binUseCase.assignBinIdsToLots(locationBinCode, lotCount);
 
-        if (binIds.size() < putAwayCount) {
+        if (binIds.size() < lotCount) {
             createLotsWithAssignedBins(productId, inboundId, binIds);
-            createLotsWithDefaultBins(productId, inboundId, putAwayCount - binIds.size());
+            createLotsWithDefaultBins(productId, inboundId, lotCount - binIds.size());
         } else {
-            createLotsWithAssignedBins(productId, inboundId, binIds.subList(0, putAwayCount));
+            createLotsWithAssignedBins(productId, inboundId, binIds.subList(0, lotCount));
         }
         inventoryPort.updateInventory(productId, putAwayCount);
-        productPort.updateRequiredQuantity(productId, putAwayCount);
+        productPort.updateRequiredQuantity(productId, lotCount);
     }
 
     private void createLotsWithAssignedBins(Long productId, Long inboundId, List<Long> binIds) {
