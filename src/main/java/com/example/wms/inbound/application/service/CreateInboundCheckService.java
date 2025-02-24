@@ -68,7 +68,7 @@ public class CreateInboundCheckService implements CreateInboundCheckUseCase {
 
             OrderProduct existingOrderProduct = orderProductPort.findByOrderId(inbound.getOrderId(), productId);
             orderProductPort.update(existingOrderProduct.getOrderProductId(), (long) defectiveCount);
-            int putAwayCount = (existingOrderProduct.getProductCount() - defectiveCount) / product.getLotUnit();
+            int putAwayCount = (existingOrderProduct.getProductCount() - defectiveCount);
             handleLotCreation(productId, inboundId, putAwayCount);
 
             if (defectiveCount > 0) {
