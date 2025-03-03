@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wms.infrastructure.mapper.OrderProductMapper">
+    <select id="findByProductId" resultType="com.example.wms.order.application.domain.OrderProduct">
+        SELECT *
+        FROM order_product
+        WHERE product_id = #{productId}
+    </select>
+
+    <update id="updateDefectiveCount">
+        UPDATE order_product
+        SET defective_count = #{defectiveCount}
+        WHERE product_id = #{productId}
+    </update>
+
+    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="orderProductId">
+        INSERT INTO order_product (order_id, product_count, product_id, is_defective, product_name)
+        VALUES
+        <foreach collection="products" item="product" separator=",">
+            (#{product.orderId}, #{product.productCount}, #{product.productId}, #{product.isDefective}, #{product.productName})
+        </foreach>
+    </insert>
+
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="orderProductId">
+        INSERT INTO order_product
+        (order_id, product_count, product_id, product_name, is_defective, defective_count)
+        VALUES
+        (#{orderProduct.orderId}, #{orderProduct.productCount}, #{orderProduct.productId}, #{orderProduct.productName}, #{orderProduct.isDefective}, #{orderProduct.defectiveCount})
+    </insert>
+
+    <select id="findByOrderId" resultType="com.example.wms.order.application.domain.OrderProduct">
+        SELECT *
+        FROM order_product
+        WHERE order_id = #{orderId} AND product_id = #{productId}
+    </select>
+
+    <update id="update">
+        UPDATE order_product
+        SET defective_count = #{defectiveCount}
+        WHERE order_product_id = #{orderProductId}
+    </update>
+</mapper>
+
+
+

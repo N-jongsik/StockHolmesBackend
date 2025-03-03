@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wms.infrastructure.mapper.WorkerInboundMapper">
+   <select id="findFilteredWorkerInboundList" resultMap="WorkerInboundResultMap" >
+      SELECT
+      i.inbound_id,
+      p.product_id,
+      p.product_code,
+      p.product_name
+      FROM
+      inbound i
+      INNER JOIN lot l ON i.inbound_id = l.inbound_id
+      INNER JOIN product p ON l.product_id = p.product_id
+      <where>
+         1=1
+         <if test="todayDate != null">
+            AND DATE(i.created_at) <![CDATA[<=]]> #{todayDate}
+         </if>
+      </where>
+      GROUP BY i.inbound_id, p.product_id, p.product_code, p.product_name
+   </select>
+
+   <update id="updateLotDefectiveStatus">
+      UPDATE order_product op
+      SET is_defective = #{isDefective}
+      WHERE product_id = #{productId}
+
+   </update>
+
+   <resultMap id="WorkerInboundResultMap" type="com.example.wms.worker.adapter.in.dto.response.WorkerInboundResDto">
+      <id column="inbound_id" property="inboundId"/>
+      <collection property="productList" ofType="com.example.wms.worker.adapter.in.dto.response.WorkerProductResDto">
+         <result column="product_id" property="productId"/>
+         <result column="product_code" property="productCode"/>
+         <result column="product_name" property="productName"/>
+      </collection>
+   </resultMap>
+</mapper>

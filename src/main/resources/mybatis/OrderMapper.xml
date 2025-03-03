@@ -1,20 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.wms.infrastructure.mapper.OrderMapper">
-
+    <resultMap id="orderResultMap" type="com.example.wms.order.adapter.in.dto.OrderResponseDto">
+        <id property="orderId" column="order_id"/>
+        <result property="orderNumber" column="order_number"/>
+        <result property="orderStatus" column="order_status"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="orderDate" column="order_date"/>
+        <result property="isApproved" column="is_approved"/>
+        <result property="isReturnOrder" column="is_return_order"/>
+        <result property="deliveryDeadline" column="delivery_deadline"/>
+        <collection property="productList" ofType="com.example.wms.order.adapter.in.dto.ProductListDto">
+            <result property="productId" column="product_id"/>
+            <result property="productName" column="product_name"/>
+            <result property="productCount" column="product_count"/>
+            <result property="productCode" column="product_code"/>
+        </collection>
+    </resultMap>
     <!-- 주문 전체 조회 -->
     <select id="findAllOrders" resultType="com.example.wms.order.application.domain.Order">
-        SELECT * FROM order
+        SELECT * FROM `order`
     </select>
 
     <!-- 주문 하나 조회 -->
     <select id="findOrderById" parameterType="long" resultType="com.example.wms.order.application.domain.Order">
-        SELECT * FROM order WHERE order_id = #{orderId}
+        SELECT * FROM `order`
+        WHERE order_id = #{orderId}
     </select>
 
     <!-- 승인된 주문 조회 -->
     <select id="findByIsApproved" resultType="com.example.wms.order.application.domain.Order">
-        SELECT * FROM order WHERE is_approved = true
+        SELECT * FROM `order` WHERE is_approved = true
     </select>
 
     <!-- 지연된 주문 조회 -->
@@ -26,5 +43,207 @@
     <select id="findApprovedNotDelayedOrders" resultType="com.example.wms.order.application.domain.Order">
         SELECT * FROM order WHERE is_approved = true AND is_delayed = false
     </select>
+
+    <insert id="saveOrder" parameterType="com.example.wms.order.application.domain.Order">
+        INSERT INTO order (order_id, order_date, is_approved, is_delayed, product_id, customer_id)
+        VALUES (#{orderId}, #{orderDate}, #{isApproved}, #{isDelayed}, #{productId}, #{customerId})
+    </insert>
+
+    <select id="getLastOrderNumber" resultType="String">
+        SELECT order_number FROM `order`
+        WHERE order_number LIKE CONCAT('OR', DATE_FORMAT(NOW(), '%Y%m%d'), '%')
+        ORDER BY order_number DESC
+        LIMIT 1
+    </select>
+
+    <insert id="createOrder" useGeneratedKeys="true" keyProperty="orderId">
+        INSERT INTO `order` (daily_plan_id, supplier_id, order_number, order_date, is_approved, is_return_order,
+        order_status, inbound_date)
+        VALUES (#{dailyPlanId}, #{supplierId}, #{orderNumber}, #{orderDate}, #{isApproved}, #{isReturnOrder},
+        #{orderStatus}, #{inboundDate})
+    </insert>
+
+
+    <insert id="upDateOrderProducts">
+        INSERT INTO order_product (
+        order_id,
+        product_id,
+        product_name,
+        product_count,
+        is_defective
+        )
+        VALUES
+        <foreach collection="productList" item="product" separator=",">
+            (
+            #{orderId},
+            #{product.productId},
+            #{product.productName},
+            #{product.productCount},
+            null
+            )
+        </foreach>
+    </insert>
+
+    <select id="findOrderFilteringWithPageNation" resultMap="orderResultMap">
+        SELECT
+        o.order_id,
+        o.order_number,
+        o.order_status,
+        s.supplier_name,
+        o.supplier_id,
+        o.order_date,
+        o.is_approved,
+        o.is_return_order,
+        o.order_date AS delivery_deadline,
+        op.product_id,
+        op.product_name,
+        p.product_code,  -- product 테이블에서 가져옴
+        op.product_count
+        FROM (
+        SELECT o.*
+        FROM `order` o
+        WHERE 1=1
+
+        ORDER BY
+        <if test="pageable.sort != null and pageable.sort.toString().contains('ORDER BY')">
+            ${pageable.sort.toString().replace('ORDER BY', '')},
+        </if>
+        o.order_date DESC
+
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+        ) o
+        JOIN supplier s ON o.supplier_id = s.supplier_id
+        LEFT JOIN order_product op ON o.order_id = op.order_id
+        LEFT JOIN product p ON op.product_id = p.product_id -- product 테이블 조인 추가
+        WHERE 1=1
+
+        <if test="orderNumber != null and orderNumber != ''">
+            AND o.order_number LIKE CONCAT('%', #{orderNumber}, '%')
+        </if>
+
+        <if test="startDate != null">
+            AND o.order_date <![CDATA[>=]]> #{startDate}
+        </if>
+
+        <if test="endDate != null">
+            AND o.order_date <![CDATA[<=]]> #{endDate}
+        </if>
+
+    </select>
+
+
+
+    <select id="countAllOrder" resultType="int">
+        SELECT COUNT(*)
+        FROM `order` o
+        <if test="startDate != null">
+            AND o.order_date <![CDATA[>=]]> #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND o.order_date <![CDATA[<=]]> #{endDate}
+        </if>
+        <if test="orderNumber != null and orderNumber != ''">
+            AND o.order_date LIKE CONCAT('%', #{orderNumber}, '%')
+        </if>
+    </select>
+
+    <select id="findProductListByOrderId">
+        SELECT
+            o.product_id AS product_id,
+            o.product_name AS product_name,
+            o.product_count AS product_count
+        FROM order_product o
+        WHERE `order_id` = #{orderId}
+    </select>
+
+    <update id="upDateOrderApprove">
+        UPDATE `order`
+        SET is_approved = true ,  order_status = "완료"
+        WHERE `order_id` = #{orderId}
+    </update>
+
+    <select id="findOrderSupplierFilteringWithPageNation" resultMap="orderResultMap">
+        SELECT
+        o.order_id,
+        o.order_number,
+        o.order_status,
+        s.supplier_name,
+        o.supplier_id,
+        o.order_date,
+        o.is_approved,
+        o.is_return_order,
+        o.order_date AS delivery_deadline,
+        op.product_id,
+        op.product_name,
+        p.product_code,
+        op.product_count
+        FROM (
+        SELECT o.*
+        FROM `order` o
+        WHERE 1=1
+        AND o.supplier_id = #{supplierId}
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+        ) o
+        JOIN supplier s ON o.supplier_id = s.supplier_id
+        LEFT JOIN order_product op ON o.order_id = op.order_id
+        LEFT JOIN product p ON op.product_id = p.product_id
+
+        <if test="orderNumber != null and orderNumber != ''">
+            AND o.order_number LIKE CONCAT('%', #{orderNumber}, '%')
+        </if>
+
+        <if test="startDate != null">
+            AND o.order_date <![CDATA[>=]]> #{startDate}
+        </if>
+
+        <if test="endDate != null">
+            AND o.order_date <![CDATA[<=]]> #{endDate}
+        </if>
+
+        ORDER BY
+        <if test="pageable.sort != null and pageable.sort.toString().contains('ORDER BY')">
+            ${pageable.sort.toString().replace('ORDER BY', '')},
+        </if>
+        o.order_date DESC
+
+    </select>
+
+    <select id="countAllOrderSupplier" resultType="int">
+        SELECT COUNT(*)
+        FROM `order` o
+        WHERE o.supplier_id = #{supplierId}
+        <if test="startDate != null">
+            AND o.order_date <![CDATA[>=]]> #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND o.order_date <![CDATA[<=]]> #{endDate}
+        </if>
+        <if test="orderNumber != null and orderNumber != ''">
+            AND o.order_date LIKE CONCAT('%', #{orderNumber}, '%')
+        </if>
+    </select>
+
+    <!-- 발주 등록하기 -->
+    <insert id="registerOrder" useGeneratedKeys="true" keyProperty="orderId">
+        INSERT INTO `order`
+        (supplier_id, order_date, is_approved, is_delayed, order_number, order_status, daily_plan_id, is_return_order, inbound_date)
+        VALUES
+            (#{supplierId}, #{orderDate}, #{isApproved}, #{isDelayed}, #{orderNumber}, #{orderStatus}, #{dailyPlanId}, #{isReturnOrder}, #{inboundDate})
+    </insert>
+
+    <!-- 최대 order_number 조회 -->
+    <select id="findMaxOutboundOrderNumber" resultType="string">
+        SELECT order_number FROM `order` ORDER BY order_number DESC LIMIT 1;
+    </select>
+
+    <!-- 발주 삭제하기 -->
+    <delete id="deleteOrder">
+        DELETE FROM `order` WHERE `order_id` = #{orderId};
+    </delete>
+
+    <!-- 발주 상품 삭제하기 -->
+    <delete id="deleteOrderProduct">
+        DELETE FROM `order_product` WHERE `order_id` = #{orderId};
+    </delete>
 
 </mapper>

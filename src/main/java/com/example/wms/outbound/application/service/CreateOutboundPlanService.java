@@ -39,7 +39,7 @@ public class CreateOutboundPlanService implements CreateOutboundPlanUseCase {
         // 엔티티로 변환하기
         OutboundPlan outboundPlan = OutboundPlan.builder()
                 .planDate(outboundPlanRequestDto.getPlanDate())
-                .status("진행중")
+                .status("출고예정")
                 .outboundScheduleNumber(osNumber)
                 .outboundScheduleDate(outboundPlanRequestDto.getOutboundScheduleDate())
                 .productionPlanNumber(outboundPlanRequestDto.getProductionPlanNumber())
@@ -47,6 +47,7 @@ public class CreateOutboundPlanService implements CreateOutboundPlanUseCase {
 
         // DB에 저장하기
         createOutboundPlanPort.save(outboundPlan);
+        System.out.println("🤬 "+outboundPlan.getOutboundPlanId());
         return outboundPlan.getOutboundPlanId();
     }
 }

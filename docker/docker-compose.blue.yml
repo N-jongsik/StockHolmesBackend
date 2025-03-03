@@ -1,0 +1,26 @@
+version: '3'
+services:
+  spring-wms-blue:
+    image: backend:${BUILD_NUMBER}
+    container_name: spring-wms-blue
+    ports:
+      - "8011:8080"
+    environment:
+      - TZ=Asia/Seoul
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - servernetwork
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  servernetwork:
+    external: true

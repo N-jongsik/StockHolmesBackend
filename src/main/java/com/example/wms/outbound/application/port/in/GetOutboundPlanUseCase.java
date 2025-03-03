@@ -7,6 +7,5 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 
 public interface GetOutboundPlanUseCase {
-    Page<OutboundPlanResponseDto> getOutboundPlans(Pageable pageable);
     Page<OutboundPlanResponseDto> getFilteredOutboundPlans(String outboundScheduleNumber, LocalDate startDate, LocalDate endDate,Pageable pageable);
 }

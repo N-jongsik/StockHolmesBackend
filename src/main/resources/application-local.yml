@@ -55,6 +55,9 @@ logging:
       apache.tiles: INFO
       spring.mail: DEBUG
     root: INFO
+    mybatis: DEBUG
+    jdbc.sqlonly: DEBUG
+    jdbc.sqltiming: DEBUG
 
 server:
   error:
@@ -89,8 +92,8 @@ springdoc:
 cloud:
   aws:
     credentials:
-      accessKey: ${secret.cloud.accessKey}
-      secretKey: ${secret.cloud.secretKey}
+      accessKey: test
+      secretKey: test
     s3:
       bucket: wms
     region:
@@ -102,7 +105,7 @@ jwt:
   refresh-expired-in: '1296000000'  # Refresh Token 만료 시간 (15일)
   access-expired-in: '18000000'      # Access Token 만료 시간 (5시간)
   cookieName: refreshToken
-  secret: ${secret-jwt.secret}
+  secret: 'XUrYUhZfrEWLtykR7h80CrcITM59YLt5CRi3AdqZu33'
 
 mybatis:
   mapper-locations: classpath:/mybatis/**/*.xml

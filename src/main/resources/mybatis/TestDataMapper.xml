@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wms.infrastructure.mapper.TestDataMapper">
+
+    <!-- Supplier 배치 삽입 (여러 건 삽입 가능) -->
+    <insert id="batchInsertSupplier" parameterType="java.util.List">
+        INSERT INTO supplier
+        (supplier_name, business_number, representative_name, address, supplier_phone, manager_phone, created_at, updated_at)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.supplierName}, #{item.businessNumber}, #{item.representativeName}, #{item.address}, #{item.supplierPhone}, #{item.managerPhone}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        </foreach>
+    </insert>
+
+    <!-- Product 배치 삽입 -->
+    <insert id="batchInsertProduct" parameterType="java.util.List">
+        INSERT INTO product
+        (product_code, product_name, purchase_price, sale_price, lot_unit, supplier_id,
+        stock_lot_count, category, threshold, lead_time, location_bin_code, abc_grade, created_at, updated_at)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.productCode}, #{item.productName}, #{item.purchasePrice}, #{item.salePrice}, #{item.lotUnit}, #{item.supplierId},
+            #{item.stockLotCount}, #{item.category}, #{item.threshold}, #{item.leadTime}, #{item.locationBinCode}, #{item.abcGrade},
+            CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        </foreach>
+    </insert>
+
+    <!-- OutboundPlan 배치 삽입 -->
+    <insert id="batchInsertOutboundPlan" parameterType="java.util.List">
+        INSERT INTO outbound_plan
+        (plan_date, status, outbound_schedule_number, outbound_schedule_date, production_plan_number, created_at, updated_at)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.planDate}, #{item.status}, #{item.outboundScheduleNumber}, #{item.outboundScheduleDate}, #{item.productionPlanNumber}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        </foreach>
+    </insert>
+
+    <!-- OutboundPlanProduct 배치 삽입 -->
+    <insert id="batchInsertOutboundPlanProduct" parameterType="java.util.List">
+        INSERT INTO outbound_plan_product
+        (outbound_plan_id, product_id, required_quantity, stock_used_quantity, order_quantity, status, created_at, updated_at)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.outboundPlanId}, #{item.productId}, #{item.requiredQuantity}, #{item.stockUsedQuantity}, #{item.orderQuantity}, #{item.status}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        </foreach>
+    </insert>
+
+    <!-- Outbound 배치 삽입 -->
+    <insert id="batchInsertOutbound" parameterType="java.util.List">
+        INSERT INTO outbound
+        (outbound_plan_id, outbound_assign_number, outbound_assign_date, outbound_picking_number, outbound_picking_date,
+        outbound_packing_number, outbound_packing_date, outbound_loading_number, outbound_loading_date)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.outboundPlanId}, #{item.outboundAssignNumber}, #{item.outboundAssignDate}, #{item.outboundPickingNumber}, #{item.outboundPickingDate},
+            #{item.outboundPackingNumber}, #{item.outboundPackingDate}, #{item.outboundLoadingNumber}, #{item.outboundLoadingDate})
+        </foreach>
+    </insert>
+
+    <!-- Product 단일 insert -->
+    <insert id="insertProduct" parameterType="com.example.wms.product.application.domain.Product">
+        INSERT INTO product
+        (product_code, product_name, purchase_price, sale_price, lot_unit, supplier_id,
+        stock_lot_count, category, threshold, lead_time, location_bin_code, abc_grade, created_at, updated_at)
+        VALUES
+        (#{productCode}, #{productName}, #{purchasePrice}, #{salePrice}, #{lotUnit}, #{supplierId},
+        #{stockLotCount}, #{category}, #{threshold}, #{leadTime}, #{locationBinCode}, #{abcGrade},
+        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        <selectKey keyProperty="productId" resultType="long" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <!-- OutboundPlan 단일 insert -->
+    <insert id="insertOutboundPlan" parameterType="com.example.wms.outbound.application.domain.OutboundPlan">
+        INSERT INTO outbound_plan
+        (plan_date, status, outbound_schedule_number, outbound_schedule_date, production_plan_number, created_at, updated_at)
+        VALUES
+        (#{planDate}, #{status}, #{outboundScheduleNumber}, #{outboundScheduleDate}, #{productionPlanNumber},
+        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        <selectKey keyProperty="outboundPlanId" resultType="long" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <!-- Supplier 단일 insert -->
+    <insert id="insertSupplier" parameterType="com.example.wms.order.application.domain.Supplier">
+        INSERT INTO supplier
+        (supplier_name, business_number, representative_name, address, supplier_phone, manager_phone, created_at, updated_at)
+        VALUES
+        (#{supplierName}, #{businessNumber}, #{representativeName}, #{address}, #{supplierPhone}, #{managerPhone}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        <selectKey keyProperty="supplierId" resultType="long" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+</mapper>

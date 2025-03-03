@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wms.infrastructure.mapper.InboundRetrievalMapper">
+
+    <!-- orderId로 입하 예정 데이터 조회 -->
+    <select id="findInboundProductListByOrderId" resultMap="InboundProductResultMap">
+        SELECT
+            p.product_id,
+            p.product_code,
+            p.product_name,
+            (p.stock_lot_count * p.lot_unit) AS product_count
+        FROM inbound i
+        JOIN `order` o ON i.order_id = o.order_id
+        JOIN order_product op ON o.order_id = op.order_id
+        JOIN product p ON op.product_id = p.product_id
+        WHERE i.order_id = #{orderId}
+    </select>
+
+    <select id ="findInboundProductListWithPagination" resultMap="InboundRetrievalResultMap">
+        SELECT * FROM (
+            SELECT
+                i.inbound_id,
+                i.inbound_status,
+                i.created_at,
+                i.schedule_number,
+                i.schedule_date,
+                i.order_id,
+                o.order_number,
+                o.order_date,
+                o.supplier_id,
+                s.supplier_name,
+                p.product_id,
+                p.product_code,
+                p.product_name,
+                (p.stock_lot_count * p.lot_unit) AS product_count,
+                p.lot_count
+            FROM inbound i
+            JOIN `order` o ON i.order_id = o.order_id
+            JOIN supplier s ON o.supplier_id = s.supplier_id
+            JOIN order_product op ON o.order_id = op.order_id
+            JOIN product p ON op.product_id = p.product_id
+        ) inbound_data
+        <if test="pageable.sort.sorted">
+            <trim prefix="ORDER BY">
+                <foreach item="order" index="i" collection="pageable.sort" separator=", ">
+                    ${order.property}
+                    <choose>
+                        <when test="order.direction.toString() == 'ASC'">ASC</when>
+                        <otherwise> DESC</otherwise>
+                    </choose>
+                </foreach>
+            </trim>
+        </if>
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+    </select>
+
+
+
+    <select id="findInboundFilteringWithPagination" resultMap="InboundAllProductResultMap">
+        SELECT
+            i.inbound_id,
+            i.inbound_status,
+            i.created_at,
+            i.schedule_number,
+            i.schedule_date,
+            i.check_number,
+            i.check_date,
+            i.order_id,
+            o.order_number,
+            o.order_date,
+            o.supplier_id,
+            s.supplier_name,
+            p.product_id,
+            p.product_code,
+            p.product_name,
+            op.product_count AS product_count
+        FROM inbound i
+        JOIN `order` o ON i.order_id = o.order_id
+        JOIN order_product op ON o.order_id = op.order_id
+        JOIN product p ON op.product_id = p.product_id
+        JOIN supplier s ON o.supplier_id = s.supplier_id
+        <where>
+            schedule_number IS NOT NULL
+            AND check_number IS NULL
+            AND put_away_number IS NULL
+            <if test="startDate != null">
+                AND
+                schedule_date <![CDATA[>=]]> #{startDate}
+            </if>
+
+            <if test="endDate != null">
+                AND
+                schedule_date <![CDATA[<=]]> #{endDate}
+            </if>
+
+            <if test="inboundScheduleNumber != null and inboundScheduleNumber != ''">
+                AND schedule_number LIKE CONCAT('%', #{inboundScheduleNumber}, '%')
+            </if>
+        </where>
+        GROUP BY
+        i.inbound_id, i.inbound_status, i.created_at, i.schedule_number, i.schedule_date,
+        i.order_id, o.order_number, o.order_date, o.supplier_id, s.supplier_name,
+        p.product_id, p.product_code, p.product_name, p.lot_unit
+
+        <if test="pageable.sort.sorted">
+            <trim prefix="ORDER BY">
+                <foreach item="order" index="i" collection="pageable.sort" separator=", ">
+                    ${order.property}
+                    <choose>
+                        <when test="order.direction.toString() == 'ASC'">ASC</when>
+                        <otherwise>DESC</otherwise>
+                    </choose>
+                </foreach>
+            </trim>
+        </if>
+
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+    </select>
+
+
+
+
+    <select id="findAllInboundByProductWithPagination" resultMap="ProductInboundResultMap">
+        SELECT * FROM (
+        SELECT
+        p.product_id,
+        p.product_code,
+        p.product_name,
+        (p.stock_lot_count * p.lot_unit) AS product_count,
+        SUM(CASE WHEN op.is_defective = TRUE THEN p.lot_unit ELSE 0 END) AS defective_count,
+        i.inbound_id,
+        i.check_number,
+        i.put_away_number,
+        i.schedule_date,
+        i.check_date,
+        i.put_away_date
+        FROM product p
+        LEFT JOIN order_product op ON p.product_id = op.product_id
+        LEFT JOIN inbound i ON op.order_id = i.order_id
+        GROUP BY p.product_id, i.inbound_id
+        ) inbound_data
+
+        <where>
+            <if test="startDate != null">
+                schedule_date <![CDATA[>=]]> #{startDate}
+            </if>
+
+            <if test="endDate != null">
+                <if test="startDate != null">
+                    AND
+                </if>
+                schedule_date <![CDATA[<=]]> #{endDate}
+            </if>
+        </where>
+
+        <if test="pageable.sort.sorted">
+            <trim prefix="ORDER BY">
+                <foreach item="order" index="i" collection="pageable.sort" separator=", ">
+                    ${order.property}
+                    <choose>
+                        <when test="order.direction.toString() == 'ASC'">ASC</when>
+                        <otherwise>DESC</otherwise>
+                    </choose>
+                </foreach>
+            </trim>
+        </if>
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+    </select>
+
+    <select id="countAllInboundPlan" resultType="int">
+        SELECT COUNT(*) FROM inbound;
+    </select>
+
+
+
+
+
+    <select id="findAllInboundBySupplierWithPagination" resultMap="SupplierInboundResultMap">
+        SELECT * FROM (
+        SELECT
+        s.supplier_id,
+        s.supplier_name,
+        SUM(p.stock_lot_count * p.lot_unit) AS product_count,
+        SUM(CASE WHEN op.is_defective = TRUE THEN p.lot_unit ELSE 0 END) AS defective_count,
+        i.inbound_id,
+        i.schedule_number,
+        i.check_number,
+        i.put_away_number,
+        i.schedule_date,
+        i.check_date,
+        i.put_away_date
+        FROM supplier s
+        LEFT JOIN `order` o ON s.supplier_id = o.supplier_id
+        LEFT JOIN order_product op ON o.order_id = op.order_id
+        LEFT JOIN product p ON op.product_id = p.product_id
+        LEFT JOIN inbound i ON o.order_id = i.order_id
+        GROUP BY s.supplier_id, i.inbound_id
+        ) inbound_data
+
+        <where>
+            <if test="startDate != null">
+                schedule_date <![CDATA[>=]]> #{startDate}
+            </if>
+            <if test="endDate != null">
+                <if test="startDate != null"> AND </if>
+                schedule_date <![CDATA[<=]]> #{endDate}
+            </if>
+        </where>
+
+        <if test="pageable.sort.sorted">
+            <trim prefix="ORDER BY">
+                <foreach item="order" index="i" collection="pageable.sort" separator=", ">
+                    ${order.property}
+                    <choose>
+                        <when test="order.direction.toString() == 'ASC'">ASC</when>
+                        <otherwise>DESC</otherwise>
+                    </choose>
+                </foreach>
+            </trim>
+        </if>
+
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+    </select>
+
+    <select id="findAllInboundProgressWithPagination" resultMap="InboundProgressResultMap">
+        SELECT
+        i.inbound_id,
+        i.schedule_number,
+        i.check_number,
+        i.put_away_number,
+        i.schedule_date,
+        i.check_date,
+        i.put_away_date,
+        o.order_number,
+        o.order_date,
+        s.supplier_name
+        FROM inbound i
+        JOIN `order` o ON i.order_id = o.order_id
+        JOIN supplier s ON o.supplier_id = s.supplier_id
+
+        <where>
+            <if test="startDate != null">
+                i.schedule_date <![CDATA[>=]]> #{startDate}
+            </if>
+            <if test="endDate != null">
+                <if test="startDate != null"> AND </if>
+                i.schedule_date <![CDATA[<=]]> #{endDate}
+            </if>
+        </where>
+
+        ORDER BY i.schedule_date DESC
+
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+    </select>
+
+    <resultMap id="InboundProgressResultMap" type="com.example.wms.inbound.adapter.in.dto.response.InboundProgressDetailDto">
+        <id column="inbound_id" property="inboundId"/>
+        <result column="schedule_number" property="scheduleNumber"/>
+        <result column="check_number" property="checkNumber"/>
+        <result column="put_away_number" property="putAwayNumber"/>
+        <result column="schedule_date" property="scheduleDate"/>
+        <result column="check_date" property="checkDate"/>
+        <result column="put_away_date" property="putAwayDate"/>
+        <result column="order_number" property="orderNumber"/>
+        <result column="order_date" property="orderDate"/>
+        <result column="supplier_name" property="supplierName"/>
+    </resultMap>
+
+    <resultMap id="InboundAllProductResultMap" type="com.example.wms.inbound.adapter.in.dto.response.InboundAllProductDto">
+        <id column="inbound_id" property="inboundId"/>
+        <result column="inbound_status" property="inboundStatus"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="schedule_number" property="scheduleNumber"/>
+        <result column="schedule_date" property="scheduleDate"/>
+        <result column="check_number" property="checkNumber"/>
+        <result column="check_date" property="checkDate"/>
+        <result column="order_id" property="orderId"/>
+        <result column="order_number" property="orderNumber"/>
+        <result column="order_date" property="orderDate"/>
+        <result column="supplier_id" property="supplierId"/>
+        <result column="supplier_name" property="supplierName"/>
+        <collection property="productList" ofType="com.example.wms.inbound.adapter.in.dto.response.InboundProductDto">
+            <id property="productId" column="product_id"/>
+            <result property="productCode" column="product_code"/>
+            <result property="productName" column="product_name"/>
+            <result property="productCount" column="product_count"/>
+            <result property="stockLotCount" column="lot_count"/>
+            <result property="defectiveCount" column="defective_count"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="InboundProductResultMap" type="com.example.wms.inbound.adapter.in.dto.response.InboundProductDto">
+        <id column="product_id" property="productId"/>
+        <result column="product_code" property="productCode"/>
+        <result column="product_name" property="productName"/>
+        <result column="product_count" property="productCount"/>
+        <result column="lot_count" property="lotCount"/>
+        <result column="defective_count" property="defectiveCount"/>
+    </resultMap>
+
+
+    <resultMap id="SupplierInboundResultMap" type="com.example.wms.inbound.adapter.in.dto.response.SupplierInboundResDto">
+        <id column="supplier_id" property="supplierId"/>
+        <result column="supplier_name" property="supplierName"/>
+        <result column="product_count" property="productCount"/>
+        <result column="defective_count" property="defectiveCount"/>
+
+        <collection property="inboundList" ofType="com.example.wms.inbound.adapter.in.dto.response.SupplierInboundDetailDto">
+            <id column="inbound_id" property="inboundId"/>
+            <result column="schedule_number" property="scheduleNumber"/>
+            <result column="check_number" property="checkNumber"/>
+            <result column="put_away_number" property="putAwayNumber"/>
+            <result column="schedule_date" property="scheduleDate"/>
+            <result column="check_date" property="checkDate"/>
+            <result column="put_away_date" property="putAwayDate"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="InboundRetrievalResultMap" type="com.example.wms.inbound.adapter.in.dto.response.InboundResDto">
+        <id property="inboundId" column="inbound_id"/>
+        <result property="inboundStatus" column="inbound_status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="scheduleNumber" column="schedule_number"/>
+        <result property="scheduleDate" column="schedule_date"/>
+        <result property="checkNumber" column="check_number"/>
+        <result property="checkDate" column="check_date"/>
+        <result property="orderId" column="order_id"/>
+        <result property="orderNumber" column="order_number"/>
+        <result property="orderDate" column="order_date"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="supplierName" column="supplier_name"/>
+
+        <collection property="productList" ofType="com.example.wms.inbound.adapter.in.dto.response.InboundProductDto">
+            <id property="productId" column="product_id"/>
+            <result property="productCode" column="product_code"/>
+            <result property="productName" column="product_name"/>
+            <result property="productCount" column="product_count"/>
+            <result property="lotCount" column="lot_count"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="InboundCheckResultMap" type="com.example.wms.inbound.adapter.in.dto.response.InboundAllProductDto">
+        <id property="inboundId" column="inbound_id"/>
+        <result property="inboundStatus" column="inbound_status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="scheduleNumber" column="schedule_number"/>
+        <result property="scheduleDate" column="schedule_date"/>
+        <result property="checkNumber" column="check_number"/>
+        <result property="checkDate" column="check_date"/>
+        <result property="orderId" column="order_id"/>
+        <result property="orderNumber" column="order_number"/>
+        <result property="orderDate" column="order_date"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="supplierName" column="supplier_name"/>
+
+        <collection property="productList" ofType="com.example.wms.inbound.adapter.in.dto.response.InboundProductDto">
+            <id property="productId" column="product_id"/>
+            <result property="productCode" column="product_code"/>
+            <result property="productName" column="product_name"/>
+            <result property="productCount" column="product_count"/>
+            <result property="stockLotCount" column="stock_lot_count"/>
+            <result property="defectiveCount" column="defective_count"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="ProductInboundResultMap" type="com.example.wms.inbound.adapter.in.dto.response.ProductInboundResDto">
+        <id column="product_id" property="productId"/>
+        <result column="product_code" property="productCode"/>
+        <result column="product_name" property="productName"/>
+        <result column="product_count" property="productCount"/>
+        <result column="defective_count" property="defectiveCount"/>
+
+        <collection property="inboundList" ofType="com.example.wms.inbound.adapter.in.dto.response.InboundDetailDto">
+            <id column="inbound_id" property="inboundId"/>
+            <result column="schedule_number" property="scheduleNumber"/>
+            <result column="check_number" property="checkNumber"/>
+            <result column="put_away_number" property="putAwayNumber"/>
+            <result column="schedule_date" property="scheduleDate"/>
+            <result column="check_date" property="checkDate"/>
+            <result column="put_away_date" property="putAwayDate"/>
+        </collection>
+    </resultMap>
+</mapper>

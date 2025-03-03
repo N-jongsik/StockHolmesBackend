@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS product (
                                         lead_time INT, -- 이 품목이 납품업체로부터 납품될 때까지 걸리는 시간
                                         location_bin_code VARCHAR(50), -- 위치 BIN 코드
                                         abc_grade CHAR(1), -- ABC 등급
+                                        product_image VARCHAR(255),
                                         created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 생성 날짜
                                         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- 수정 날짜
                                         FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id) -- 외래키: supplier 테이블 참조
@@ -64,17 +65,14 @@ CREATE TABLE IF NOT EXISTS product (
 CREATE TABLE IF NOT EXISTS `order` (
                                        order_id BIGINT AUTO_INCREMENT PRIMARY KEY,
                                        supplier_id BIGINT NOT NULL,
-                                       order_date DATETIME NOT NULL,
+                                       order_date DATE NOT NULL,
                                        order_number VARCHAR(255) NOT NULL,
-                                       inbound_date DATETIME,
+                                       inbound_date DATE,
                                        is_approved BOOLEAN,
                                        is_delayed BOOLEAN,
                                        is_return_order BOOLEAN,
-                                       order_quantity INT,
                                        order_status VARCHAR(50),
                                        daily_plan_id VARCHAR(50),
-                                       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                                       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                                        CONSTRAINT fk_supplier_order FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id)
 );
 
@@ -82,14 +80,13 @@ CREATE TABLE IF NOT EXISTS `order` (
 CREATE TABLE IF NOT EXISTS order_product (
                                              order_product_id BIGINT AUTO_INCREMENT PRIMARY KEY,
                                              order_id BIGINT NOT NULL,
+                                             product_count INT,
                                              product_id BIGINT NOT NULL,
+                                             product_name VARCHAR(50),
                                              is_defective BOOLEAN,
-                                             bin_id BIGINT,
-                                             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                                             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                             defective_count BIGINT,
                                              CONSTRAINT fk_order FOREIGN KEY (order_id) REFERENCES `order`(order_id),
-                                             CONSTRAINT fk_product_order_product FOREIGN KEY (product_id) REFERENCES product(product_id),
-                                             CONSTRAINT fk_bin_order_product FOREIGN KEY (bin_id) REFERENCES bin(bin_id)
+                                             CONSTRAINT fk_product_order_product FOREIGN KEY (product_id) REFERENCES product(product_id)
 );
 
 -- account_book 테이블 생성
@@ -176,12 +173,13 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS inbound (
                                       inbound_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                      inbound_status VARCHAR(255) NULL,
                                       schedule_number VARCHAR(255) NULL,
                                       schedule_date DATE NULL,
                                       check_number VARCHAR(255) NULL,
                                       check_date DATE NULL,
                                       put_away_number VARCHAR(255) NULL,
-                                      put_away_date DATETIME NULL,
+                                      put_away_date DATE NULL,
                                       order_id BIGINT NULL,
                                       supplier_id BIGINT NULL,
                                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -190,3 +188,25 @@ CREATE TABLE IF NOT EXISTS inbound (
                                       CONSTRAINT fk_inbound_order FOREIGN KEY (order_id) REFERENCES `order`(order_id) ON DELETE CASCADE
 );
 
+-- outbound 테이블 생성
+CREATE TABLE IF NOT EXISTS outbound (
+                                        outbound_id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL , -- 출고 고유 ID (자동 증가)
+                                        outbound_plan_id BIGINT NOT NULL, -- 출고 계획 ID
+                                        outbound_assign_number VARCHAR(50) , -- 출고 배정 번호
+                                        outbound_assign_date DATE, -- 출고 배정 일시
+                                        outbound_picking_number VARCHAR(50), -- 출고 피킹 번호
+                                        outbound_picking_date DATE, -- 출고 피킹 일시
+                                        outbound_packing_number VARCHAR(50), -- 출고 패킹 번호
+                                        outbound_packing_date DATE, -- 출고 패킹 일시
+                                        outbound_loading_number VARCHAR(50), -- 출고 상차 번호
+                                        outbound_loading_date DATE, -- 출고 상차 일시
+                                        CONSTRAINT fk_outbound_plan FOREIGN KEY (outbound_plan_id) REFERENCES outbound_plan(outbound_plan_id) -- 외래키: outbound_plan 테이블 참조
+);
+
+CREATE TABLE IF NOT EXISTS inventory (
+                            inventory_id BIGINT AUTO_INCREMENT PRIMARY KEY, -- 재고 고유 ID
+                            product_id   BIGINT NOT NULL,                     -- 제품 ID
+                            available_quantity INT NOT NULL,                  -- 사용 가능한 수량
+                            last_updated DATE,
+                            CONSTRAINT fk_product FOREIGN KEY (product_id) REFERENCES product(product_id)
+);

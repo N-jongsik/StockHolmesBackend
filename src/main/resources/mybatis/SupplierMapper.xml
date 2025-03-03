@@ -3,6 +3,9 @@
 <mapper namespace="com.example.wms.infrastructure.mapper.SupplierMapper">
     <select id="findSupplierWithPagination" resultType="com.example.wms.order.adapter.in.dto.SupplierResponseDto">
         SELECT * FROM supplier
+        <if test="businessNumber != null and businessNumber != ''">
+            WHERE business_number LIKE CONCAT('%', #{businessNumber}, '%')
+        </if>
         <if test="pageable.sort.sorted">
             <trim prefix="ORDER BY">
                 <foreach item="order" index="i" collection="pageable.sort" separator=", ">
@@ -17,11 +20,22 @@
         LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
     </select>
 
+    <select id="countAllSuppliers" resultType="long">
+        SELECT COUNT(*)
+        FROM supplier
+        <where>
+            <if test="businessNumber != null and businessNumber != ''">
+                business_number LIKE CONCAT('%', #{businessNumber}, '%')
+            </if>
+        </where>
+    </select>
+
     <select id="findProductsBySupplierIds" resultType="com.example.wms.order.adapter.in.dto.ProductInSupplierDto" parameterType="list">
         SELECT product_id, supplier_id, product_name, product_code
         FROM product
         <choose>
-            <when test="supplierIds != null and supplierIds.size() > 0">
+            <!-- supplierIds가 null이 아니고, 비어있지 않은 경우에만 WHERE 절 실행 -->
+            <when test="supplierIds != null and supplierIds != {}">
                 WHERE supplier_id IN
                 <foreach item="supplierId" collection="supplierIds" open="(" separator="," close=")">
                     #{supplierId}
@@ -33,4 +47,8 @@
         </choose>
     </select>
 
+    <select id="findSupplierOverview" resultType="com.example.wms.order.adapter.in.dto.SupplierOverviewDto">
+        select supplier_id, supplier_name
+        from supplier
+    </select>
 </mapper>

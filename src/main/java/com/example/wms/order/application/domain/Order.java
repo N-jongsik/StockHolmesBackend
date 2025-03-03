@@ -1,23 +1,21 @@
 package com.example.wms.order.application.domain;
 
-import com.example.wms.infrastructure.entity.BaseEntity;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Order extends BaseEntity {
+public class Order {
     private Long orderId;
     private Long supplierId;
-    private LocalDateTime orderDate; //주문 날짜
-    private LocalDateTime inboundDate; //입고 날짜
+    private LocalDate orderDate; //주문 날짜
+    private LocalDate inboundDate; //입고 날짜
     private Boolean isApproved;
     private Boolean isDelayed;
     private String orderNumber;
-    private Integer orderQuantity;
     private String orderStatus;
     private Long dailyPlanId;
     private Boolean isReturnOrder;

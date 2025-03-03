@@ -1,0 +1,78 @@
+package com.example.wms.outbound.application.service;
+
+import com.example.wms.infrastructure.pagination.util.PageableUtils;
+import com.example.wms.outbound.adapter.in.dto.OutboundPickingResponseDto;
+import com.example.wms.outbound.adapter.in.dto.ProductInfoDto;
+import com.example.wms.outbound.application.domain.Outbound;
+import com.example.wms.outbound.application.domain.OutboundPlan;
+import com.example.wms.outbound.application.port.in.GetOutboundPickingUseCase;
+import com.example.wms.outbound.application.port.out.GetOutboundPickingPort;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class GetOutboundPickingService implements GetOutboundPickingUseCase {
+
+    private final GetOutboundPickingPort getOutboundPickingPort;
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<OutboundPickingResponseDto> getFilteredOutboundPickings(String outboundPickingNumber, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        Pageable safePageale = PageableUtils.convertToSafePageableStrict(pageable, OutboundPickingResponseDto.class);
+        List<OutboundPickingResponseDto> outboundList = getOutboundPickingPort.findOutboundPickingFilteringWithPageNation(outboundPickingNumber, startDate, endDate, safePageale);
+        Integer count = getOutboundPickingPort.countAllPicking(outboundPickingNumber, startDate, endDate);
+        return new PageImpl<>(outboundList, pageable, count);
+    }
+
+    private List<OutboundPickingResponseDto> covertToDtoList(List<Outbound> outboundList) {
+        return outboundList.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    private OutboundPickingResponseDto convertToDto(Outbound outbound) {
+        List<ProductInfoDto> productList = getOutboundPickingPort.findProductInfoByOutboundPlanId(outbound.getOutboundPlanId())
+                .stream()
+                .map(p->ProductInfoDto.builder()
+                        .productId(p.getProductId())
+                        .productCode(p.getProductCode())
+                        .productName(p.getProductName())
+                        .productCount(p.getProductCount())
+                        .build())
+                .collect(Collectors.toList());
+
+        OutboundPlan outboundPlan = getOutboundPickingPort.findOutboundPlanByOutboundPlanId(outbound.getOutboundPlanId());
+
+        String process = "출고지시";
+
+        if(outbound.getOutboundPickingNumber() != null && outbound.getOutboundPackingNumber() != null && outbound.getOutboundLoadingNumber() != null) {
+            process = "출하상차 및 확정";
+        } else if(outbound.getOutboundPickingNumber() != null && outbound.getOutboundPackingNumber() != null) {
+            process = "출고패킹";
+        } else if(outbound.getOutboundPickingNumber() != null) {
+            process = "출고피킹";
+        }
+
+        return OutboundPickingResponseDto.builder()
+                .outboundId(outbound.getOutboundId())
+                .outboundPlanId(outbound.getOutboundPlanId())
+                .process(process) //outbound테이블 보고 수정하기
+                .outboundScheduleNumber(outboundPlan.getOutboundScheduleNumber())
+                .outboundAssignNumber(outbound.getOutboundAssignNumber())
+                .outboundPickingNumber(outbound.getOutboundPickingNumber())
+                .outboundPickingDate(outbound.getOutboundPickingDate())
+                .productionPlanNumber(outboundPlan.getProductionPlanNumber())
+                .planDate(outboundPlan.getPlanDate())
+                .productList(productList)
+                .build();
+    }
+}

@@ -1,8 +1,11 @@
 package com.example.wms.infrastructure.mapper;
 
+import com.example.wms.product.adapter.in.dto.ProductOverviewDto;
+import com.example.wms.product.adapter.in.dto.ProductResponseDto;
 import com.example.wms.product.application.domain.Product;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -13,6 +16,16 @@ public interface ProductMapper {
     void updateABCGrade(@Param("productId") Long productId, @Param("abcGrade") String abcGrade);
     void updateBinLocation(@Param("productId") Long productId, @Param("binCode") String locationBinCode);
 
-    List<Product> findProductWithPagination(@Param("pageable") Pageable pageable);
-    long countAllProducts();
+    List<ProductResponseDto> findProductWithPagination(@Param("productCode") String productCode, @Param("pageable") Pageable pageable);
+    long countAllProducts(@Param("productCode") String productCode);
+
+    List<ProductOverviewDto> selectProductOverview();
+
+    Product findById(@Param("productId") Long productId);
+    String getLocationBinCode(@Param("productId") Long productId);
+    void updateRequiredQuantity(@Param("productId") Long productId, @Param("lotCount") Integer lotCount);
+
+    Long getSupplierIdByProductId(Long productId);
+
+    List<Product> findPutAwayProductsByInboundId(Long inboundId);
 }

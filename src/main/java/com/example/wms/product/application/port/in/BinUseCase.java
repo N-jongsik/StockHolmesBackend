@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface BinUseCase {
     List<BinResponseDto> findAllBinsWithDetails();
+    List<Long> assignBinIdsToLots(String locationBinCode, int lotCount);
 }

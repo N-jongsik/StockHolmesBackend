@@ -20,6 +20,13 @@
         SELECT * FROM product
     </select>
 
+    <!-- locationBincode 가져오기 -->
+    <select id="getLocationBinCode" resultType="java.lang.String">
+        SELECT location_bin_code
+        FROM product
+        WHERE product_id = #{productId};
+    </select>
+
     <!-- ABC 분석 판매금액 기준 -->
     <update id="updateABCGrade">
         UPDATE product
@@ -38,9 +45,32 @@
         FROM product;
     </select>
 
+    <select id="getSupplierIdByProductId" resultType="java.lang.Long">
+        SELECT supplier_id
+        FROM product
+        WHERE product_id = #{productId};
+    </select>
 
-    <select id="findProductWithPagination" resultMap="productResultMap">
-        SELECT * FROM product
+
+    <select id="findProductWithPagination" resultType="com.example.wms.product.adapter.in.dto.ProductResponseDto">
+        SELECT
+            p.product_id,
+            p.product_code,
+            p.product_name,
+            p.purchase_price,
+            p.sale_price,
+            (p.lot_unit * p.stock_lot_count) as product_count,
+            i.available_quantity,
+            s.supplier_name,
+            p.category,
+            p.threshold,
+            p.lead_time,
+            p.location_bin_code,
+            p.abc_grade
+        FROM product p join inventory i on p.product_id = i.product_id join supplier s on p.supplier_id = s.supplier_id
+        <if test="productCode != null and productCode != ''">
+            WHERE product_code LIKE CONCAT('%', #{productCode}, '%')
+        </if>
         <if test="pageable.sort.sorted">
             <trim prefix="ORDER BY">
                 <foreach item="order" index="i" collection="pageable.sort" separator=", ">
@@ -56,7 +86,33 @@
     </select>
 
 
-    <select id="countAllProducts" resultType="long">
+    <select id="countAllProducts" resultType="java.lang.Long">
         SELECT COUNT(*) FROM product
+        <if test="productCode != null and productCode != ''">
+            WHERE product_code LIKE CONCAT('%', #{productCode}, '%')
+        </if>
+    </select>
+
+    <select id="findById" resultMap="productResultMap">
+        SELECT * FROM product
+        WHERE product_id = #{productId}
+    </select>
+
+    <update id="updateRequiredQuantity">
+        UPDATE product
+        SET stock_lot_count = stock_lot_count + #{lotCount}
+        WHERE product_id = #{productId}
+    </update>
+
+    <select id="findPutAwayProductsByInboundId" resultType="com.example.wms.product.application.domain.Product">
+        SELECT *
+        FROM product p
+        INNER JOIN order_product op ON p.product_id = op.product_id
+        INNER JOIN inbound i ON op.order_id = i.order_id
+        WHERE i.inbound_id = #{inboundId}
+    </select>
+
+    <select id="selectProductOverview" resultType="com.example.wms.product.adapter.in.dto.ProductOverviewDto">
+        SELECT product_id, product_name, product_code FROM product
     </select>
 </mapper>

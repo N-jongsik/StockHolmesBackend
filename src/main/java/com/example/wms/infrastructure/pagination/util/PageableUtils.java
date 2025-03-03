@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class PageableUtils {
 
@@ -41,6 +42,35 @@ public class PageableUtils {
             // camelCase → snake_case 변환
             String snakeCaseProperty = camelToSnake(property);
             safeOrders.add(new Sort.Order(order.getDirection(), snakeCaseProperty));
+        }
+
+        Sort safeSort = Sort.by(safeOrders);
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), safeSort);
+    }
+
+    public static Pageable convertToSafePageableStrict(Pageable pageable, Class<?> entityClass, Map<String, String> fieldMapping) {
+        // 정렬 조건이 없다면 그대로 반환
+        if (!pageable.getSort().isSorted()) {
+            return pageable;
+        }
+
+        List<Sort.Order> safeOrders = new ArrayList<>();
+
+        // 기존 정렬 조건 순회: 매핑 사전에 값이 있으면 그 값을 그대로 사용, 없으면 엔티티 필드 존재여부 확인 후 camelCase -> snake_case 변환
+        for (Sort.Order order : pageable.getSort()) {
+            String apiProperty = order.getProperty();
+            String dbProperty;
+            if (fieldMapping != null && fieldMapping.containsKey(apiProperty)) {
+                // 매핑 사전에 정의된 값 사용 (snake_case 변환 없이)
+                dbProperty = fieldMapping.get(apiProperty);
+            } else {
+                // 엔티티에 해당 필드가 있는지 확인
+                if (!hasField(entityClass, apiProperty)) {
+                    throw new IllegalArgumentException("Invalid sort property: " + apiProperty);
+                }
+                dbProperty = camelToSnake(apiProperty);
+            }
+            safeOrders.add(new Sort.Order(order.getDirection(), dbProperty));
         }
 
         Sort safeSort = Sort.by(safeOrders);

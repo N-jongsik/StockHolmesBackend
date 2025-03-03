@@ -97,6 +97,7 @@ public class JwtTokenProvider implements JwtTokenPort {
         Claims claims = parseClaims(accessToken);
 
         if (claims.get("auth") == null) {
+            log.error("Auth claim is missing in the token");
             throw new InvalidTokenException(INVALID_TOKEN.getMessage());
         }
 
@@ -105,21 +106,25 @@ public class JwtTokenProvider implements JwtTokenPort {
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
+        log.info("Creating authentication for user: {}, authorities: {}", claims.getSubject(), authorities);
         UserDetails principal = new User(claims.getSubject(), "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
-
     /**
      * 토큰이 유효한지 검증합니다.
      */
     public boolean validateToken(String token) throws TokenException {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            log.info("Token validated successfully. Subject: {}, Expiration: {}",
+                    claims.getBody().getSubject(), claims.getBody().getExpiration());
             return true;
         } catch (SecurityException | MalformedJwtException | UnsupportedJwtException |
                  IllegalArgumentException e) {
+            log.error("Invalid token: {}", e.getMessage());
             throw new InvalidTokenException(INVALID_TOKEN.getMessage());
         } catch (ExpiredJwtException e) {
+            log.error("Expired token. Expiration: {}", e.getClaims().getExpiration());
             throw new ExpiredTokenException(EXPIRED_TOKEN.getMessage());
         }
     }

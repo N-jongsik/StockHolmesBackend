@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wms.infrastructure.mapper.InboundPutAwayMapper">
+    <select id="findInboundPutAwayFilteringWithPagination" resultMap="InboundPutAwayAllProductResultMap">
+        SELECT
+        b.inbound_id,
+        b.inbound_status,
+        b.created_at,
+        b.schedule_number,
+        b.check_number,
+        b.put_away_number,
+        b.put_away_date,
+        b.order_id,
+        b.order_number,
+        b.order_date,
+        b.supplier_id,
+        s.supplier_name,
+        l.lot_id,
+        l.lot_number,
+        p.product_id,
+        p.product_code,
+        p.product_name,
+        p.lot_unit AS product_count,
+        bin.bin_code AS location_bin_code
+        FROM (
+        SELECT
+            i.inbound_id,
+            i.inbound_status,
+            i.created_at,
+            i.schedule_number,
+            i.check_number,
+            i.put_away_number,
+            i.put_away_date,
+            i.order_id,
+            o.order_number,
+            o.order_date,
+            o.supplier_id
+        FROM inbound i
+        INNER JOIN `order` o ON i.order_id = o.order_id
+        <where>
+            schedule_number IS NOT NULL
+            AND check_number IS NOT NULL
+            AND put_away_number IS NOT NULL
+            <if test="startDate != null">
+                AND put_away_date <![CDATA[>=]]> #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND put_away_date <![CDATA[<=]]> #{endDate}
+            </if>
+            <if test="inboundPutAwayNumber != null and inboundPutAwayNumber != ''">
+                AND put_away_number LIKE CONCAT('%', #{inboundPutAwayNumber}, '%')
+            </if>
+        </where>
+
+        <if test="pageable.sort.sorted">
+            <trim prefix="ORDER BY">
+                <foreach item="order" index="i" collection="pageable.sort" separator=", ">
+                    ${order.property}
+                    <choose>
+                        <when test="order.direction.toString() == 'ASC'">ASC</when>
+                        <otherwise>DESC</otherwise>
+                    </choose>
+                </foreach>
+            </trim>
+        </if>
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+        ) b
+        INNER JOIN lot l ON b.inbound_id = l.inbound_id
+        INNER JOIN product p ON l.product_id = p.product_id
+        INNER JOIN supplier s ON b.supplier_id = s.supplier_id
+        INNER JOIN bin ON l.bin_id = bin.bin_id
+    </select>
+
+    <select id="countFilteredPutAway" resultType="int">
+        SELECT COUNT(*)
+        FROM inbound
+        <where>
+            schedule_number IS NOT NULL AND check_number IS NOT NULL AND put_away_number IS NOT NULL
+            <if test="startDate != null">
+                AND
+                put_away_date <![CDATA[>=]]> #{startDate}
+            </if>
+
+            <if test="endDate != null">
+                AND
+                put_away_date <![CDATA[<=]]> #{endDate}
+            </if>
+
+            <if test="inboundPutAwayNumber != null and inboundPutAwayNumber != ''">
+                AND put_away_number LIKE CONCAT('%', #{inboundPutAwayNumber}, '%')
+            </if>
+        </where>
+    </select>
+
+    <resultMap id="InboundPutAwayAllProductResultMap" type="com.example.wms.inbound.adapter.in.dto.response.InboundPutAwayAllProductDto">
+        <id column="inbound_id" property="inboundId"/>
+        <result column="inbound_status" property="inboundStatus"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="schedule_number" property="scheduleNumber"/>
+        <result column="check_number" property="inboundCheckNumber"/>
+        <result column="put_away_number" property="putAwayNumber"/>
+        <result column="put_away_date" property="putAwayDate"/>
+        <result column="order_id" property="orderId"/>
+        <result column="order_number" property="orderNumber"/>
+        <result column="order_date" property="orderDate"/>
+        <result column="supplier_id" property="supplierId"/>
+        <result column="supplier_name" property="supplierName"/>
+        <collection property="lotList" ofType="com.example.wms.inbound.adapter.in.dto.response.LotResDto">
+            <result column="lot_id" property="lotId"/>
+            <result column="lot_number" property="lotNumber"/>
+            <result column="product_id" property="productId"/>
+            <result column="product_code" property="productCode"/>
+            <result column="product_name" property="productName" />
+            <result column="product_count" property="productCount" />
+            <result column="location_bin_code" property="locationBinCode" />
+        </collection>
+    </resultMap>
+</mapper>

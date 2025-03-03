@@ -9,7 +9,6 @@ import com.example.wms.user.adapter.in.dto.response.UserInfoResDto;
 import com.example.wms.user.application.port.in.AuthUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @Tag(name = "auth", description = "auth domain apis")
 @Slf4j
@@ -125,6 +126,36 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String accessToken) {
         authUseCase.logout(JwtHeaderUtil.extractToken(accessToken));
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 사용자 권한 변경
+     */
+    @Operation(summary = "사용자 권한 변경", description = "사용자의 권한을 변경합니다.")
+    @PutMapping("/role")
+    public ResponseEntity updateUserRole(@RequestParam String staffNumber, @RequestParam String newRole) {
+        authUseCase.updateUserRole(staffNumber, newRole);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 사용자 활성/비활성 업데이트
+     */
+    @Operation(summary = "사용자 활성/비활성 업데이트", description = "사용자의 계정 활성 상태를 변경합니다.")
+    @PutMapping("/active")
+    public ResponseEntity updateActive(@RequestParam String staffNumber, @RequestParam boolean isActive) {
+        authUseCase.updateActive(staffNumber, isActive);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 비밀번호 수정
+     */
+    @Operation(summary = "비밀번호 수정", description = "사용자의 비밀번호를 변경합니다.")
+    @PutMapping("/password")
+    public ResponseEntity updateUserPassword(@RequestParam String staffNumber, @RequestParam String newPassword) {
+        authUseCase.updateUserPassword(staffNumber, newPassword);
         return ResponseEntity.ok().build();
     }
 }

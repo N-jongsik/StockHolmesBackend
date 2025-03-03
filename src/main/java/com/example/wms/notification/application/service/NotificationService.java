@@ -1,5 +1,6 @@
 package com.example.wms.notification.application.service;
 
+import com.example.wms.notification.adapter.CustomSseEmitter;
 import com.example.wms.notification.adapter.SseEmitters;
 import com.example.wms.notification.application.domain.Notification;
 import com.example.wms.notification.application.port.in.NotificationUseCase;
@@ -27,7 +28,7 @@ public class NotificationService implements NotificationUseCase {
 
     @Override
     public SseEmitter connect(UserRole userRole) {
-        SseEmitter emitter = new SseEmitter(10 * 60 * 1000L);
+        SseEmitter emitter = new CustomSseEmitter(10 * 60 * 1000L);
 
         emitters.computeIfAbsent(userRole, k -> new ArrayList<>()).add(emitter);
 
@@ -71,15 +72,25 @@ public class NotificationService implements NotificationUseCase {
 
         for (Iterator<SseEmitter> iterator = roleEmitters.iterator(); iterator.hasNext(); ) {
             SseEmitter emitter = iterator.next();
+            // emitter가 CustomSseEmitter 인스턴스라면 다운캐스팅하여 isDisposed() 호출
+            if (emitter instanceof CustomSseEmitter && ((CustomSseEmitter) emitter).isDisposed()) {
+                iterator.remove();
+                log.info("❌ 이미 완료된 emitter 제거: {}", userRole);
+                continue;
+            }
+
             try {
                 emitter.send(SseEmitter.event().name("NOTIFICATION").data(notification));
                 log.info("📩 알림 전송 완료 to {}: {}", userRole, notification.getContent());
             } catch (IOException e) {
                 iterator.remove();
-                log.info("❌ 알림 전송 실패, emitter 제거: {}", userRole);
+                log.info("❌ 알림 전송 실패, emitter 제거: {} - {}", userRole, e.getMessage());
             }
         }
+
+
     }
+
 
     // emitter연결이 끊기면 큐에 알림 내용 쌓임
     private void sendQueuedNotifications(UserRole userRole, SseEmitter emitter) {

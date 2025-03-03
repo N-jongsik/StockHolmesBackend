@@ -19,10 +19,77 @@
                l.inbound_id,
                l.outbound_id,
                p.product_code,
-               p.product_name
+               p.product_name,
+               p.product_image
         FROM bin b
                  LEFT JOIN lot l ON b.bin_id = l.bin_id
                  LEFT JOIN product p ON l.product_id = p.product_id;
     </select>
+
+    <select id="findAvailableBinIdInAisle" resultType="java.lang.Long">
+        SELECT bin_id
+        FROM bin
+        WHERE zone = #{zone}
+            AND aisle = #{aisle}
+        ORDER BY row ASC, floor ASC, amount ASC
+        LIMIT 1
+    </select>
+
+    <select id="findAvailableBinInRow" resultType="java.lang.Long">
+        SELECT bin_id
+        FROM bin
+        WHERE zone = #{zone}
+            AND aisle = #{aisle}
+            AND row_num = #{rowNum}
+        ORDER BY floor ASC, amount ASC
+        LIMIT 1
+    </select>
+
+    <select id="findBinIdByBinCode" resultType="java.lang.Long">
+        SELECT bin_id
+        FROM bin
+        WHERE bin_code = #{locationBinCode}
+    </select>
+
+    <select id="findBinIdInZone" resultType="java.lang.Long">
+        SELECT bin_id
+        FROM bin
+        WHERE zone = #{zone}
+        ORDER BY row_num ASC, floor ASC
+        LIMIT 1
+    </select>
+
+    <select id="findBinIdsByBinPrefix" resultType="java.lang.Long">
+        SELECT bin_id
+        FROM bin
+        WHERE bin_code LIKE CONCAT(#{binPrefix}, '-%')
+        ORDER BY bin_code ASC
+    </select>
+
+    <select id="findExactBinIdByBinCode" resultType="java.lang.Long">
+        SELECT bin_id
+        FROM bin
+        WHERE bin_code = #{binCode}
+    </select>
+
+
+    <update id="incrementBinAmount">
+        UPDATE bin
+        SET amount = amount + #{lotCount}
+        WHERE bin_id = #{binId}
+    </update>
+
+    <select id="findBinByBinId" resultType="com.example.wms.product.application.domain.Bin">
+        SELECT *
+        FROM bin
+        WHERE bin_id = #{binId}
+    </select>
+
+    <select id="findBinCode" resultType="java.lang.String">
+        SELECT bin_code
+        FROM bin
+        WHERE bin_id = #{binId}
+    </select>
+
 
 </mapper>

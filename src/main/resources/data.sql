@@ -14,3 +14,4 @@ WHERE NOT EXISTS (
     SELECT 1 FROM bin b WHERE b.bin_code = CONCAT(z.zone, '-', LPAD(a.aisle, 2, '0'), '-', LPAD(r.row_num, 2, '0'), '-', LPAD(f.floor, 2, '0'))
 )
 ORDER BY z.zone ASC, a.aisle ASC, r.row_num ASC, f.floor ASC;
+
