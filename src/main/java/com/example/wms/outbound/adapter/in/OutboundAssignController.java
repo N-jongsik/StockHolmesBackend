@@ -65,3 +65,4 @@ public class OutboundAssignController {
         return ResponseEntity.ok(getOutboundAssignUseCase.getFilteredOutboundAssings(outboundAssignNumber, startDate, endDate, pageable));
     }
 }
+
